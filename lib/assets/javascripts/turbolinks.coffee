@@ -162,34 +162,10 @@ changePage = (title, body, csrfToken, options) ->
   triggerEvent EVENTS.UPDATE
   return changedNodes
 
-findNodes = (body, selector) ->
-  Array::slice.apply(body.querySelectorAll(selector))
-
-findNodesMatchingKeys = (body, keys) ->
-  matchingNodes = []
-  for key in (if Array.isArray(keys) then keys else [keys])
-    matchingNodes.push(findNodes(body, '[id^="'+key+':"], [id="'+key+'"]')...)
-
-  return matchingNodes
-
 onNodeRemoved = (node) ->
   if typeof jQuery isnt 'undefined'
     jQuery(node).remove()
   triggerEvent(EVENTS.AFTER_REMOVE, node)
-
-withinPermanent = (element) ->
-  while element?
-    return true if element.hasAttribute?('data-turbolinks-permanent')
-    element = element.parentNode
-
-  return false
-
-nestedWithinNodeList = (nodeList, element) ->
-  while element?
-    return true if element in nodeList
-    element = element.parentNode
-
-  return false
 
 # Firefox bug: Doesn't autofocus fields that are inserted via JavaScript
 setAutofocusElement = ->
