@@ -151,10 +151,6 @@ changePage = (title, body, csrfToken, options) ->
   triggerEvent EVENTS.BEFORE_UNLOAD, nodesToChange
   document.title = title if title isnt false
 
-  unless options.flush
-    nodesToKeep = findNodes(currentBody, '[data-turbolinks-permanent]')
-    swapNodes(body, removeDuplicates(nodesToKeep), keep: true)
-
   document.body = body
   CSRFToken.update csrfToken if csrfToken?
   setAutofocusElement()
@@ -176,19 +172,6 @@ findNodesMatchingKeys = (body, keys) ->
     matchingNodes.push(findNodes(body, '[id^="'+key+':"], [id="'+key+'"]')...)
 
   return matchingNodes
-
-swapNodes = (targetBody, existingNodes, options) ->
-  changedNodes = []
-  for existingNode in existingNodes
-    unless nodeId = existingNode.getAttribute('id')
-      throw new Error("Turbolinks partial replace: turbolinks elements must have an id.")
-
-    if targetNode = targetBody.querySelector('[id="'+nodeId+'"]')
-      existingNode.parentNode.replaceChild(targetNode, existingNode)
-      onNodeRemoved(existingNode)
-      changedNodes.push(targetNode)
-
-  return changedNodes
 
 onNodeRemoved = (node) ->
   if typeof jQuery isnt 'undefined'
@@ -268,11 +251,6 @@ clone = (original) ->
   copy = new original.constructor()
   copy[key] = clone value for key, value of original
   copy
-
-removeDuplicates = (array) ->
-  result = []
-  result.push(obj) for obj in array when result.indexOf(obj) is -1
-  result
 
 popCookie = (name) ->
   value = document.cookie.match(new RegExp(name+"=(\\w+)"))?[1].toUpperCase() or ''
