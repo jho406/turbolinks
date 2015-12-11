@@ -19,7 +19,6 @@ EVENTS =
   CHANGE:         'page:change'
   UPDATE:         'page:update'
   LOAD:           'page:load'
-  PARTIAL_LOAD:   'page:partial-load'
   RESTORE:        'page:restore'
   BEFORE_UNLOAD:  'page:before-unload'
   AFTER_REMOVE:   'page:after-remove'
@@ -36,25 +35,22 @@ fetch = (url, options = {}) ->
     document.location.href = url.absolute
     return
 
-  if isPartialReplacement(options) or options.keep
-    removeCurrentPageFromCache()
-  else
     cacheCurrentPage()
 
   rememberReferer()
   progressBar?.start(delay: progressBarDelay)
 
-  if transitionCacheEnabled and !isPartialReplacement(options) and cachedPage = transitionCacheFor(url.absolute)
+  if transitionCacheEnabled and cachedPage = transitionCacheFor(url.absolute)
     reflectNewUrl(url)
     fetchHistory cachedPage
     options.showProgressBar = false
     options.scroll = false
   else
-    options.scroll ?= false if isPartialReplacement(options) and !url.hash
+    options.scroll ?= false if !url.hash
 
   fetchReplacement url, options
 
-transitionCacheFor = (url) ->
+transitionCacheFor = (url) >
   return if url is currentState.url
   cachedPage = pageCache[url]
   cachedPage if cachedPage and !cachedPage.transitionCacheDisabled
@@ -88,7 +84,7 @@ fetchReplacement = (url, options) ->
       if options.showProgressBar
         progressBar?.done()
       updateScrollPosition(options.scroll)
-      triggerEvent (if isPartialReplacement(options) then EVENTS.PARTIAL_LOAD else EVENTS.LOAD), loadedNodes
+      triggerEvent EVENTS.LOAD, loadedNodes
       constrainPageCacheTo(cacheSize)
     else
       progressBar?.done()
@@ -145,44 +141,24 @@ constrainPageCacheTo = (limit) ->
 
 replace = (html, options = {}) ->
   loadedNodes = changePage extractTitleAndBody(createDocument(html))..., options
-  triggerEvent (if isPartialReplacement(options) then EVENTS.PARTIAL_LOAD else EVENTS.LOAD), loadedNodes
+  triggerEvent EVENTS.LOAD, loadedNodes
 
 changePage = (title, body, csrfToken, options) ->
   title = options.title ? title
   currentBody = document.body
-
-  if isPartialReplacement(options)
-    nodesToAppend = findNodesMatchingKeys(currentBody, options.append) if options.append
-    nodesToPrepend = findNodesMatchingKeys(currentBody, options.prepend) if options.prepend
-
-    nodesToReplace = findNodes(currentBody, '[data-turbolinks-temporary]')
-    nodesToReplace = nodesToReplace.concat findNodesMatchingKeys(currentBody, options.change) if options.change
-
-    nodesToChange = [].concat(nodesToAppend || [], nodesToPrepend || [], nodesToReplace || [])
-    nodesToChange = removeDuplicates(nodesToChange)
-  else
-    nodesToChange = [currentBody]
+  nodesToChange = [currentBody]
 
   triggerEvent EVENTS.BEFORE_UNLOAD, nodesToChange
   document.title = title if title isnt false
 
-  if isPartialReplacement(options)
-    appendedNodes = swapNodes(body, nodesToAppend, keep: false, append: true) if nodesToAppend
-    prependedNodes = swapNodes(body, nodesToPrepend, keep: false, prepend: true) if nodesToPrepend
-    replacedNodes = swapNodes(body, nodesToReplace, keep: false) if nodesToReplace
+  unless options.flush
+    nodesToKeep = findNodes(currentBody, '[data-turbolinks-permanent]')
+    swapNodes(body, removeDuplicates(nodesToKeep), keep: true)
 
-    changedNodes = [].concat(appendedNodes || [], prependedNodes || [], replacedNodes || [])
-    changedNodes = removeDuplicates(changedNodes)
-  else
-    unless options.flush
-      nodesToKeep = findNodes(currentBody, '[data-turbolinks-permanent]')
-      nodesToKeep.push(findNodesMatchingKeys(currentBody, options.keep)...) if options.keep
-      swapNodes(body, removeDuplicates(nodesToKeep), keep: true)
-
-    document.body = body
-    CSRFToken.update csrfToken if csrfToken?
-    setAutofocusElement()
-    changedNodes = [body]
+  document.body = body
+  CSRFToken.update csrfToken if csrfToken?
+  setAutofocusElement()
+  changedNodes = [body]
 
   executeScriptTags(getScriptsToRun(changedNodes, options.runScripts))
   currentState = window.history.state
@@ -208,27 +184,9 @@ swapNodes = (targetBody, existingNodes, options) ->
       throw new Error("Turbolinks partial replace: turbolinks elements must have an id.")
 
     if targetNode = targetBody.querySelector('[id="'+nodeId+'"]')
-      if options.keep
-        existingNode.parentNode.insertBefore(existingNode.cloneNode(true), existingNode)
-        existingNode = targetNode.ownerDocument.adoptNode(existingNode)
-        targetNode.parentNode.replaceChild(existingNode, targetNode)
-      else
-        if options.append or options.prepend
-          firstChild = existingNode.firstChild
-
-          childNodes = Array::slice.call targetNode.childNodes, 0 # a copy has to be made since the list is mutated while processing
-
-          for childNode in childNodes
-            if !firstChild or options.append # when the parent node is empty, there is no difference between appending and prepending
-              existingNode.appendChild(childNode)
-            else if options.prepend
-              existingNode.insertBefore(childNode, firstChild)
-
-          changedNodes.push(existingNode)
-        else
-          existingNode.parentNode.replaceChild(targetNode, existingNode)
-          onNodeRemoved(existingNode)
-          changedNodes.push(targetNode)
+      existingNode.parentNode.replaceChild(targetNode, existingNode)
+      onNodeRemoved(existingNode)
+      changedNodes.push(targetNode)
 
   return changedNodes
 
