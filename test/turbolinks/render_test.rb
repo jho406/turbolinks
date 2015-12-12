@@ -43,14 +43,6 @@ class RenderController < TestController
   def render_with_flush_false
     render action: :action, flush: false
   end
-
-  def render_with_append
-    render :action, append: ['foo', 'bar']
-  end
-
-  def render_with_prepend
-    render :action, prepend: ['foo', 'bar']
-  end
 end
 
 class RenderTest < ActionController::TestCase
@@ -174,16 +166,6 @@ class RenderTest < ActionController::TestCase
     @controller.response = @response
     result = @controller.render(text: 'test', turbolinks: true)
     assert_equal ["Turbolinks.replace('test');"], result
-  end
-
-  def test_render_with_append
-    xhr :post, :render_with_append
-    assert_turbolinks_replace 'content', '{"append":["foo","bar"]}'
-  end
-
-  def test_render_with_prepend
-    xhr :post, :render_with_prepend
-    assert_turbolinks_replace 'content', '{"prepend":["foo","bar"]}'
   end
 
   private

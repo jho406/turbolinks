@@ -191,22 +191,9 @@ swapNodes = (targetBody, existingNodes, options) ->
         existingNode = targetNode.ownerDocument.adoptNode(existingNode)
         targetNode.parentNode.replaceChild(existingNode, targetNode)
       else
-        if options.append or options.prepend
-          firstChild = existingNode.firstChild
-
-          childNodes = Array::slice.call targetNode.childNodes, 0 # a copy has to be made since the list is mutated while processing
-
-          for childNode in childNodes
-            if !firstChild or options.append # when the parent node is empty, there is no difference between appending and prepending
-              existingNode.appendChild(childNode)
-            else if options.prepend
-              existingNode.insertBefore(childNode, firstChild)
-
-          changedNodes.push(existingNode)
-        else
-          existingNode.parentNode.replaceChild(targetNode, existingNode)
-          onNodeRemoved(existingNode)
-          changedNodes.push(targetNode)
+        existingNode.parentNode.replaceChild(targetNode, existingNode)
+        onNodeRemoved(existingNode)
+        changedNodes.push(targetNode)
 
   return changedNodes
 
