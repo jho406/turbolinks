@@ -22,8 +22,6 @@ suite 'Turbolinks.visit()', ->
 
   test "successful", (done) ->
     body = @$('body')
-    permanent = @$('#permanent')
-    permanent.addEventListener 'click', -> done()
     beforeChangeFired = pageReceivedFired = beforeUnloadFired = afterRemoveFired = pageChangeFired = partialLoadFired = false
     @document.addEventListener 'page:before-change', =>
       beforeChangeFired = true
@@ -62,7 +60,6 @@ suite 'Turbolinks.visit()', ->
       assert.ok @$('#new-div')
       assert.ok @$('body').hasAttribute('new-attribute')
       assert.notOk @$('#div')
-      assert.equal @$('#permanent').textContent, 'permanent content'
       assert.equal @$('#temporary').textContent, 'temporary content 2'
       assert.equal @document.title, 'title 2'
       assert.equal @$('meta[name="csrf-token"]').getAttribute('content'), 'token2'
@@ -71,12 +68,8 @@ suite 'Turbolinks.visit()', ->
       state = turbolinks: true, url: "#{location.protocol}//#{location.host}/javascript/iframe2.html"
       assert.deepEqual @history.state, state
       assert.equal @location.href, state.url
+      done()
 
-      assert.equal @$('#permanent'), permanent # permanent nodes are transferred
-      setTimeout =>
-        assert.notOk partialLoadFired
-        @$('#permanent').click() # event listeners on permanent nodes should not be lost
-      , 0
     @Turbolinks.visit('iframe2.html')
 
   test "error fallback", (done) ->
@@ -110,8 +103,6 @@ suite 'Turbolinks.visit()', ->
     @Turbolinks.visit('iframe2.html')
 
   test "with transition cache", (done) ->
-    permanent = @$('#permanent')
-    permanent.addEventListener 'click', -> done()
     @$('#div').foo = 'bar'
     load = 0
     restoreCalled = false
@@ -120,21 +111,18 @@ suite 'Turbolinks.visit()', ->
       if load is 1
         assert.ok @$('body').hasAttribute('new-attribute')
         assert.equal @document.title, 'title 2'
-        assert.equal @$('#permanent'), permanent
         setTimeout (=> @Turbolinks.visit('iframe.html')), 0
       else if load is 2
         assert.ok restoreCalled
         assert.equal @window.i, 2
         assert.equal @document.title, 'title'
-        assert.equal @$('#permanent'), permanent
         assert.equal @history.length, @historyLengthOnRestore
-        @$('#permanent').click() # event listeners on permanent nodes should not be lost
+        done()
     @document.addEventListener 'page:restore', =>
       assert.equal load, 1
       assert.equal @window.i, 1
       assert.notOk @$('body').hasAttribute('new-attribute')
       assert.equal @document.title, 'title'
-      assert.equal @$('#permanent'), permanent
       assert.equal @$('#div').foo, 'bar' # DOM state is restored
       assert.equal @window.location.pathname.substr(-11), 'iframe.html'
       @historyLengthOnRestore = @history.length
@@ -179,7 +167,6 @@ suite 'Turbolinks.visit()', ->
     @Turbolinks.visit('iframe2.html')
 
   test "history.back() cache miss", (done) ->
-    @$('#permanent').addEventListener 'click', -> done()
     change = 0
     @document.addEventListener 'page:change', =>
       change += 1
@@ -196,23 +183,9 @@ suite 'Turbolinks.visit()', ->
         assert.equal @window.j, 1
         assert.equal @document.title, 'title'
         assert.notOk @document.querySelector('#new-div')
-        @window.document.querySelector('#permanent').click()
+        done()
     @Turbolinks.pagesCached(0)
     @Turbolinks.visit('iframe2.html')
-
-
-  test "with :keep, doesn't store page in cache", (done) ->
-    @$('#change').foo = 'bar'
-    load = 0
-    @document.addEventListener 'page:load', (event) =>
-      load += 1
-      if load is 1
-        assert.equal @$('#change').foo, 'bar'
-        setTimeout (=> @history.back()), 0
-      else if load is 2
-        assert.isUndefined @$('#change').foo
-        done()
-    @Turbolinks.visit('iframe2.html', keep: ['change'])
 
   test "after-remove callback is called after load when body is evicted from cache", (done) ->
     load = 0

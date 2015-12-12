@@ -19,7 +19,6 @@ EVENTS =
   CHANGE:         'page:change'
   UPDATE:         'page:update'
   LOAD:           'page:load'
-  PARTIAL_LOAD:   'page:partial-load'
   RESTORE:        'page:restore'
   BEFORE_UNLOAD:  'page:before-unload'
   AFTER_REMOVE:   'page:after-remove'
@@ -152,11 +151,6 @@ changePage = (title, body, csrfToken, options) ->
   triggerEvent EVENTS.BEFORE_UNLOAD, nodesToChange
   document.title = title if title isnt false
 
-  unless options.flush
-    nodesToKeep = findNodes(currentBody, '[data-turbolinks-permanent]')
-    nodesToKeep.push(findNodesMatchingKeys(currentBody, options.keep)...) if options.keep
-    swapNodes(body, removeDuplicates(nodesToKeep), keep: true)
-
   document.body = body
   CSRFToken.update csrfToken if csrfToken?
   setAutofocusElement()
@@ -168,16 +162,6 @@ changePage = (title, body, csrfToken, options) ->
   triggerEvent EVENTS.CHANGE, changedNodes
   triggerEvent EVENTS.UPDATE
   return changedNodes
-
-findNodes = (body, selector) ->
-  Array::slice.apply(body.querySelectorAll(selector))
-
-findNodesMatchingKeys = (body, keys) ->
-  matchingNodes = []
-  for key in (if Array.isArray(keys) then keys else [keys])
-    matchingNodes.push(findNodes(body, '[id^="'+key+':"], [id="'+key+'"]')...)
-
-  return matchingNodes
 
 swapNodes = (targetBody, existingNodes, options) ->
   changedNodes = []
@@ -275,11 +259,6 @@ clone = (original) ->
   copy = new original.constructor()
   copy[key] = clone value for key, value of original
   copy
-
-removeDuplicates = (array) ->
-  result = []
-  result.push(obj) for obj in array when result.indexOf(obj) is -1
-  result
 
 popCookie = (name) ->
   value = document.cookie.match(new RegExp(name+"=(\\w+)"))?[1].toUpperCase() or ''
