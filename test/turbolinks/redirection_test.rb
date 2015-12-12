@@ -30,18 +30,6 @@ class RedirectController < TestController
     redirect_to '/path', status: 303
   end
 
-  def redirect_to_path_with_single_change_option
-    redirect_to '/path', change: 'foo'
-  end
-
-  def redirect_to_path_with_multiple_change_option
-    redirect_to '/path', change: ['foo', :bar]
-  end
-
-  def redirect_to_path_with_change_option_and_custom_status
-    redirect_to '/path', change: ['foo', :bar], status: 303
-  end
-
   def redirect_to_path_with_turbolinks_and_single_keep_option
     redirect_to '/path', turbolinks: true, keep: 'foo'
   end
@@ -129,32 +117,6 @@ class RedirectionTest < ActionController::TestCase
   def test_redirect_to_via_put_and_not_xhr_does_normal_redirect
     put :redirect_to_url_string
     assert_redirected_to 'http://example.com'
-  end
-
-  def test_redirect_to_via_xhr_and_post_with_single_change_option
-    xhr :post, :redirect_to_path_with_single_change_option
-    assert_turbolinks_visit 'http://test.host/path', '{"change":["foo"]}'
-  end
-
-  def test_redirect_to_via_xhr_and_post_with_multiple_change_option
-    xhr :post, :redirect_to_path_with_multiple_change_option
-    assert_turbolinks_visit 'http://test.host/path', '{"change":["foo","bar"]}'
-  end
-
-  def test_redirect_to_via_xhr_and_post_with_change_option_and_custom_status
-    xhr :post, :redirect_to_path_with_change_option_and_custom_status
-    assert_turbolinks_visit 'http://test.host/path', '{"change":["foo","bar"]}'
-  end
-
-  def test_redirect_to_via_xhr_and_get_with_single_change_option
-    xhr :get, :redirect_to_path_with_single_change_option
-    assert_turbolinks_visit 'http://test.host/path', '{"change":["foo"]}'
-  end
-
-  def test_redirect_to_via_post_and_not_xhr_with_change_option_and_custom_status
-    post :redirect_to_path_with_change_option_and_custom_status
-    assert_response 303
-    assert_redirected_to 'http://test.host/path'
   end
 
   def test_redirect_to_with_turbolinks_and_single_keep_option

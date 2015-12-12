@@ -47,8 +47,6 @@ suite 'Turbolinks.visit()', ->
     @document.addEventListener 'page:change', (event) =>
       assert.deepEqual event.data, [@document.body]
       pageChangeFired = true
-    @document.addEventListener 'page:partial-load', (event) =>
-      partialLoadFired = true
     @document.addEventListener 'page:load', (event) =>
       assert.ok pageReceivedFired
       assert.ok beforeUnloadFired
@@ -80,59 +78,6 @@ suite 'Turbolinks.visit()', ->
         @$('#permanent').click() # event listeners on permanent nodes should not be lost
       , 0
     @Turbolinks.visit('iframe2.html')
-
-  test "successful with :change", (done) ->
-    body = @$('body')
-    change = @$('#change')
-    change2 = @$('[id="change:key"]')
-    temporary = @$('#temporary')
-    beforeUnloadFired = pageChangeFired = loadFired = false
-    @document.addEventListener 'page:before-unload', (event) =>
-      assert.deepEqual event.data, [temporary, change, change2]
-      assert.equal @window.i, 1
-      assert.equal @$('#change').textContent, 'change content'
-      assert.equal @$('[id="change:key"]').textContent, 'change content'
-      assert.equal @$('#temporary').textContent, 'temporary content'
-      assert.equal @document.title, 'title'
-      beforeUnloadFired = true
-    afterRemoveNodes = [temporary, change, change2]
-    @document.addEventListener 'page:after-remove', (event) =>
-      assert.isNull event.data.parentNode
-      assert.equal event.data, afterRemoveNodes.shift()
-    @document.addEventListener 'page:change', (event) =>
-      assert.deepEqual event.data, [@$('#temporary'), @$('#change'), @$('[id="change:key"]')]
-      pageChangeFired = true
-    @document.addEventListener 'page:load', (event) =>
-      loadFired = true
-    @document.addEventListener 'page:partial-load', (event) =>
-      assert.ok beforeUnloadFired
-      assert.ok pageChangeFired
-      assert.equal afterRemoveNodes.length, 0 # after-remove is called immediately on changed nodes
-      assert.deepEqual event.data, [@$('#temporary'), @$('#change'), @$('[id="change:key"]')]
-      assert.equal @window.i, 1 # only scripts within the changed nodes are re-run
-      assert.equal @window.countPerm, 1
-      assert.equal @window.countAlways, 2
-      assert.isUndefined @window.j
-      assert.isUndefined @window.headScript
-      assert.isUndefined @window.bodyScriptEvalFalse
-      assert.notOk @$('#new-div')
-      assert.notOk @$('body').hasAttribute('new-attribute')
-      assert.equal @$('#change').textContent, 'change content 2'
-      assert.equal @$('[id="change:key"]').textContent, 'change content 2'
-      assert.equal @$('#temporary').textContent, 'temporary content 2'
-      assert.equal @$('#div').textContent, 'div content'
-      assert.equal @$('#permanent').textContent, 'permanent content'
-      assert.equal @$('meta[name="csrf-token"]').getAttribute('content'), 'token'
-      assert.equal @document.title, 'title 2'
-      assert.notEqual @$('#change'), change # changed nodes are cloned
-      assert.notEqual @$('#temporary'), temporary # temporary nodes are cloned
-      assert.equal @$('body'), body
-      assert.equal @location.href, "#{location.protocol}//#{location.host}/javascript/iframe2.html"
-      setTimeout =>
-        assert.notOk loadFired
-        done()
-      , 0
-    @Turbolinks.visit('iframe2.html', change: ['change'])
 
   test "error fallback", (done) ->
     unloadFired = false
@@ -207,16 +152,6 @@ suite 'Turbolinks.visit()', ->
     @Turbolinks.enableTransitionCache()
     @Turbolinks.visit('iframe.html')
 
-  test "with :change, skips transition cache", (done) ->
-    restoreCalled = false
-    @document.addEventListener 'page:restore', =>
-      restoreCalled = true
-    @document.addEventListener 'page:partial-load', =>
-      assert.notOk restoreCalled
-      done()
-    @Turbolinks.enableTransitionCache()
-    @Turbolinks.visit('iframe.html', change: 'div')
-
   test "history.back() cache hit", (done) ->
     @$('#div').addEventListener 'click', -> done()
     change = 0
@@ -265,32 +200,6 @@ suite 'Turbolinks.visit()', ->
     @Turbolinks.pagesCached(0)
     @Turbolinks.visit('iframe2.html')
 
-  test "with :change, doesn't store page in cache", (done) ->
-    @document.addEventListener 'page:partial-load', (event) =>
-      assert.equal @$('#change').textContent, 'change content 2'
-      setTimeout (=> @history.back()), 0
-    @document.addEventListener 'page:load', (event) =>
-      assert.equal @$('#change').textContent, 'change content'
-      done()
-    @Turbolinks.visit('iframe2.html', change: ['change'])
-
-  test "with :change, removes previous page from cache", (done) ->
-    @$('#change').foo = 'bar'
-    load = 0
-    @document.addEventListener 'page:partial-load', (event) =>
-      load += 1
-      if load is 2
-        setTimeout (=> @Turbolinks.visit('iframe2.html', change: 'change:key')), 0
-      else if load is 3
-        setTimeout (=> @history.back()), 0
-    @document.addEventListener 'page:load', (event) =>
-      load += 1
-      if load is 1
-        setTimeout (=> @Turbolinks.visit('iframe.html', change: 'change:key')), 0
-      else if load is 4
-        assert.isUndefined @$('#change').foo
-        done()
-    @Turbolinks.visit('iframe2.html')
 
   test "with :keep, doesn't store page in cache", (done) ->
     @$('#change').foo = 'bar'
@@ -468,20 +377,6 @@ suite 'Turbolinks.visit()', ->
     @window.scrollTo(4, 4)
     @Turbolinks.enableTransitionCache()
     @Turbolinks.visit('iframe2.html')
-
-  test "scroll to #anchor with :change", (done) ->
-    @document.addEventListener 'page:partial-load', =>
-      assert.closeTo @window.pageYOffset, @$('#change').offsetTop, 100
-      done()
-    @Turbolinks.visit('iframe2.html#change', change: ['change'])
-
-  test "doesn't scroll to top with :change", (done) ->
-    @window.scrollTo(42, 42)
-    @document.addEventListener 'page:partial-load', =>
-      assert.equal @window.pageXOffset, 42
-      assert.equal @window.pageYOffset, 42
-      done()
-    @Turbolinks.visit('iframe2.html', change: ['change'])
 
   test "doesn't scroll to top with scroll: false", (done) ->
     @window.scrollTo(42, 42)
