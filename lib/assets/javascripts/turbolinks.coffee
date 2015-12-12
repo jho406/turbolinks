@@ -156,7 +156,6 @@ changePage = (title, body, csrfToken, options) ->
   setAutofocusElement()
   changedNodes = [body]
 
-  executeScriptTags(getScriptsToRun(changedNodes, options.runScripts))
   currentState = window.history.state
 
   triggerEvent EVENTS.CHANGE, changedNodes
@@ -186,13 +185,6 @@ onNodeRemoved = (node) ->
     jQuery(node).remove()
   triggerEvent(EVENTS.AFTER_REMOVE, node)
 
-getScriptsToRun = (changedNodes, runScripts) ->
-  selector = if runScripts is false then 'script[data-turbolinks-eval="always"]' else 'script:not([data-turbolinks-eval="false"])'
-  script for script in document.body.querySelectorAll(selector) when isEvalAlways(script) or (nestedWithinNodeList(changedNodes, script) and not withinPermanent(script))
-
-isEvalAlways = (script) ->
-  script.getAttribute('data-turbolinks-eval') is 'always'
-
 withinPermanent = (element) ->
   while element?
     return true if element.hasAttribute?('data-turbolinks-permanent')
@@ -206,17 +198,6 @@ nestedWithinNodeList = (nodeList, element) ->
     element = element.parentNode
 
   return false
-
-executeScriptTags = (scripts) ->
-  for script in scripts when script.type in ['', 'text/javascript']
-    copy = document.createElement 'script'
-    copy.setAttribute attr.name, attr.value for attr in script.attributes
-    copy.async = false unless script.hasAttribute 'async'
-    copy.appendChild document.createTextNode script.innerHTML
-    { parentNode, nextSibling } = script
-    parentNode.removeChild script
-    parentNode.insertBefore copy, nextSibling
-  return
 
 # Firefox bug: Doesn't autofocus fields that are inserted via JavaScript
 setAutofocusElement = ->

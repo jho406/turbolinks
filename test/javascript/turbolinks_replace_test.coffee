@@ -24,20 +24,16 @@ suite 'Turbolinks.replace()', ->
         <meta charset="utf-8">
         <title>new title</title>
         <meta content="new-token" name="csrf-token">
-        <script>var headScript = true</script>
       </head>
       <body new-attribute>
         <div id="new-div"></div>
         <div id="temporary" data-turbolinks-temporary>new content</div>
-        <script>window.j = window.j || 0; window.j++;</script>
-        <script data-turbolinks-eval="false">var bodyScriptEvalFalse = true</script>
       </body>
       </html>
     """
     body = @$('body')
     beforeUnloadFired = partialLoadFired = false
     @document.addEventListener 'page:before-unload', =>
-      assert.isUndefined @window.j
       assert.notOk @$('#new-div')
       assert.notOk @$('body').hasAttribute('new-attribute')
       assert.ok @$('#div')
@@ -48,9 +44,6 @@ suite 'Turbolinks.replace()', ->
     @document.addEventListener 'page:load', (event) =>
       assert.ok beforeUnloadFired
       assert.deepEqual event.data, [@document.body]
-      assert.equal @window.j, 1
-      assert.isUndefined @window.headScript
-      assert.isUndefined @window.bodyScriptEvalFalse
       assert.ok @$('#new-div')
       assert.ok @$('body').hasAttribute('new-attribute')
       assert.notOk @$('#div')

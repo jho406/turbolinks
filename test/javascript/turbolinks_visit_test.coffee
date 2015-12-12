@@ -31,7 +31,6 @@ suite 'Turbolinks.visit()', ->
       assert.ok beforeChangeFired
       pageReceivedFired = true
     @document.addEventListener 'page:before-unload', (event) =>
-      assert.isUndefined @window.j
       assert.deepEqual event.data, [body]
       assert.notOk @$('#new-div')
       assert.notOk @$('body').hasAttribute('new-attribute')
@@ -51,12 +50,6 @@ suite 'Turbolinks.visit()', ->
       assert.notOk afterRemoveFired # after-remove isn't called until body is evicted from cache
       assert.ok pageChangeFired
       assert.deepEqual event.data, [@document.body]
-      assert.equal @window.i, 1
-      assert.equal @window.j, 1
-      assert.equal @window.countPerm, 1
-      assert.equal @window.countAlways, 1
-      assert.isUndefined @window.headScript
-      assert.isUndefined @window.bodyScriptEvalFalse
       assert.ok @$('#new-div')
       assert.ok @$('body').hasAttribute('new-attribute')
       assert.notOk @$('#div')
@@ -95,7 +88,6 @@ suite 'Turbolinks.visit()', ->
         setTimeout (=> @Turbolinks.visit('iframe.html')), 0
       else if load is 2
         assert.notOk restoreCalled
-        assert.equal @window.i, 2
         assert.equal @document.title, 'title'
         done()
     @document.addEventListener 'page:restore', =>
@@ -114,13 +106,11 @@ suite 'Turbolinks.visit()', ->
         setTimeout (=> @Turbolinks.visit('iframe.html')), 0
       else if load is 2
         assert.ok restoreCalled
-        assert.equal @window.i, 2
         assert.equal @document.title, 'title'
         assert.equal @history.length, @historyLengthOnRestore
         done()
     @document.addEventListener 'page:restore', =>
       assert.equal load, 1
-      assert.equal @window.i, 1
       assert.notOk @$('body').hasAttribute('new-attribute')
       assert.equal @document.title, 'title'
       assert.equal @$('#div').foo, 'bar' # DOM state is restored
@@ -148,9 +138,6 @@ suite 'Turbolinks.visit()', ->
       change += 1
       if change is 1
         @document.addEventListener 'page:fetch', -> fetchCalled = true
-        assert.equal @window.i, 1
-        assert.equal @window.k, 1
-        assert.equal @window.j, 1
         assert.equal @document.title, 'title 2'
         assert.notOk @document.querySelector('#div')
         setTimeout =>
@@ -158,9 +145,6 @@ suite 'Turbolinks.visit()', ->
         , 0
       else if change is 2
         assert.notOk fetchCalled
-        assert.equal @window.i, 1 # normal scripts are not re-run
-        assert.equal @window.k, 2 # data-turbolinks-eval="always" scripts are re-run
-        assert.equal @window.j, 1
         assert.equal @document.title, 'title'
         assert.notOk @document.querySelector('#new-div')
         @document.querySelector('#div').click() # event listeners should not be lost
@@ -171,16 +155,12 @@ suite 'Turbolinks.visit()', ->
     @document.addEventListener 'page:change', =>
       change += 1
       if change is 1
-        assert.equal @window.i, 1
-        assert.equal @window.j, 1
         assert.equal @document.title, 'title 2'
         assert.notOk @document.querySelector('#div')
         setTimeout =>
           @history.back()
         , 0
       else if change is 2
-        assert.equal @window.i, 2
-        assert.equal @window.j, 1
         assert.equal @document.title, 'title'
         assert.notOk @document.querySelector('#new-div')
         done()
