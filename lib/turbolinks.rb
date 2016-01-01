@@ -18,6 +18,11 @@ module Turbolinks
         base.before_filter :set_xhr_redirected_to, :set_request_method_cookie
         base.after_filter :abort_xdomain_redirect
       end
+
+      if base.respond_to?(:helper_method)
+        base.helper_method :turbolinks
+        base.helper_method :turbolinks_js_tag
+      end
     end
   end
 
