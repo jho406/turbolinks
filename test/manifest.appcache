@@ -7,4 +7,4 @@ NETWORK:
 *
 
 FALLBACK:
-/fallback.html /offline.html
+/fallback /offline.html

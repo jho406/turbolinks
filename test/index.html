@@ -5,12 +5,8 @@
   <title>Home</title>
   <script type="text/javascript" src="/js/turbolinks.js"></script>
   <script type="text/javascript">
-    document.addEventListener("page:change", function() {
-      console.log("page changed");
-    });
-
-    document.addEventListener("page:update", function() {
-      console.log("page updated");
+    document.addEventListener("page:load", function() {
+      console.log("page load");
     });
 
     document.addEventListener("page:restore", function() {
@@ -19,35 +15,43 @@
   </script>
 </head>
 <body class="page-index">
+  <h2>These are manual integration tests inherited from forking Turbolinks.</h2>
+  <div id="app">
+  </div>
   <ul style="margin-top:20px;">
-    <li><a href="/other.html">Other page</a></li>
-    <li><a href="/form.html">Form</a></li>
-    <li><a href="/slow-response">Slow loading page for progress bar</a></li>
-    <li><a href="/other.html"><span>Wrapped link</span></a></li>
-    <li><a href="/withoutextension">Without extension</a></li>
-    <li><a href="/withoutextension?sort=user.name">Without extension with query params</a></li>
-    <li><a href="http://www.google.com/">Cross origin</a></li>
-    <li><a href="/other.html" onclick="if(!confirm('follow link?')) { return false}">Confirm Fire Order</a></li>
-    <li><a href="/reload.html"><span>New assets track </span></a></li>
-    <li><a href="/partial1.html" data-no-turbolink>Partial replacement</a></li>
-    <li><a href="/dummy.gif?12345">Query Param Image Link</a></li>
-    <li><a href="/bounce">Redirect</a></li>
-    <li><a href="#">Hash link</a></li>
-    <li><a href="/reload.html#foo">New assets track with hash link</a></li>
-    <li><a href="/attachment.txt">A text response should load normally</a></li>
-    <li><a href="/attachment.html">An html response with Content-Disposition: attachment should load normally</a></li>
+    <li><a href="/other" data-turbolinks>A happy case, the div top should populate with with data</a></li>
+    <li><a href="/form" data-turbolinks>Expect visits with HTML responses to result in a direct visit to the page</a></li>
+    <li><a href="/slow-response" data-turbolinks>Expect a progress bar on top while the next state loads</a></li>
+    <li><a href="/other" data-turbolinks><span>Expect links with inner elements to work.</span></a></li>
+    <li><a href="/other.html" data-turbolinks>Expect links with extensions (.html, .jpg, etc) to result in a direct visits to the page</a></li>
+    <li><a href="http://www.google.com/" data-turbolinks>Expect cross origin links to result in direct visits.</a></li>
+    <li><a href="/other" onclick="if(!confirm('follow link?')) { return false}" data-turbolinks>Expect JS alerts to work as normal (preventing request for new state until you confirm).</a></li>
+    <li><a href="/reload" data-turbolinks><span>Expect recieved states with new assets digests to reload</span></a></li>
+    <li><a href="/dummy.gif?12345" data-turbolinks>Expect links with extenstions and params to result in direct visits</a></li>
+    <li><a href="/bounce" data-turbolinks>Expect redirected responses with X-XHR-Redirected-To headers to correctly reflect the redirected URLs</a></li>
+    <li><a href="#" data-turbolinks>Expect hash links in the current page to do not do anything</a></li>
+    <li><a href="/reload#foo" data-turbolinks>Expect hash links to a new URL with new assets to reload</a></li>
+    <li><a href="/attachment.txt" data-turbolinks>Expect that a text response loads normally</a></li>
+    <li><a href="/attachment" data-turbolinks>Expect a html response with Content-Disposition: attachment to load normally</a></li>
     <li><h5>If you stop the server or go into airplane/offline mode</h5></li>
-    <li><a href="/doesnotexist.html">A page with client error (4xx, rfc2616 sec. 10.4) should error out</a></li>
-    <li><a href="/500">Also server errors (5xx, rfc2616 sec. 10.5) should error out</a></li>
-    <li><a href="/fallback.html">A page that has a fallback in appcache should fallback</a></li>
+    <li><a href="/doesnotexist.html" data-turbolinks>Expect an error page with a client error (4xx, rfc2616 sec. 10.4)</a></li>
+    <li><a href="/500" data-turbolinks>Expect an error page when the server errors (5xx, rfc2616 sec. 10.5)</a></li>
+    <li><a href="/fallback" data-turbolinks>Expect fallback if a fallback is specified in the appcache</a></li>
   </ul>
 
+  <!-- probably used to test with scrollposition -->
   <div style="background:#ccc;height:5000px;width:200px;">
   </div>
+  <!-- i don't know... -->
   <iframe height='1' scrolling='no' src='/offline.html' style='display: none;' width='1'></iframe>
 
-  <script type="text/javascript" data-turbolinks-eval=false>
-    console.log("turbolinks-eval-false script fired. This should only happen on the initial page load.");
+  <script type="text/javascript">
+    document.addEventListener('turbolinks:load', function(event){
+      document.getElementById('app').innerText = JSON.stringify(event.data)
+    });
+
+    Turbolinks.replace({"data":{"content":"initial data"},"turbolinks":{"assets":["/test.js","/test.css"]}});
   </script>
+
 </body>
 </html>

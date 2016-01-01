@@ -4,19 +4,6 @@
   <meta charset="utf-8">
   <title>Home</title>
   <script type="text/javascript" src="/js/turbolinks.js"></script>
-  <script type="text/javascript">
-    document.addEventListener("page:change", function() {
-      console.log("page changed");
-    });
-
-    document.addEventListener("page:update", function() {
-      console.log("page updated");
-    });
-
-    document.addEventListener("page:restore", function() {
-      console.log("page restored");
-    });
-  </script>
 </head>
 <body class="page-other">
   <ul>
