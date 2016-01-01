@@ -17,77 +17,57 @@ suite 'Turbolinks.replace()', ->
     document.body.removeChild(@iframe)
 
   test "default", (done) ->
-    doc = """
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>new title</title>
-        <meta content="new-token" name="csrf-token">
-      </head>
-      <body new-attribute>
-        <div id="new-div"></div>
-        <div id="temporary" data-turbolinks-temporary>new content</div>
-      </body>
-      </html>
-    """
-    body = @$('body')
-    beforeUnloadFired = partialLoadFired = false
-    @document.addEventListener 'page:before-unload', =>
-      assert.notOk @$('#new-div')
-      assert.notOk @$('body').hasAttribute('new-attribute')
-      assert.ok @$('#div')
-      assert.equal @$('meta[name="csrf-token"]').getAttribute('content'), 'token'
-      assert.equal @document.title, 'title'
-      assert.equal @$('body'), body
-      beforeUnloadFired = true
-    @document.addEventListener 'page:load', (event) =>
-      assert.ok beforeUnloadFired
-      assert.deepEqual event.data, [@document.body]
-      assert.ok @$('#new-div')
-      assert.ok @$('body').hasAttribute('new-attribute')
-      assert.notOk @$('#div')
-      assert.equal @$('#temporary').textContent, 'new content'
+    doc =
+      data: { heading: 'some data' }
+      turbolinks:
+        title: 'new title'
+        csrf_token: 'new-token'
+        assets: ['application-123.js', 'application-123.js']
+
+    assert.equal @$('meta[name="csrf-token"]').getAttribute('content'), 'token'
+    assert.equal @document.title, 'title'
+    @document.addEventListener 'turbolinks:load', (event) =>
       assert.equal @document.title, 'new title'
       assert.equal @$('meta[name="csrf-token"]').getAttribute('content'), 'new-token'
-      assert.notEqual @$('body'), body # body is replaced
+      assert.deepEqual event.data.data, { heading: "some data" } # body is replaced
       done()
     @Turbolinks.replace(doc)
 
-
-
   test "with :title set to a value replaces the title with the value", (done) ->
-    doc = """
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>new title</title>
-      </head>
-      <body new-attribute>
-        <div id="new-div"></div>
-      </body>
-      </html>
-    """
+    doc =
+      data: { heading: 'some data' }
+      turbolinks:
+        title: 'new title'
+        csrf_token: 'new-token'
+        assets: ['application-123.js', 'application-123.js']
+
     body = @$('body')
-    @document.addEventListener 'page:load', (event) =>
+    @document.addEventListener 'turbolinks:load', (event) =>
       assert.equal @document.title, 'specified title'
       done()
     @Turbolinks.replace(doc, title: 'specified title')
 
   test "with :title set to false doesn't replace the title", (done) ->
-    doc = """
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>new title</title>
-      </head>
-      <body new-attribute>
-        <div id="new-div"></div>
-      </body>
-      </html>
-    """
-    body = @$('body')
-    @document.addEventListener 'page:load', (event) =>
+    doc =
+      data: { heading: 'some data' }
+      turbolinks:
+        title: 'new title'
+        csrf_token: 'new-token'
+        assets: ['application-123.js', 'application-123.js']
+
+    @document.addEventListener 'turbolinks:load', (event) =>
       assert.equal @document.title, 'title'
       done()
     @Turbolinks.replace(doc, title: false)
+
+  test "with different assets refreshes the page", (done) ->
+    doc =
+      data: { heading: 'some data' }
+      turbolinks:
+        title: 'new title'
+        csrf_token: 'new-token'
+        assets: ['application-789.js']
+
+    @window.addEventListener 'unload', =>
+      done()
+    @Turbolinks.replace(doc, title: 'specified title')

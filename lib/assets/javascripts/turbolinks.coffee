@@ -1,11 +1,13 @@
 pageCache               = {}
-cacheSize               = 10
+pageCacheSize           = 20
+
 transitionCacheEnabled  = false
 requestCachingEnabled   = true
 progressBar             = null
 progressBarDelay        = 400
 
-currentState            = null
+currentPage             = null
+currentBrowserState     = null
 loadedAssets            = null
 
 referer                 = null
@@ -13,15 +15,11 @@ referer                 = null
 xhr                     = null
 
 EVENTS =
-  BEFORE_CHANGE:  'page:before-change'
-  FETCH:          'page:fetch'
-  RECEIVE:        'page:receive'
-  CHANGE:         'page:change'
-  UPDATE:         'page:update'
-  LOAD:           'page:load'
-  RESTORE:        'page:restore'
-  BEFORE_UNLOAD:  'page:before-unload'
-  AFTER_REMOVE:   'page:after-remove'
+  BEFORE_CHANGE:  'turbolinks:click'
+  FETCH:          'turbolinks:request-start'
+  RECEIVE:        'turbolinks:request-end'
+  LOAD:           'turbolinks:load'
+  RESTORE:        'turbolinks:restore'
 
 fetch = (url, options = {}) ->
   url = new ComponentUrl url
@@ -32,25 +30,20 @@ fetch = (url, options = {}) ->
     document.location.href = url.absolute
     return
 
-  if options.keep
-    removeCurrentPageFromCache()
-  else
-    cacheCurrentPage()
-
+  cacheCurrentPage()
 
   rememberReferer()
   progressBar?.start(delay: progressBarDelay)
-
-  if transitionCacheEnabled and cachedPage = transitionCacheFor(url.absolute)
+  if transitionCacheEnabled and restorePoint = transitionCacheFor(url.absolute)
     reflectNewUrl(url)
-    fetchHistory cachedPage
+    fetchHistory restorePoint
     options.showProgressBar = false
     options.scroll = false
 
   fetchReplacement url, options
 
 transitionCacheFor = (url) ->
-  return if url is currentState.url
+  return if url is currentBrowserState.url
   cachedPage = pageCache[url]
   cachedPage if cachedPage and !cachedPage.transitionCacheDisabled
 
@@ -61,6 +54,12 @@ disableRequestCaching = (disable = true) ->
   requestCachingEnabled = not disable
   disable
 
+DOMEval = (code, doc , url) =>
+  doc = doc || document
+  script = doc.createElement( "script" )
+  script.text = code
+  doc.head.appendChild( script ).parentNode.removeChild( script )
+
 fetchReplacement = (url, options) ->
   options.cacheRequest ?= requestCachingEnabled
   options.showProgressBar ?= true
@@ -70,7 +69,7 @@ fetchReplacement = (url, options) ->
   xhr?.abort()
   xhr = new XMLHttpRequest
   xhr.open 'GET', url.formatForXHR(cache: options.cacheRequest), true
-  xhr.setRequestHeader 'Accept', 'text/html, application/xhtml+xml, application/xml'
+  xhr.setRequestHeader 'Accept', 'text/javascript, application/x-javascript, application/javascript'
   xhr.setRequestHeader 'X-XHR-Referer', referer
 
   xhr.onload = ->
@@ -79,12 +78,13 @@ fetchReplacement = (url, options) ->
     if doc = processResponse()
       reflectNewUrl url
       reflectRedirectedUrl()
-      loadedNodes = changePage extractTitleAndBody(doc)..., options
+      updateScrollPosition(options.scroll) #move this to change page?
+
+      DOMEval(doc, document, url.absolute)
+
       if options.showProgressBar
         progressBar?.done()
-      updateScrollPosition(options.scroll)
-      triggerEvent EVENTS.LOAD, loadedNodes
-      constrainPageCacheTo(cacheSize)
+      constrainPageCacheTo(pageCacheSize)
     else
       progressBar?.done()
       document.location.href = crossOriginRedirect() or url.absolute
@@ -99,111 +99,91 @@ fetchReplacement = (url, options) ->
 
   xhr.onloadend = -> xhr = null
   xhr.onerror   = -> document.location.href = url.absolute
-
   xhr.send()
 
 fetchHistory = (cachedPage, options = {}) ->
   xhr?.abort()
-  changePage cachedPage.title, cachedPage.body, null, runScripts: false
+  changePage(cachedPage, options)
+
   progressBar?.done()
   updateScrollPosition(options.scroll)
   triggerEvent EVENTS.RESTORE
+  triggerEvent EVENTS.LOAD, cachedPage
 
 cacheCurrentPage = ->
-  currentStateUrl = new ComponentUrl currentState.url
+  return unless currentPage
+  currentUrl = new ComponentUrl currentBrowserState.url
 
-  pageCache[currentStateUrl.absolute] =
-    url:                      currentStateUrl.relative,
-    body:                     document.body,
-    title:                    document.title,
-    positionY:                window.pageYOffset,
-    positionX:                window.pageXOffset,
-    cachedAt:                 new Date().getTime(),
-    transitionCacheDisabled:  document.querySelector('[data-no-transition-cache]')?
+  merge currentPage.turbolinks,
+    cachedAt: new Date().getTime()
+    positionY: window.pageYOffset
+    positionX: window.pageXOffset
+    url: currentUrl.relative
+
+  pageCache[currentUrl.absolute] = currentPage
 
 removeCurrentPageFromCache = ->
-  delete pageCache[new ComponentUrl(currentState.url).absolute]
+  delete pageCache[new ComponentUrl(currentBrowserState.url).absolute]
 
-pagesCached = (size = cacheSize) ->
-  cacheSize = parseInt(size) if /^[\d]+$/.test size
+pagesCached = (size = pageCacheSize) ->
+  pageCacheSize = parseInt(size) if /^[\d]+$/.test size
 
 constrainPageCacheTo = (limit) ->
   pageCacheKeys = Object.keys pageCache
 
   cacheTimesRecentFirst = pageCacheKeys.map (url) ->
-    pageCache[url].cachedAt
+    pageCache[url].turbolinks.cachedAt
   .sort (a, b) -> b - a
 
-  for key in pageCacheKeys when pageCache[key].cachedAt <= cacheTimesRecentFirst[limit]
-    onNodeRemoved(pageCache[key].body)
+  for key in pageCacheKeys when pageCache[key].turbolinks.cachedAt <= cacheTimesRecentFirst[limit]
     delete pageCache[key]
 
-replace = (html, options = {}) ->
-  loadedNodes = changePage extractTitleAndBody(createDocument(html))..., options
-  triggerEvent EVENTS.LOAD, loadedNodes
+replace = (nextPage, options = {}) ->
+  currentUrl = new ComponentUrl currentBrowserState.url
 
-changePage = (title, body, csrfToken, options) ->
-  title = options.title ? title
-  currentBody = document.body
+  reverseMerge nextPage.turbolinks,
+    url: currentUrl.relative
+    cachedAt: new Date().getTime()
+    assets: []
+    title: ''
+    positionY: 0
+    positionX: 0
+    csrf_token: null
 
-  nodesToChange = [currentBody]
+  changePage(nextPage, options)
+  triggerEvent EVENTS.LOAD, currentPage
 
-  triggerEvent EVENTS.BEFORE_UNLOAD, nodesToChange
-  document.title = title if title isnt false
+reverseMerge = (dest, obj) ->
+  for k, v of obj
+    dest[k] = v if !dest.hasOwnProperty(k)
+  dest
 
-  document.body = body
-  CSRFToken.update csrfToken if csrfToken?
-  setAutofocusElement()
-  changedNodes = [body]
+merge = (dest, obj) ->
+  for k, v of obj
+    dest[k] = v
+  dest
 
-  currentState = window.history.state
+changePage = (nextPage, options) ->
+  if currentPage and assetsChanged(nextPage)
+    document.location.reload()
+    return
 
-  triggerEvent EVENTS.CHANGE, changedNodes
-  triggerEvent EVENTS.UPDATE
-  return changedNodes
+  currentPage = nextPage
+  meta = currentPage.turbolinks
+  meta.title = options.title ? meta.title
+  document.title = meta.title if meta.title isnt false
 
-swapNodes = (targetBody, existingNodes, options) ->
-  changedNodes = []
-  for existingNode in existingNodes
-    unless nodeId = existingNode.getAttribute('id')
-      throw new Error("Turbolinks partial replace: turbolinks elements must have an id.")
+  CSRFToken.update meta.csrf_token if meta.csrf_token?
+  currentBrowserState = window.history.state
 
-    if targetNode = targetBody.querySelector('[id="'+nodeId+'"]')
-      if options.keep
-        existingNode.parentNode.insertBefore(existingNode.cloneNode(true), existingNode)
-        existingNode = targetNode.ownerDocument.adoptNode(existingNode)
-        targetNode.parentNode.replaceChild(existingNode, targetNode)
-      else
-        existingNode.parentNode.replaceChild(targetNode, existingNode)
-        onNodeRemoved(existingNode)
-        changedNodes.push(targetNode)
+assetsChanged = (nextPage) ->
+  loadedAssets ||= currentPage.turbolinks.assets
+  fetchedAssets  = nextPage.turbolinks.assets
+  fetchedAssets.length isnt loadedAssets.length or intersection(fetchedAssets, loadedAssets).length isnt loadedAssets.length
 
-  return changedNodes
-
-onNodeRemoved = (node) ->
-  if typeof jQuery isnt 'undefined'
-    jQuery(node).remove()
-  triggerEvent(EVENTS.AFTER_REMOVE, node)
-
-withinPermanent = (element) ->
-  while element?
-    return true if element.hasAttribute?('data-turbolinks-permanent')
-    element = element.parentNode
-
-  return false
-
-nestedWithinNodeList = (nodeList, element) ->
-  while element?
-    return true if element in nodeList
-    element = element.parentNode
-
-  return false
-
-# Firefox bug: Doesn't autofocus fields that are inserted via JavaScript
-setAutofocusElement = ->
-  autofocusElement = (list = document.querySelectorAll 'input[autofocus], textarea[autofocus]')[list.length - 1]
-  if autofocusElement and document.activeElement isnt autofocusElement
-    autofocusElement.focus()
+intersection = (a, b) ->
+  [a, b] = [b, a] if a.length > b.length
+  value for value in a when value in b
 
 reflectNewUrl = (url) ->
   if (url = new ComponentUrl url).absolute not in [referer, document.location.href]
@@ -223,7 +203,7 @@ rememberReferer = ->
 
 rememberCurrentUrlAndState = ->
   window.history.replaceState { turbolinks: true, url: document.location.href }, '', document.location.href
-  currentState = window.history.state
+  currentBrowserState = window.history.state
 
 updateScrollPosition = (position) ->
   if Array.isArray(position)
@@ -264,57 +244,25 @@ pageChangePrevented = (url) ->
 processResponse = ->
   clientOrServerError = ->
     400 <= xhr.status < 600
-
   validContent = ->
     (contentType = xhr.getResponseHeader('Content-Type'))? and
-      contentType.match /^(?:text\/html|application\/xhtml\+xml|application\/xml)(?:;|$)/
-
+      contentType.match /^(?:text\/javascript|application\/x-javascript|application\/javascript)(?:;|$)/
   downloadingFile = ->
     (disposition = xhr.getResponseHeader('Content-Disposition'))? and
       disposition.match /^attachment/
 
-  extractTrackAssets = (doc) ->
-    for node in doc.querySelector('head').childNodes when node.getAttribute?('data-turbolinks-track')?
-      node.getAttribute('src') or node.getAttribute('href')
-
-  assetsChanged = (doc) ->
-    loadedAssets ||= extractTrackAssets document
-    fetchedAssets  = extractTrackAssets doc
-    fetchedAssets.length isnt loadedAssets.length or intersection(fetchedAssets, loadedAssets).length isnt loadedAssets.length
-
-  intersection = (a, b) ->
-    [a, b] = [b, a] if a.length > b.length
-    value for value in a when value in b
-
   if not clientOrServerError() and validContent() and not downloadingFile()
-    doc = createDocument xhr.responseText
-    if doc and !assetsChanged doc
-      return doc
-
-extractTitleAndBody = (doc) ->
-  title = doc.querySelector 'title'
-  [ title?.textContent, doc.querySelector('body'), CSRFToken.get(doc).token ]
+    return xhr.responseText
 
 CSRFToken =
-  get: (doc = document) ->
-    node:   tag = doc.querySelector 'meta[name="csrf-token"]'
+  get: ->
+    node:   tag = document.querySelector 'meta[name="csrf-token"]'
     token:  tag?.getAttribute? 'content'
 
   update: (latest) ->
     current = @get()
     if current.token? and latest? and current.token isnt latest
       current.node.setAttribute 'content', latest
-
-createDocument = (html) ->
-  if /<(html|body)/i.test(html)
-    doc = document.documentElement.cloneNode()
-    doc.innerHTML = html
-  else
-    doc = document.documentElement.cloneNode(true)
-    doc.querySelector('body').innerHTML = html
-  doc.head = doc.querySelector('head')
-  doc.body = doc.querySelector('body')
-  doc
 
 # The ComponentUrl class converts a basic URL string into an object
 # that behaves similarly to document.location.
@@ -337,14 +285,22 @@ class ComponentUrl
     @origin isnt (new ComponentUrl).origin
 
   formatForXHR: (options = {}) ->
-    (if options.cache then @ else @withAntiCacheParam()).withoutHashForIE10compatibility()
+    (if options.cache then @withMimeBust() else @withAntiCacheParam()).withoutHashForIE10compatibility()
+
+  withMimeBust: ->
+    new ComponentUrl(
+      if /([?&])__=[^&]*/.test @absolute
+        @absolute
+      else
+        new ComponentUrl(@withoutHash() + (if /\?/.test(@absolute) then "&" else "?") + "__=0" + @hash)
+    )
 
   withAntiCacheParam: ->
     new ComponentUrl(
       if /([?&])_=[^&]*/.test @absolute
         @absolute.replace /([?&])_=[^&]*/, "$1_=#{uniqueId()}"
       else
-        new ComponentUrl(@absolute + (if /\?/.test(@absolute) then "&" else "?") + "_=#{uniqueId()}")
+        new ComponentUrl(@withoutHash() + (if /\?/.test(@absolute) then "&" else "?") + "_=#{uniqueId()}" + @hash)
     )
 
   _parse: ->
@@ -359,7 +315,7 @@ class ComponentUrl
 # existing link element.  Provides verification functionality for Turbolinks
 # to use in determining whether it should process the link when clicked.
 class Link extends ComponentUrl
-  @HTML_EXTENSIONS: ['html']
+  @HTML_EXTENSIONS: []
 
   @allowExtensions: (extensions...) ->
     Link.HTML_EXTENSIONS.push extension for extension in extensions
@@ -388,10 +344,10 @@ class Link extends ComponentUrl
 
   _optOut: ->
     link = @originalElement
-    until ignore or link is document
-      ignore = link.getAttribute('data-no-turbolink')?
+    until enabled or link is document
+      enabled = link.getAttribute('data-turbolinks')?
       link = link.parentNode
-    ignore
+    !enabled
 
   _target: ->
     @link.target.length isnt 0
@@ -568,28 +524,18 @@ ProgressBarAPI =
   advanceTo: (value) -> progressBar?.advanceTo(value)
   done: -> progressBar?.done()
 
-installDocumentReadyPageEventTriggers = ->
-  document.addEventListener 'DOMContentLoaded', ( ->
-    triggerEvent EVENTS.CHANGE, [document.body]
-    triggerEvent EVENTS.UPDATE
-  ), true
-
-installJqueryAjaxSuccessPageUpdateTrigger = ->
-  if typeof jQuery isnt 'undefined'
-    jQuery(document).on 'ajaxSuccess', (event, xhr, settings) ->
-      return unless jQuery.trim xhr.responseText
-      triggerEvent EVENTS.UPDATE
-
 onHistoryChange = (event) ->
-  if event.state?.turbolinks && event.state.url != currentState.url
-    previousUrl = new ComponentUrl(currentState.url)
+  if event.state?.turbolinks && event.state.url != currentBrowserState.url
+    previousUrl = new ComponentUrl(currentBrowserState.url)
     newUrl = new ComponentUrl(event.state.url)
 
     if newUrl.withoutHash() is previousUrl.withoutHash()
       updateScrollPosition()
-    else if cachedPage = pageCache[newUrl.absolute]
+    else if restorePoint = pageCache[newUrl.absolute]
       cacheCurrentPage()
-      fetchHistory cachedPage, scroll: [cachedPage.positionX, cachedPage.positionY]
+      currentPage = restorePoint
+      meta = currentPage.turbolinks
+      fetchHistory currentPage, scroll: [meta.positionX, meta.positionY]
     else
       visit event.target.location.href
 
@@ -618,10 +564,6 @@ browserSupportsTurbolinks = browserSupportsPushState and !browserIsBuggy and req
 browserSupportsCustomEvents =
   document.addEventListener and document.createEvent
 
-if browserSupportsCustomEvents
-  installDocumentReadyPageEventTriggers()
-  installJqueryAjaxSuccessPageUpdateTrigger()
-
 if browserSupportsTurbolinks
   visit = fetch
   initializeTurbolinks()
@@ -633,7 +575,6 @@ else
 #   Turbolinks.replace(html)
 #   Turbolinks.pagesCached()
 #   Turbolinks.pagesCached(20)
-#   Turbolinks.cacheCurrentPage()
 #   Turbolinks.enableTransitionCache()
 #   Turbolinks.disableRequestCaching()
 #   Turbolinks.ProgressBar.enable()
@@ -648,7 +589,6 @@ else
   visit,
   replace,
   pagesCached,
-  cacheCurrentPage,
   enableTransitionCache,
   disableRequestCaching,
   ProgressBar: ProgressBarAPI,
