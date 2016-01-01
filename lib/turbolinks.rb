@@ -5,6 +5,10 @@ require 'turbolinks/xhr_url_for'
 require 'turbolinks/cookies'
 require 'turbolinks/x_domain_blocker'
 require 'turbolinks/redirection'
+require 'turbolinks/configuration'
+
+require 'jbuilder'
+require 'jbuilder/turbolinks'
 
 module Turbolinks
   module Controller
