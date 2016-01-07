@@ -6,9 +6,7 @@ require 'turbolinks/cookies'
 require 'turbolinks/x_domain_blocker'
 require 'turbolinks/redirection'
 require 'turbolinks/configuration'
-
-require 'jbuilder'
-require 'jbuilder/turbolinks'
+require 'turbolinks/kbuilder_template'
 
 module Turbolinks
   module Controller
@@ -60,6 +58,10 @@ module Turbolinks
       end
 
       ActiveSupport.on_load(:action_view) do
+        ActionView::Template.register_template_handler :kbuilder, Turbolinks::KbuilderHandler
+        require 'turbolinks/dependency_tracker'
+        require 'turbolinks/active_support'
+
         (ActionView::RoutingUrlFor rescue ActionView::Helpers::UrlHelper).module_eval do
           if defined?(prepend) && Rails.version >= '4'
             prepend XHRUrlFor

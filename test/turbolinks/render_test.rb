@@ -4,7 +4,7 @@ class RenderController < TestController
   require 'action_view/testing/resolvers'
 
   append_view_path(ActionView::FixtureResolver.new(
-    'render/action.js.jbuilder' => 'json.author "john smith"',
+    'render/action.js.kbuilder' => 'json.author "john smith"',
     'render/action.html.erb' => 'john smith',
     'layouts/application.html.erb' => "<html><head><%=turbolinks_js_tag%></head><body><%=yield%></body></html>"
   ))

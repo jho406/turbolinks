@@ -3,6 +3,7 @@ require 'abstract_controller'
 require 'abstract_controller/railties/routes_helpers'
 require 'action_controller'
 require 'turbolinks'
+require "active_support"
 
 require 'active_support/testing/autorun' if Rails.version >= '4'
 require 'active_support/test_case'
