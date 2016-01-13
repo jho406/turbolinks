@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'coffee-rails'
   s.add_dependency 'jbuilder'
-  s.add_dependency 'action_view'
+  s.add_dependency 'actionview'
 
   s.add_development_dependency 'rake'
 end
