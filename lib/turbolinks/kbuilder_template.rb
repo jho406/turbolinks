@@ -24,6 +24,10 @@ module Turbolinks
       def as_json(*)
         self
       end
+
+      def encode_json(*)
+        @digest
+      end
     end
 
     def initialize(context, *args)
