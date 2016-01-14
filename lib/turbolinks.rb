@@ -50,11 +50,7 @@ module Turbolinks
 
         require 'action_dispatch/routing/redirection'
         ActionDispatch::Routing::Redirect.class_eval do
-          if defined?(prepend)
-            prepend XHRRedirect
-          else
-            include LegacyXHRRedirect
-          end
+          prepend XHRRedirect
         end
       end
 
@@ -64,11 +60,7 @@ module Turbolinks
         require 'turbolinks/active_support'
 
         (ActionView::RoutingUrlFor rescue ActionView::Helpers::UrlHelper).module_eval do
-          if defined?(prepend) && Rails.version >= '4'
-            prepend XHRUrlFor
-          else
-            include LegacyXHRUrlFor
-          end
+          prepend XHRUrlFor
         end
       end
     end
