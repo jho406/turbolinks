@@ -1,9 +1,11 @@
 require 'jbuilder'
 require 'digest/md5'
 require 'action_view'
+require 'turbolinks/digestor'
 
 module Turbolinks
   class KbuilderTemplate < ::Jbuilder
+    include ::Turbolinks::PartialDigestor
 
     class << self
       attr_accessor :template_lookup_options
@@ -297,11 +299,6 @@ module Turbolinks
 
       def _logger
         ::ActionView::Base.logger
-      end
-
-      # To be overiden by turbolinks/digestor class eval
-      def _partial_digestor(options)
-        options[:name]
       end
   end
 
