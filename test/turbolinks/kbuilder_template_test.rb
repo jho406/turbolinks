@@ -36,11 +36,11 @@ COLLECTION_COLLECTION = Array.new(5){ |i| Collection.new(i+1, "collection #{i+1}
 ActionView::Template.register_template_handler :kbuilder, Turbolinks::KbuilderHandler
 
 PARTIALS = {
-  "_partial.json.kbuilder"  => "foo ||= 'hello'; json.content foo",
-  "_blog_post.json.kbuilder" => BLOG_POST_PARTIAL,
-  "_profile.json.kbuilder" => PROFILE_PARTIAL,
-  "_footer.json.kbuilder" => FOOTER_PARTIAL,
-  "_collection.json.kbuilder" => COLLECTION_PARTIAL
+  "_partial.js.kbuilder"  => "foo ||= 'hello'; json.content foo",
+  "_blog_post.js.kbuilder" => BLOG_POST_PARTIAL,
+  "_profile.js.kbuilder" => PROFILE_PARTIAL,
+  "_footer.js.kbuilder" => FOOTER_PARTIAL,
+  "_collection.js.kbuilder" => COLLECTION_PARTIAL
 }
 
 def strip_format(str)
@@ -68,9 +68,10 @@ class KbuilderTemplateTest < ActionView::TestCase
   def jbuild(source)
     @rendered = []
     partials = PARTIALS.clone
-    partials["test.json.kbuilder"] = source
+    partials["test.js.kbuilder"] = source
     resolver = ActionView::FixtureResolver.new(partials)
     lookup_context.view_paths = [resolver]
+    lookup_context.formats = [:js]
     template = ActionView::Template.new(source, "test", Turbolinks::KbuilderHandler, virtual_path: "test")
     template.render(self, {}).strip
   end
@@ -90,7 +91,7 @@ class KbuilderTemplateTest < ActionView::TestCase
   def form_authenticity_token
     "secret"
   end
-
+  
   test "rendering" do
     result = jbuild(<<-JBUILDER)
       json.content "hello"

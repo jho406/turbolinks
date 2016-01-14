@@ -7,6 +7,7 @@ require 'turbolinks/x_domain_blocker'
 require 'turbolinks/redirection'
 require 'turbolinks/configuration'
 require 'turbolinks/kbuilder_template'
+require 'turbolinks/digestor'
 
 module Turbolinks
   module Controller
