@@ -1,10 +1,11 @@
 require 'jbuilder'
 require 'digest/md5'
 require 'action_view'
-require 'action_view/digestor'
+require 'turbolinks/digestor'
 
 module Turbolinks
   class KbuilderTemplate < ::Jbuilder
+    include ::Turbolinks::PartialDigestor
 
     class << self
       attr_accessor :template_lookup_options
@@ -23,6 +24,10 @@ module Turbolinks
 
       def as_json(*)
         self
+      end
+
+      def encode_json(*)
+        @digest
       end
     end
 
@@ -289,7 +294,7 @@ module Turbolinks
       def _partial_digest(partial)
         lookup_context = @context.lookup_context
         name = lookup_context.find(partial, lookup_context.prefixes, true).virtual_path
-        ::ActionView::PartialDigestor.new(name: name, finder: lookup_context).digest
+        _partial_digestor({name: name, finder: lookup_context})
       end
 
       def _logger
@@ -299,6 +304,9 @@ module Turbolinks
 
 
   class KbuilderHandler
+    cattr_accessor :default_format
+    self.default_format = Mime[:js]
+
     def self.call(template)
       # this juggling is required to keep line numbers right in the error
       %{__already_defined = defined?(json); json||=::Turbolinks::KbuilderTemplate.new(self);#{template.source}

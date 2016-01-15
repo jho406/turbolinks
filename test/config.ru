@@ -36,46 +36,6 @@ class SlowResponse
   end
 end
 
-class MimeFile < Rack::File
-  F = ::File
-
-  def call(env)
-    dup._call(env)
-  end
-
-  def _call(env)
-    unless ALLOWED_VERBS.include? env["REQUEST_METHOD"]
-      return fail(405, "Method Not Allowed", {'Allow' => ALLOW_HEADER})
-    end
-
-    path_info = Rack::Utils.unescape(env["PATH_INFO"])
-    clean_path_info = Rack::Utils.clean_path_info(path_info)
-
-    if F.extname(clean_path_info).empty?
-      extname = case env['HTTP_ACCEPT']
-      when /html/
-        '.html'
-      when /javascript/
-        '.js'
-      end
-
-      clean_path_info += extname
-    end
-
-    @path = F.join(@root, clean_path_info)
-    available = begin
-      F.file?(@path) && F.readable?(@path)
-    rescue SystemCallError
-      false
-    end
-
-    if available
-      serving(env)
-    else
-      fail(404, "File not found: #{path_info}")
-    end
-  end
-end
 
 map "/js" do
   run Assets
@@ -93,7 +53,27 @@ map "/withoutextension" do
 end
 
 map "/javascript" do
-  run MimeFile.new(File.join(Root, "test", "javascript"))
+  run Proc.new{|request|
+    ext, type = if request['HTTP_ACCEPT'].include? 'javascript'
+      ['js', 'application/javascript']
+    else
+      ['html', 'text/html']
+    end
+
+    path = File.join(Root, "test", "javascript", [request["PATH_INFO"].split('.')[0],ext].join('.'))
+
+    available = begin
+      File.file?(path) && File.readable?(path)
+    rescue SystemCallError
+      false
+    end
+
+    if available
+      [200, { "Content-Type" => type }, File.open( path ) ]
+    else
+      fail(404, "File not found: #{path}")
+    end
+  }
 end
 
 map "/slow-response" do
@@ -112,7 +92,8 @@ map "/other" do
       ['other.html', 'text/html']
     end
 
-    [200, { "Content-Type" => type }, File.open( File.join( Root, "test", filename ) ) ] }
+    [200, { "Content-Type" => type }, File.open( File.join( Root, "test", filename ) ) ]
+  }
 end
 
 map "/reload" do
@@ -123,7 +104,8 @@ map "/reload" do
       ['reload.html', 'text/html']
     end
 
-    [200, { "Content-Type" => type }, File.open( File.join( Root, "test", filename ) ) ] }
+    [200, { "Content-Type" => type }, File.open( File.join( Root, "test", filename ) ) ]
+  }
 end
 
 map "/attachment.txt" do

@@ -7,6 +7,7 @@ require 'turbolinks/x_domain_blocker'
 require 'turbolinks/redirection'
 require 'turbolinks/configuration'
 require 'turbolinks/kbuilder_template'
+require 'turbolinks/digestor'
 
 module Turbolinks
   module Controller
@@ -49,11 +50,7 @@ module Turbolinks
 
         require 'action_dispatch/routing/redirection'
         ActionDispatch::Routing::Redirect.class_eval do
-          if defined?(prepend)
-            prepend XHRRedirect
-          else
-            include LegacyXHRRedirect
-          end
+          prepend XHRRedirect
         end
       end
 
@@ -63,11 +60,7 @@ module Turbolinks
         require 'turbolinks/active_support'
 
         (ActionView::RoutingUrlFor rescue ActionView::Helpers::UrlHelper).module_eval do
-          if defined?(prepend) && Rails.version >= '4'
-            prepend XHRUrlFor
-          else
-            include LegacyXHRUrlFor
-          end
+          prepend XHRUrlFor
         end
       end
     end

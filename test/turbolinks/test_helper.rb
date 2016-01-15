@@ -7,7 +7,14 @@ require "active_support"
 
 require 'active_support/testing/autorun' if Rails.version >= '4'
 require 'active_support/test_case'
+
 ActiveSupport::TestCase.test_order = :random if ActiveSupport::TestCase.respond_to?(:test_order=)
+
+module Rails
+  def self.cache
+    @cache ||= ActiveSupport::Cache::MemoryStore.new
+  end
+end
 
 class TestApplication < Rails::Application
   config.secret_token = Digest::SHA1.hexdigest(Time.now.to_s)
