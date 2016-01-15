@@ -60,6 +60,19 @@ DOMEval = (code, doc , url) =>
   script.text = code
   doc.head.appendChild( script ).parentNode.removeChild( script )
 
+withDefaults = (page) =>
+    currentUrl = new ComponentUrl currentBrowserState.url
+
+    reverseMerge page,
+      url: currentUrl.relative
+      cachedAt: new Date().getTime()
+      assets: []
+      data: {}
+      title: ''
+      positionY: 0
+      positionX: 0
+      csrf_token: null
+
 fetchReplacement = (url, options) ->
   options.cacheRequest ?= requestCachingEnabled
   options.showProgressBar ?= true
@@ -75,12 +88,13 @@ fetchReplacement = (url, options) ->
   xhr.onload = ->
     triggerEvent EVENTS.RECEIVE, url: url.absolute
 
-    if doc = processResponse()
+    if nextPage = processResponse()
       reflectNewUrl url
       reflectRedirectedUrl()
-      updateScrollPosition(options.scroll) #move this to change page?
-
-      DOMEval(doc, document, url.absolute)
+      withDefaults(nextPage)
+      changePage(nextPage, options)
+      updateScrollPosition(options.scroll)
+      triggerEvent EVENTS.LOAD, currentPage
 
       if options.showProgressBar
         progressBar?.done()
@@ -114,7 +128,7 @@ cacheCurrentPage = ->
   return unless currentPage
   currentUrl = new ComponentUrl currentBrowserState.url
 
-  merge currentPage.turbolinks,
+  merge currentPage,
     cachedAt: new Date().getTime()
     positionY: window.pageYOffset
     positionX: window.pageXOffset
@@ -132,24 +146,14 @@ constrainPageCacheTo = (limit) ->
   pageCacheKeys = Object.keys pageCache
 
   cacheTimesRecentFirst = pageCacheKeys.map (url) ->
-    pageCache[url].turbolinks.cachedAt
+    pageCache[url].cachedAt
   .sort (a, b) -> b - a
 
-  for key in pageCacheKeys when pageCache[key].turbolinks.cachedAt <= cacheTimesRecentFirst[limit]
+  for key in pageCacheKeys when pageCache[key].cachedAt <= cacheTimesRecentFirst[limit]
     delete pageCache[key]
 
 replace = (nextPage, options = {}) ->
-  currentUrl = new ComponentUrl currentBrowserState.url
-
-  reverseMerge nextPage.turbolinks,
-    url: currentUrl.relative
-    cachedAt: new Date().getTime()
-    assets: []
-    title: ''
-    positionY: 0
-    positionX: 0
-    csrf_token: null
-
+  withDefaults(nextPage)
   changePage(nextPage, options)
   triggerEvent EVENTS.LOAD, currentPage
 
@@ -169,16 +173,15 @@ changePage = (nextPage, options) ->
     return
 
   currentPage = nextPage
-  meta = currentPage.turbolinks
-  meta.title = options.title ? meta.title
-  document.title = meta.title if meta.title isnt false
+  currentPage.title = options.title ? currentPage.title
+  document.title = currentPage.title if currentPage.title isnt false
 
-  CSRFToken.update meta.csrf_token if meta.csrf_token?
+  CSRFToken.update currentPage.csrf_token if currentPage.csrf_token?
   currentBrowserState = window.history.state
 
 assetsChanged = (nextPage) ->
-  loadedAssets ||= currentPage.turbolinks.assets
-  fetchedAssets  = nextPage.turbolinks.assets
+  loadedAssets ||= currentPage.assets
+  fetchedAssets  = nextPage.assets
   fetchedAssets.length isnt loadedAssets.length or intersection(fetchedAssets, loadedAssets).length isnt loadedAssets.length
 
 intersection = (a, b) ->
@@ -252,7 +255,7 @@ processResponse = ->
       disposition.match /^attachment/
 
   if not clientOrServerError() and validContent() and not downloadingFile()
-    return xhr.responseText
+    return new Function("'use strict'; return " + xhr.responseText )();
 
 CSRFToken =
   get: ->
@@ -534,8 +537,7 @@ onHistoryChange = (event) ->
     else if restorePoint = pageCache[newUrl.absolute]
       cacheCurrentPage()
       currentPage = restorePoint
-      meta = currentPage.turbolinks
-      fetchHistory currentPage, scroll: [meta.positionX, meta.positionY]
+      fetchHistory currentPage, scroll: [currentPage.positionX, currentPage.positionY]
     else
       visit event.target.location.href
 

@@ -2,7 +2,6 @@ assert = chai.assert
 
 suite 'Turbolinks.visit()', ->
   setup (done) ->
-    # console.log('up')
     @iframe = document.createElement('iframe')
     @iframe.setAttribute('scrolling', 'yes')
     @iframe.setAttribute('style', 'visibility: hidden;')

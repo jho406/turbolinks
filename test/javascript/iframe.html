@@ -11,7 +11,14 @@
     html { overflow: scroll; }
     body:before { content: ''; display: block; width: 1000px; height: 1000px; }
   </style>
-  <script src="/js/iframe.js"></script>
+  <script>
+    Turbolinks.replace({
+      data: { heading: 'Some heading' },
+      title: 'title',
+      csrf_token: 'token',
+      assets: ['application-123.js', 'application-123.js']
+    });
+  </script>
 </head>
 <body>
   <div id="div">div content</div>
