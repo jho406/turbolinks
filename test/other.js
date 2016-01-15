@@ -1,1 +1,1 @@
-Turbolinks.replace({"data":{"content":"This is the other page"},"turbolinks":{"assets":["/test.js","/test.css"]}});
+Turbolinks.replace({"data":{"content":"This is the other page"},"assets":["/test.js","/test.css"]});

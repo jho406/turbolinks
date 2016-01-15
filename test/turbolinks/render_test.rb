@@ -89,13 +89,13 @@ class RenderTest < ActionController::TestCase
 
   def assert_turbolinks_html(content)
     assert_response 200
-    assert_equal "<html><head><script type='text/javascript'>Turbolinks.replace({\"data\":#{content.to_json},\"turbolinks\":{\"csrf_token\":\"secret\",\"assets\":[\"/app.js\"]}});</script></head><body></body></html>", @response.body
+    assert_equal "<html><head><script type='text/javascript'>Turbolinks.replace((function(){return ({\"data\":#{content.to_json},\"csrf_token\":\"secret\",\"assets\":[\"/app.js\"]});})());</script></head><body></body></html>", @response.body
     assert_equal 'text/html', @response.content_type
   end
 
   def assert_turbolinks_js(content)
     assert_response 200
-    assert_equal 'Turbolinks.replace({"data":' + content.to_json + ',"turbolinks":{"csrf_token":"secret","assets":["/app.js"]}});', @response.body
+    assert_equal '(function(){return ({"data":' + content.to_json + ',"csrf_token":"secret","assets":["/app.js"]});})()', @response.body
     assert_equal 'text/javascript', @response.content_type
   end
 

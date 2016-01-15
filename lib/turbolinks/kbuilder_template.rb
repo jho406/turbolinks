@@ -114,9 +114,9 @@ module Turbolinks
     end
 
     def target!
-      js = _turbolinks_replace(@attributes)
+      js = _turbolinks_return(@attributes)
       @js.push(js)
-      @js.join("\n")
+      "(function(){#{@js.join}})()"
     end
 
     private
@@ -157,7 +157,7 @@ module Turbolinks
             result = yield self
             if result !=BLANK
               @js << _turbolinks_set_cache(key, result)
-              @js.join("\n")
+              @js.join
             else
               BLANK
             end
@@ -179,8 +179,8 @@ module Turbolinks
         "Turbolinks.setCache(\"#{key}\", #{_dump(value)});"
       end
 
-      def _turbolinks_replace(results)
-        "Turbolinks.replace(#{_dump(results)});"
+      def _turbolinks_return(results)
+        "return (#{_dump(results)});"
       end
 
       def _dump(value)
@@ -311,24 +311,22 @@ module Turbolinks
       # this juggling is required to keep line numbers right in the error
       %{__already_defined = defined?(json); json||=::Turbolinks::KbuilderTemplate.new(self);#{template.source}
         if !(__already_defined && __already_defined != "method")
-          json.merge!({data: json.empty!})
-          json.turbolinks do
-            if defined?(turbolinks) && turbolinks
-              turbolinks.each do |k, v|
-                json.set! k, v
-              end
+        json.merge!({data: json.empty!})
+          if defined?(turbolinks) && turbolinks
+            turbolinks.each do |k, v|
+              json.set! k, v
             end
+          end
 
-            if protect_against_forgery?
-              json.csrf_token form_authenticity_token
-            end
+          if protect_against_forgery?
+            json.csrf_token form_authenticity_token
+          end
 
-            if ::Turbolinks.configuration.track_assets.any?
-              json.assets do
-                json.array! (::Turbolinks.configuration.track_assets || []).map{|assets|
-                  asset_path(assets)
-                }
-              end
+          if ::Turbolinks.configuration.track_assets.any?
+            json.assets do
+              json.array! (::Turbolinks.configuration.track_assets || []).map{|assets|
+                asset_path(assets)
+              }
             end
           end
 

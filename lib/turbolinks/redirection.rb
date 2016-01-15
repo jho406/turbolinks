@@ -7,7 +7,7 @@ module Turbolinks
 
     def turbolinks_js_tag
       if @turbolinks_js
-        "<script type='text/javascript'>#{@turbolinks_js}</script>".html_safe
+        "<script type='text/javascript'>Turbolinks.replace(#{@turbolinks_js});</script>".html_safe
       end
     end
 

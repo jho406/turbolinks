@@ -14,7 +14,7 @@ Assets = Sprockets::Environment.new do |env|
 end
 
 class SlowResponse
-  CHUNKS = [' '*50, ' '*20, 'Turbolinks.replace({"data":{"content":"Slow Reponse"},"turbolinks":{"assets":["/test.js","/test.css"]}});']
+  CHUNKS = [' '*50, ' '*20, 'Turbolinks.replace({"data":{"content":"Slow Reponse"},"assets":["/test.js","/test.css"]});']
 
   def call(env)
     [200, headers, self]
