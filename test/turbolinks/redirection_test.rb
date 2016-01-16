@@ -34,53 +34,53 @@ end
 class RedirectionTest < ActionController::TestCase
   tests RedirectController
 
-  def test_redirect_to_returns_a_truthy_value
+  test "redirect to returns a truthy value" do
     get :redirect_to_and_return
     assert_redirected_to '/path'
   end
 
-  def test_redirect_to_url_string_with_turbolinks
+  test "redirect to url string with turbolinks" do
     get :redirect_to_url_string_with_turbolinks
     assert_turbolinks_visit 'http://example.com'
   end
 
-  def test_redirect_to_url_hash_with_turbolinks
+  test "redirect to url hash with turbolinks" do
     get :redirect_to_url_hash_with_turbolinks
     assert_turbolinks_visit 'http://test.host/redirect/action'
   end
 
-  def test_redirect_to_url_string_via_xhr_and_post_redirects_via_turbolinks
+  test "redirect to url string via xhr and post redirects via turbolinks" do
     xhr :post, :redirect_to_url_string
     assert_turbolinks_visit 'http://example.com'
   end
 
-  def test_redirect_to_url_hash_via_xhr_and_put_redirects_via_turbolinks
+  test "test redirect to url hash via xhr and put redirects via turbolinks" do
     xhr :put, :redirect_to_url_hash
     assert_turbolinks_visit 'http://test.host/redirect/action'
   end
 
-  def test_redirect_to_path_and_custom_status_via_xhr_and_delete_redirects_via_turbolinks
+  test "redirect to path and custom status via xhr and delete redirects via turbolinks" do
     xhr :delete, :redirect_to_path_and_custom_status
     assert_turbolinks_visit 'http://test.host/path'
   end
 
-  def test_redirect_to_via_xhr_and_post_with_turbolinks_false_does_normal_redirect
+  test "redirect to via xhr and post with turbolinks false does normal redirect" do
     xhr :post, :redirect_to_path_with_turbolinks_false
     assert_redirected_to 'http://test.host/path'
   end
 
-  def test_redirect_to_via_xhr_and_get_does_normal_redirect
+  test "redirect to via xhr and get does normal redirect" do
     xhr :get, :redirect_to_path_and_custom_status
     assert_response 303
     assert_redirected_to 'http://test.host/path'
   end
 
-  def test_redirect_to_via_post_and_not_xhr_does_normal_redirect
+  test "redirect to via post and not xhr does normal redirect" do
     post :redirect_to_url_hash
     assert_redirected_to 'http://test.host/redirect/action'
   end
 
-  def test_redirect_to_via_put_and_not_xhr_does_normal_redirect
+  test "redirect to via put and not xhr does normal redirect" do
     put :redirect_to_url_string
     assert_redirected_to 'http://example.com'
   end

@@ -40,46 +40,46 @@ class RenderTest < ActionController::TestCase
     Turbolinks.configuration.track_assets = []
   end
 
-  def test_render_action_via_get
+  test "render action via get" do
     get :render_action
     assert_normal_render 'john smith'
   end
 
-  def test_simple_render_with_turbolinks
+  test "simple render with turbolinks" do
     get :simple_render_with_turbolinks
     assert_turbolinks_html({author: "john smith"})
   end
 
-  def test_simple_render_with_turbolinks_via_get_js
+  test "simple render with turbolinks via get js" do
     @request.accept = 'application/javascript'
     get :simple_render_with_turbolinks
     assert_turbolinks_js({author: "john smith"})
   end
 
-  def test_render_action_via_xhr_and_get_js
+  test "render action via xhr and get js" do
     @request.accept = 'application/javascript'
     xhr :get, :simple_render_with_turbolinks
     assert_turbolinks_js({author: "john smith"})
   end
 
-  def test_render_action_via_xhr_and_put_js
+  test "render action via xhr and put js" do
     @request.accept = 'application/javascript'
     xhr :put, :simple_render_with_turbolinks
     assert_turbolinks_js({author: "john smith"})
   end
 
-  def test_render_with_turbolinks_false
+  test "render with turbolinks false" do
     get :render_action_with_turbolinks_false
     assert_normal_render("john smith")
   end
 
-  def test_render_with_turbolinks_false_via_xhr_get
+  test "render with turbolinks false via xhr get" do
     @request.accept = 'text/html'
     xhr :get, :render_action_with_turbolinks_false
     assert_normal_render("john smith")
   end
 
-  def test_render_action_via_xhr_and_put
+  test "render action via xhr and put" do
     @request.accept = 'text/html'
     xhr :put, :render_action
     assert_normal_render 'john smith'
