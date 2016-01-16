@@ -14,7 +14,7 @@ Assets = Sprockets::Environment.new do |env|
 end
 
 class SlowResponse
-  CHUNKS = [' '*50, ' '*20, 'Turbolinks.replace({"data":{"content":"Slow Reponse"},"assets":["/test.js","/test.css"]});']
+  CHUNKS = [' '*50, ' '*20, '(function(){return ({"data":{"content":"Slow Reponse"},"assets":["/test.js","/test.css"]});})()']
 
   def call(env)
     [200, headers, self]
@@ -82,6 +82,12 @@ end
 
 map "/bounce" do
   run Proc.new{ [200, { "X-XHR-Redirected-To" => "redirect1", "Content-Type" => "application/javascript" }, File.open( File.join( Root, "test", "redirect1.js" ) ) ] }
+end
+
+map "/form" do
+  run Proc.new{|request|
+    [200, { "Content-Type" => 'text/html' }, File.open( File.join( Root, "test", 'form.html' ) ) ]
+  }
 end
 
 map "/other" do
