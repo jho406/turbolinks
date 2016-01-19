@@ -6,7 +6,7 @@ class RenderController < TestController
   append_view_path(ActionView::FixtureResolver.new(
     'render/action.js.kbuilder' => 'json.author "john smith"',
     'render/action.html.erb' => 'john smith',
-    'layouts/application.html.erb' => "<html><head><%=turbolinks_js_tag%></head><body><%=yield%></body></html>"
+    'layouts/application.html.erb' => "<html><head><%=turbolinks_tag%></head><body><%=yield%></body></html>"
   ))
 
   layout 'application'

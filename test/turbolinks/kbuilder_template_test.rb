@@ -51,6 +51,9 @@ class KbuilderTemplateTest < ActionView::TestCase
   setup do
     self.request_forgery = false
     Turbolinks.configuration.track_assets = []
+
+    # this is a stub. Normally this would be set by the
+    # controller locals
     self.turbolinks = {}
 
     @context = self
@@ -103,7 +106,6 @@ class KbuilderTemplateTest < ActionView::TestCase
 
   test "render with asset tracking" do
     Turbolinks.configuration.track_assets = ['test.js', 'test.css']
-    self.turbolinks = {}
 
     result = jbuild(<<-TEMPLATE)
       json.content "hello"

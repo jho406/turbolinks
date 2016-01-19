@@ -1,16 +1,5 @@
 module Turbolinks
   module Redirection
-
-    def turbolinks
-      @turbolinks ||= {}
-    end
-
-    def turbolinks_js_tag
-      if @turbolinks_js
-        "<script type='text/javascript'>Turbolinks.replace(#{@turbolinks_js});</script>".html_safe
-      end
-    end
-
     def redirect_to(url = {}, response_status = {})
       turbolinks = response_status.delete(:turbolinks)
       turbolinks = (request.xhr? && !request.get?) if turbolinks.nil?
@@ -31,18 +20,20 @@ module Turbolinks
 
     def render(*args, &block)
       render_options = args.extract_options!
-      opts = render_options.delete(:turbolinks)
-      opts = {} if opts == true
+      turbolinks = render_options.delete(:turbolinks)
+      turbolinks = {} if turbolinks == true
 
-      if opts
-       self.turbolinks.reverse_merge!(opts)
+      if turbolinks
+        render_options[:locals] ||= {}
+        render_options[:locals][:turbolinks] = turbolinks
+      end
 
-       if request.format == :html
+      if turbolinks && request.format == :html
          original_formats = self.formats
-         @turbolinks_js = render_to_string(*args, render_options.merge(formats: [:js]))
+
+         @turbolinks = render_to_string(*args, render_options.merge(formats: [:js]))
          self.formats = original_formats
          render_options.reverse_merge!(formats: original_formats, template: 'turbolinks/response')
-       end
       end
 
       super(*args, render_options, &block)

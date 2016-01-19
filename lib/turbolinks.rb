@@ -5,13 +5,14 @@ require 'turbolinks/xhr_url_for'
 require 'turbolinks/cookies'
 require 'turbolinks/x_domain_blocker'
 require 'turbolinks/redirection'
+require 'turbolinks/helpers'
 require 'turbolinks/configuration'
 require 'turbolinks/kbuilder_template'
 require 'turbolinks/digestor'
 
 module Turbolinks
   module Controller
-    include XHRHeaders, Cookies, XDomainBlocker, Redirection
+    include XHRHeaders, Cookies, XDomainBlocker, Redirection, Helpers
 
     def self.included(base)
       if base.respond_to?(:before_action)
@@ -23,8 +24,7 @@ module Turbolinks
       end
 
       if base.respond_to?(:helper_method)
-        base.helper_method :turbolinks
-        base.helper_method :turbolinks_js_tag
+        base.helper_method :turbolinks_tag
       end
     end
   end
