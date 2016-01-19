@@ -275,3 +275,10 @@ suite 'Turbolinks.visit()', ->
       assert.closeTo @window.pageYOffset, 42, 1
       done()
     @Turbolinks.visit('iframe2', scroll: false)
+
+  test "js responses with Turbolinks.cache caches correctly", (done) ->
+    @window.addEventListener 'turbolinks:load', (event) =>
+      assert.equal(event.data.data.footer, 'legal footer')
+      assert.equal(@Turbolinks.cache('cachekey'), 'legal footer')
+      done()
+    @Turbolinks.visit('iframe4')

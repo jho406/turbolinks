@@ -246,8 +246,8 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.setCache("fbf68bd43dba9d0054ad02b65b7bb4aa", {"email":"test@test.com"});
-        return ({"data":{"profile":Turbolinks.cache["fbf68bd43dba9d0054ad02b65b7bb4aa"]}});
+        Turbolinks.cache("fbf68bd43dba9d0054ad02b65b7bb4aa", {"email":"test@test.com"});
+        return ({"data":{"profile":Turbolinks.cache("fbf68bd43dba9d0054ad02b65b7bb4aa")}});
       })()
     JS
 
@@ -289,9 +289,9 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.setCache("0d6be77bebdef3fee771f21b49d51806", {"terms":"You agree"});
-        Turbolinks.setCache("c88c9332e539d4f3740f3c44575a1ebc", {"terms":"You agree"});
-        return ({"data":[Turbolinks.cache["0d6be77bebdef3fee771f21b49d51806"],Turbolinks.cache["c88c9332e539d4f3740f3c44575a1ebc"]]});
+        Turbolinks.cache("0d6be77bebdef3fee771f21b49d51806", {"terms":"You agree"});
+        Turbolinks.cache("c88c9332e539d4f3740f3c44575a1ebc", {"terms":"You agree"});
+        return ({"data":[Turbolinks.cache("0d6be77bebdef3fee771f21b49d51806"),Turbolinks.cache("c88c9332e539d4f3740f3c44575a1ebc")]});
       })()
     JS
 
@@ -394,8 +394,8 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.setCache("420dd59aa351baf103b4184869dfe516", 32);
-        return ({"data":{"hello":Turbolinks.cache["420dd59aa351baf103b4184869dfe516"]}});
+        Turbolinks.cache("420dd59aa351baf103b4184869dfe516", 32);
+        return ({"data":{"hello":Turbolinks.cache("420dd59aa351baf103b4184869dfe516")}});
       })()
     JS
 
@@ -415,9 +415,9 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.setCache("31a0b2d69da777bb2dcf027350566f1d", {"top":"hello4"});
-        Turbolinks.setCache("e9b9b9b98dafc029c4e814b091e90a7a", {"top":"hello5"});
-        return ({"data":{"hello":[Turbolinks.cache["31a0b2d69da777bb2dcf027350566f1d"],Turbolinks.cache["e9b9b9b98dafc029c4e814b091e90a7a"]]}});
+        Turbolinks.cache("31a0b2d69da777bb2dcf027350566f1d", {"top":"hello4"});
+        Turbolinks.cache("e9b9b9b98dafc029c4e814b091e90a7a", {"top":"hello5"});
+        return ({"data":{"hello":[Turbolinks.cache("31a0b2d69da777bb2dcf027350566f1d"),Turbolinks.cache("e9b9b9b98dafc029c4e814b091e90a7a")]}});
       })()
     JS
 
@@ -441,11 +441,11 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.setCache("31a0b2d69da777bb2dcf027350566f1d", {"top":"hello"});
-        Turbolinks.setCache("e9b9b9b98dafc029c4e814b091e90a7a", {"top":"hello"});
-        Turbolinks.setCache("4237e6f58bfe464b27ee270b55c12e84", {"bottom":"hello"});
-        Turbolinks.setCache("34cfb415aba6256e9aaf661a8697248c", {"bottom":"hello"});
-        return ({"data":{"hello":[Turbolinks.cache["31a0b2d69da777bb2dcf027350566f1d"],Turbolinks.cache["e9b9b9b98dafc029c4e814b091e90a7a"],3,4,Turbolinks.cache["4237e6f58bfe464b27ee270b55c12e84"],Turbolinks.cache["34cfb415aba6256e9aaf661a8697248c"]]}});
+        Turbolinks.cache("31a0b2d69da777bb2dcf027350566f1d", {"top":"hello"});
+        Turbolinks.cache("e9b9b9b98dafc029c4e814b091e90a7a", {"top":"hello"});
+        Turbolinks.cache("4237e6f58bfe464b27ee270b55c12e84", {"bottom":"hello"});
+        Turbolinks.cache("34cfb415aba6256e9aaf661a8697248c", {"bottom":"hello"});
+        return ({"data":{"hello":[Turbolinks.cache("31a0b2d69da777bb2dcf027350566f1d"),Turbolinks.cache("e9b9b9b98dafc029c4e814b091e90a7a"),3,4,Turbolinks.cache("4237e6f58bfe464b27ee270b55c12e84"),Turbolinks.cache("34cfb415aba6256e9aaf661a8697248c")]}});
       })()
     JS
 
@@ -468,10 +468,10 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.setCache("527312c467060937453434d11496f10f", {"subcontent":"inner"});
-        Turbolinks.setCache("423c34f3270addc1369ee6d95d662c04", {"subcontent":"other"});
-        Turbolinks.setCache("64af83f0566cd020f44ca0b25121fc58", {"content":Turbolinks.cache["527312c467060937453434d11496f10f"],"other":Turbolinks.cache["423c34f3270addc1369ee6d95d662c04"]});
-        return ({"data":{"hello":Turbolinks.cache["64af83f0566cd020f44ca0b25121fc58"]}});
+        Turbolinks.cache("527312c467060937453434d11496f10f", {"subcontent":"inner"});
+        Turbolinks.cache("423c34f3270addc1369ee6d95d662c04", {"subcontent":"other"});
+        Turbolinks.cache("64af83f0566cd020f44ca0b25121fc58", {"content":Turbolinks.cache("527312c467060937453434d11496f10f"),"other":Turbolinks.cache("423c34f3270addc1369ee6d95d662c04")});
+        return ({"data":{"hello":Turbolinks.cache("64af83f0566cd020f44ca0b25121fc58")}});
       })()
     JS
 
@@ -513,8 +513,8 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.setCache("423c34f3270addc1369ee6d95d662c04", {"content":"hello"});
-        return ({"data":{"comments":[Turbolinks.cache["423c34f3270addc1369ee6d95d662c04"],{"content":"world"}]}});
+        Turbolinks.cache("423c34f3270addc1369ee6d95d662c04", {"content":"hello"});
+        return ({"data":{"comments":[Turbolinks.cache("423c34f3270addc1369ee6d95d662c04"),{"content":"world"}]}});
       })()
     JS
 
@@ -538,8 +538,8 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.setCache("c6eb1da804069b92da0553e647a6770a", {"name":"Cache"});
-        return ({"data":{"post":Turbolinks.cache["c6eb1da804069b92da0553e647a6770a"]}});
+        Turbolinks.cache("c6eb1da804069b92da0553e647a6770a", {"name":"Cache"});
+        return ({"data":{"post":Turbolinks.cache("c6eb1da804069b92da0553e647a6770a")}});
       })()
     JS
 
@@ -557,8 +557,8 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.setCache("c6eb1da804069b92da0553e647a6770a", ["a","b","c"]);
-        return ({"data":{"content":Turbolinks.cache["c6eb1da804069b92da0553e647a6770a"]}});
+        Turbolinks.cache("c6eb1da804069b92da0553e647a6770a", ["a","b","c"]);
+        return ({"data":{"content":Turbolinks.cache("c6eb1da804069b92da0553e647a6770a")}});
       })()
     JS
 
@@ -633,8 +633,8 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.setCache("fedd00e5759ffda2b4ac1aeb6f2a7dde", {"id":1,"body":"post body 1","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        return ({"data":{"post":Turbolinks.cache["fedd00e5759ffda2b4ac1aeb6f2a7dde"]}});
+        Turbolinks.cache("fedd00e5759ffda2b4ac1aeb6f2a7dde", {"id":1,"body":"post body 1","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        return ({"data":{"post":Turbolinks.cache("fedd00e5759ffda2b4ac1aeb6f2a7dde")}});
       })()
     JS
 
@@ -655,8 +655,8 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.setCache("fedd00e5759ffda2b4ac1aeb6f2a7dde", {"id":1,"body":"hit","author":{"first_name":"John","last_name":"Smith"}});
-        return ({"data":{"post":Turbolinks.cache["fedd00e5759ffda2b4ac1aeb6f2a7dde"]}});
+        Turbolinks.cache("fedd00e5759ffda2b4ac1aeb6f2a7dde", {"id":1,"body":"hit","author":{"first_name":"John","last_name":"Smith"}});
+        return ({"data":{"post":Turbolinks.cache("fedd00e5759ffda2b4ac1aeb6f2a7dde")}});
       })()
     JS
 
@@ -672,17 +672,17 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.setCache("0d6be77bebdef3fee771f21b49d51806", {"id":1,"body":"post body 1","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Turbolinks.setCache("c88c9332e539d4f3740f3c44575a1ebc", {"id":2,"body":"post body 2","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        Turbolinks.setCache("f693f9f35d5cd7fa1df4d6cb05f0dd64", {"id":3,"body":"post body 3","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Turbolinks.setCache("306d22c07d0ed0080656222b634a23fd", {"id":4,"body":"post body 4","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        Turbolinks.setCache("599510241b78966805152d3f10379bdc", {"id":5,"body":"post body 5","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Turbolinks.setCache("37741607162f895d17d45ec9ff75d4dc", {"id":6,"body":"post body 6","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        Turbolinks.setCache("65e8f91af9ffe9989cb759345dcb7d26", {"id":7,"body":"post body 7","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Turbolinks.setCache("ca627b17e0fe8b9560ec1e0911099762", {"id":8,"body":"post body 8","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        Turbolinks.setCache("63543700a921958662967cc003f0dc06", {"id":9,"body":"post body 9","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Turbolinks.setCache("277a88c729950f01f14013d13dedf37d", {"id":10,"body":"post body 10","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        return ({"data":[Turbolinks.cache["0d6be77bebdef3fee771f21b49d51806"],Turbolinks.cache["c88c9332e539d4f3740f3c44575a1ebc"],Turbolinks.cache["f693f9f35d5cd7fa1df4d6cb05f0dd64"],Turbolinks.cache["306d22c07d0ed0080656222b634a23fd"],Turbolinks.cache["599510241b78966805152d3f10379bdc"],Turbolinks.cache["37741607162f895d17d45ec9ff75d4dc"],Turbolinks.cache["65e8f91af9ffe9989cb759345dcb7d26"],Turbolinks.cache["ca627b17e0fe8b9560ec1e0911099762"],Turbolinks.cache["63543700a921958662967cc003f0dc06"],Turbolinks.cache["277a88c729950f01f14013d13dedf37d"]]});
+        Turbolinks.cache("0d6be77bebdef3fee771f21b49d51806", {"id":1,"body":"post body 1","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Turbolinks.cache("c88c9332e539d4f3740f3c44575a1ebc", {"id":2,"body":"post body 2","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        Turbolinks.cache("f693f9f35d5cd7fa1df4d6cb05f0dd64", {"id":3,"body":"post body 3","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Turbolinks.cache("306d22c07d0ed0080656222b634a23fd", {"id":4,"body":"post body 4","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        Turbolinks.cache("599510241b78966805152d3f10379bdc", {"id":5,"body":"post body 5","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Turbolinks.cache("37741607162f895d17d45ec9ff75d4dc", {"id":6,"body":"post body 6","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        Turbolinks.cache("65e8f91af9ffe9989cb759345dcb7d26", {"id":7,"body":"post body 7","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Turbolinks.cache("ca627b17e0fe8b9560ec1e0911099762", {"id":8,"body":"post body 8","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        Turbolinks.cache("63543700a921958662967cc003f0dc06", {"id":9,"body":"post body 9","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Turbolinks.cache("277a88c729950f01f14013d13dedf37d", {"id":10,"body":"post body 10","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        return ({"data":[Turbolinks.cache("0d6be77bebdef3fee771f21b49d51806"),Turbolinks.cache("c88c9332e539d4f3740f3c44575a1ebc"),Turbolinks.cache("f693f9f35d5cd7fa1df4d6cb05f0dd64"),Turbolinks.cache("306d22c07d0ed0080656222b634a23fd"),Turbolinks.cache("599510241b78966805152d3f10379bdc"),Turbolinks.cache("37741607162f895d17d45ec9ff75d4dc"),Turbolinks.cache("65e8f91af9ffe9989cb759345dcb7d26"),Turbolinks.cache("ca627b17e0fe8b9560ec1e0911099762"),Turbolinks.cache("63543700a921958662967cc003f0dc06"),Turbolinks.cache("277a88c729950f01f14013d13dedf37d")]});
       })()
     JS
 

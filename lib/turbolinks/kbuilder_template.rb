@@ -15,7 +15,7 @@ module Turbolinks
 
     class Digest
       def initialize(digest)
-        @digest = "Turbolinks.cache[\"#{digest}\"]"
+        @digest = "Turbolinks.cache(\"#{digest}\")"
       end
 
       def to_json(*)
@@ -176,7 +176,7 @@ module Turbolinks
       end
 
       def _turbolinks_set_cache(key, value)
-        "Turbolinks.setCache(\"#{key}\", #{_dump(value)});"
+        "Turbolinks.cache(\"#{key}\", #{_dump(value)});"
       end
 
       def _turbolinks_return(results)

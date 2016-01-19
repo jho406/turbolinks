@@ -1,3 +1,4 @@
+atomCache               = {}
 pageCache               = {}
 pageCacheSize           = 20
 
@@ -53,12 +54,6 @@ enableTransitionCache = (enable = true) ->
 disableRequestCaching = (disable = true) ->
   requestCachingEnabled = not disable
   disable
-
-DOMEval = (code, doc , url) =>
-  doc = doc || document
-  script = doc.createElement( "script" )
-  script.text = code
-  doc.head.appendChild( script ).parentNode.removeChild( script )
 
 withDefaults = (page) =>
     currentUrl = new ComponentUrl currentBrowserState.url
@@ -256,6 +251,10 @@ processResponse = ->
 
   if not clientOrServerError() and validContent() and not downloadingFile()
     return new Function("'use strict'; return " + xhr.responseText )();
+
+cache = (key, value) ->
+  return atomCache[key] if value == null
+  atomCache[key] ||= value
 
 CSRFToken =
   get: ->
@@ -590,6 +589,7 @@ else
 @Turbolinks = {
   visit,
   replace,
+  cache,
   pagesCached,
   enableTransitionCache,
   disableRequestCaching,
