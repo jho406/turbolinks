@@ -25,6 +25,7 @@ module Turbolinks
 
       if base.respond_to?(:helper_method)
         base.helper_method :turbolinks_tag
+        base.helper_method :turbolinks_snippet
       end
     end
   end
