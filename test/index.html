@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>Home</title>
-  <script type="text/javascript" src="/js/turbolinks.js"></script>
+  <script type="text/javascript" src="/js/plumlinks.js"></script>
   <script type="text/javascript">
     document.addEventListener("page:load", function() {
       console.log("page load");
@@ -15,28 +15,28 @@
   </script>
 </head>
 <body class="page-index">
-  <h2>These are manual integration tests inherited from forking Turbolinks.</h2>
+  <h2>These are manual integration tests inherited from forking Plumlinks.</h2>
   <div id="app">
   </div>
   <ul style="margin-top:20px;">
-    <li><a href="/other" data-turbolinks>A happy case, the div top should populate with with data</a></li>
-    <li><a href="/form" data-turbolinks>Expect visits with HTML responses to result in a direct visit to the page</a></li>
-    <li><a href="/slow-response" data-turbolinks>Expect a progress bar on top while the next state loads</a></li>
-    <li><a href="/other" data-turbolinks><span>Expect links with inner elements to work.</span></a></li>
-    <li><a href="/other.html" data-turbolinks>Expect links with extensions (.html, .jpg, etc) to result in a direct visits to the page</a></li>
-    <li><a href="http://www.google.com/" data-turbolinks>Expect cross origin links to result in direct visits.</a></li>
-    <li><a href="/other" onclick="if(!confirm('follow link?')) { return false}" data-turbolinks>Expect JS alerts to work as normal (preventing request for new state until you confirm).</a></li>
-    <li><a href="/reload" data-turbolinks><span>Expect recieved states with new assets digests to reload</span></a></li>
-    <li><a href="/dummy.gif?12345" data-turbolinks>Expect links with extenstions and params to result in direct visits</a></li>
-    <li><a href="/bounce" data-turbolinks>Expect redirected responses with X-XHR-Redirected-To headers to correctly reflect the redirected URLs</a></li>
-    <li><a href="#" data-turbolinks>Expect hash links in the current page to do not do anything</a></li>
-    <li><a href="/reload#foo" data-turbolinks>Expect hash links to a new URL with new assets to reload</a></li>
-    <li><a href="/attachment.txt" data-turbolinks>Expect that a text response loads normally</a></li>
-    <li><a href="/attachment" data-turbolinks>Expect a html response with Content-Disposition: attachment to load normally</a></li>
+    <li><a href="/other" data-plumlinks>A happy case, the div top should populate with with data</a></li>
+    <li><a href="/form" data-plumlinks>Expect visits with HTML responses to result in a direct visit to the page</a></li>
+    <li><a href="/slow-response" data-plumlinks>Expect a progress bar on top while the next state loads</a></li>
+    <li><a href="/other" data-plumlinks><span>Expect links with inner elements to work.</span></a></li>
+    <li><a href="/other.html" data-plumlinks>Expect links with extensions (.html, .jpg, etc) to result in a direct visits to the page</a></li>
+    <li><a href="http://www.google.com/" data-plumlinks>Expect cross origin links to result in direct visits.</a></li>
+    <li><a href="/other" onclick="if(!confirm('follow link?')) { return false}" data-plumlinks>Expect JS alerts to work as normal (preventing request for new state until you confirm).</a></li>
+    <li><a href="/reload" data-plumlinks><span>Expect recieved states with new assets digests to reload</span></a></li>
+    <li><a href="/dummy.gif?12345" data-plumlinks>Expect links with extenstions and params to result in direct visits</a></li>
+    <li><a href="/bounce" data-plumlinks>Expect redirected responses with X-XHR-Redirected-To headers to correctly reflect the redirected URLs</a></li>
+    <li><a href="#" data-plumlinks>Expect hash links in the current page to do not do anything</a></li>
+    <li><a href="/reload#foo" data-plumlinks>Expect hash links to a new URL with new assets to reload</a></li>
+    <li><a href="/attachment.txt" data-plumlinks>Expect that a text response loads normally</a></li>
+    <li><a href="/attachment" data-plumlinks>Expect a html response with Content-Disposition: attachment to load normally</a></li>
     <li><h5>If you stop the server or go into airplane/offline mode</h5></li>
-    <li><a href="/doesnotexist.html" data-turbolinks>Expect an error page with a client error (4xx, rfc2616 sec. 10.4)</a></li>
-    <li><a href="/500" data-turbolinks>Expect an error page when the server errors (5xx, rfc2616 sec. 10.5)</a></li>
-    <li><a href="/fallback" data-turbolinks>Expect fallback if a fallback is specified in the appcache</a></li>
+    <li><a href="/doesnotexist.html" data-plumlinks>Expect an error page with a client error (4xx, rfc2616 sec. 10.4)</a></li>
+    <li><a href="/500" data-plumlinks>Expect an error page when the server errors (5xx, rfc2616 sec. 10.5)</a></li>
+    <li><a href="/fallback" data-plumlinks>Expect fallback if a fallback is specified in the appcache</a></li>
   </ul>
 
   <!-- probably used to test with scrollposition -->
@@ -46,11 +46,11 @@
   <iframe height='1' scrolling='no' src='/offline.html' style='display: none;' width='1'></iframe>
 
   <script type="text/javascript">
-    document.addEventListener('turbolinks:load', function(event){
+    document.addEventListener('plumlinks:load', function(event){
       document.getElementById('app').innerText = JSON.stringify(event.data)
     });
 
-    Turbolinks.replace({"data":{"content":"initial data"},"assets":["/test.js","/test.css"]});
+    Plumlinks.replace({"data":{"content":"initial data"},"assets":["/test.js","/test.css"]});
   </script>
 
 </body>

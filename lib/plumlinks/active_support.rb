@@ -8,7 +8,7 @@ if Rails.version >= '4.1'
           alias_method :original_jsonify, :jsonify
 
           def jsonify(value)
-            if ::Turbolinks::KbuilderTemplate::Digest === value
+            if ::Plumlinks::PlumTemplate::Digest === value
               value
             else
               original_jsonify(value)

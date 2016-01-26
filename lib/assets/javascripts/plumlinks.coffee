@@ -16,11 +16,11 @@ referer                 = null
 xhr                     = null
 
 EVENTS =
-  BEFORE_CHANGE:  'turbolinks:click'
-  FETCH:          'turbolinks:request-start'
-  RECEIVE:        'turbolinks:request-end'
-  LOAD:           'turbolinks:load'
-  RESTORE:        'turbolinks:restore'
+  BEFORE_CHANGE:  'plumlinks:click'
+  FETCH:          'plumlinks:request-start'
+  RECEIVE:        'plumlinks:request-end'
+  LOAD:           'plumlinks:load'
+  RESTORE:        'plumlinks:restore'
 
 fetch = (url, options = {}) ->
   url = new ComponentUrl url
@@ -186,7 +186,7 @@ intersection = (a, b) ->
 
 reflectNewUrl = (url) ->
   if (url = new ComponentUrl url).absolute not in [referer, document.location.href]
-    window.history.pushState { turbolinks: true, url: url.absolute }, '', url.absolute
+    window.history.pushState { plumlinks: true, url: url.absolute }, '', url.absolute
 
 reflectRedirectedUrl = ->
   if location = xhr.getResponseHeader 'X-XHR-Redirected-To'
@@ -201,7 +201,7 @@ rememberReferer = ->
   referer = document.location.href
 
 rememberCurrentUrlAndState = ->
-  window.history.replaceState { turbolinks: true, url: document.location.href }, '', document.location.href
+  window.history.replaceState { plumlinks: true, url: document.location.href }, '', document.location.href
   currentBrowserState = window.history.state
 
 updateScrollPosition = (position) ->
@@ -315,7 +315,7 @@ class ComponentUrl
     @absolute = @href
 
 # The Link class derives from the ComponentUrl class, but is built from an
-# existing link element.  Provides verification functionality for Turbolinks
+# existing link element.  Provides verification functionality for Plumlinks
 # to use in determining whether it should process the link when clicked.
 class Link extends ComponentUrl
   @HTML_EXTENSIONS: []
@@ -348,7 +348,7 @@ class Link extends ComponentUrl
   _optOut: ->
     link = @originalElement
     until enabled or link is document
-      enabled = link.getAttribute('data-turbolinks')?
+      enabled = link.getAttribute('data-plumlinks')?
       link = link.parentNode
     !enabled
 
@@ -356,7 +356,7 @@ class Link extends ComponentUrl
     @link.target.length isnt 0
 
 
-# The Click class handles clicked links, verifying if Turbolinks should
+# The Click class handles clicked links, verifying if Plumlinks should
 # take control by inspecting both the event and the link. If it should,
 # the page change process is initiated. If not, control is passed back
 # to the browser for default functionality.
@@ -372,7 +372,7 @@ class Click
   constructor: (@event) ->
     return if @event.defaultPrevented
     @_extractLink()
-    if @_validForTurbolinks()
+    if @_validForPlumlinks()
       visit @link.href
       @event.preventDefault()
 
@@ -381,7 +381,7 @@ class Click
     link = link.parentNode until !link.parentNode or link.nodeName is 'A'
     @link = new Link(link) if link.nodeName is 'A' and link.href.length isnt 0
 
-  _validForTurbolinks: ->
+  _validForPlumlinks: ->
     @link? and not (@link.shouldIgnore() or @_nonStandardClick())
 
   _nonStandardClick: ->
@@ -393,7 +393,7 @@ class Click
 
 
 class ProgressBar
-  className = 'turbolinks-progress-bar'
+  className = 'plumlinks-progress-bar'
   # Setting the opacity to a value < 1 fixes a display issue in Safari 6 and
   # iOS 6 where the progress bar would fill the entire page.
   originalOpacity = 0.99
@@ -528,7 +528,7 @@ ProgressBarAPI =
   done: -> progressBar?.done()
 
 onHistoryChange = (event) ->
-  if event.state?.turbolinks && event.state.url != currentBrowserState.url
+  if event.state?.plumlinks && event.state.url != currentBrowserState.url
     previousUrl = new ComponentUrl(currentBrowserState.url)
     newUrl = new ComponentUrl(event.state.url)
 
@@ -541,7 +541,7 @@ onHistoryChange = (event) ->
     else
       visit event.target.location.href
 
-initializeTurbolinks = ->
+initializePlumlinks = ->
   rememberCurrentUrlAndState()
   ProgressBar.enable()
 
@@ -561,33 +561,33 @@ browserIsBuggy =
 
 requestMethodIsSafe = popCookie('request_method') in ['GET','']
 
-browserSupportsTurbolinks = browserSupportsPushState and !browserIsBuggy and requestMethodIsSafe
+browserSupportsPlumlinks = browserSupportsPushState and !browserIsBuggy and requestMethodIsSafe
 
 browserSupportsCustomEvents =
   document.addEventListener and document.createEvent
 
-if browserSupportsTurbolinks
+if browserSupportsPlumlinks
   visit = fetch
-  initializeTurbolinks()
+  initializePlumlinks()
 else
   visit = (url = document.location.href) -> document.location.href = url
 
 # Public API
-#   Turbolinks.visit(url)
-#   Turbolinks.replace(html)
-#   Turbolinks.pagesCached()
-#   Turbolinks.pagesCached(20)
-#   Turbolinks.enableTransitionCache()
-#   Turbolinks.disableRequestCaching()
-#   Turbolinks.ProgressBar.enable()
-#   Turbolinks.ProgressBar.disable()
-#   Turbolinks.ProgressBar.start()
-#   Turbolinks.ProgressBar.advanceTo(80)
-#   Turbolinks.ProgressBar.done()
-#   Turbolinks.allowLinkExtensions('md')
-#   Turbolinks.supported
-#   Turbolinks.EVENTS
-@Turbolinks = {
+#   Plumlinks.visit(url)
+#   Plumlinks.replace(html)
+#   Plumlinks.pagesCached()
+#   Plumlinks.pagesCached(20)
+#   Plumlinks.enableTransitionCache()
+#   Plumlinks.disableRequestCaching()
+#   Plumlinks.ProgressBar.enable()
+#   Plumlinks.ProgressBar.disable()
+#   Plumlinks.ProgressBar.start()
+#   Plumlinks.ProgressBar.advanceTo(80)
+#   Plumlinks.ProgressBar.done()
+#   Plumlinks.allowLinkExtensions('md')
+#   Plumlinks.supported
+#   Plumlinks.EVENTS
+@Plumlinks = {
   visit,
   replace,
   cache,
@@ -596,6 +596,6 @@ else
   disableRequestCaching,
   ProgressBar: ProgressBarAPI,
   allowLinkExtensions: Link.allowExtensions,
-  supported: browserSupportsTurbolinks,
+  supported: browserSupportsPlumlinks,
   EVENTS: clone(EVENTS)
 }

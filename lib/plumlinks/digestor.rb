@@ -1,7 +1,7 @@
 require 'action_view'
 require 'action_view/digestor'
 
-module Turbolinks
+module Plumlinks
   module PartialDigestor
     if ::Rails.version >= '4.1'
       def _partial_digestor(options)

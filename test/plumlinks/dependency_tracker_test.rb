@@ -1,7 +1,7 @@
 # taken from jbuilder's jbuilder_dependency_tracker_test.rb
 
 require_relative 'test_helper'
-require 'turbolinks/dependency_tracker'
+require 'plumlinks/dependency_tracker'
 
 
 class FakeTemplate
@@ -15,11 +15,11 @@ end
 class KbuilderDependencyTrackerTest < ActiveSupport::TestCase
   def make_tracker(name, source)
     template = FakeTemplate.new(source)
-    Turbolinks::DependencyTracker.new(name, template)
+    Plumlinks::DependencyTracker.new(name, template)
   end
 
   def track_dependencies(source)
-    make_tracker('kbuilder_template', source).dependencies
+    make_tracker('plum_template', source).dependencies
   end
 
   test 'jbuilder direct partial! feature are not allowed' do

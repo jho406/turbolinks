@@ -1,6 +1,6 @@
 require_relative 'test_helper'
 
-class TurbolinksController < TestController
+class PlumlinksController < TestController
   def simple_action
     render text: ' '
   end
@@ -26,8 +26,8 @@ class TurbolinksController < TestController
   end
 end
 
-class TurbolinksTest < ActionController::TestCase
-  tests TurbolinksController
+class PlumlinksTest < ActionController::TestCase
+  tests PlumlinksController
 
   test "request referer returns xhr referer or standard referer" do
     @request.env['HTTP_REFERER'] = 'referer'
@@ -68,7 +68,7 @@ class TurbolinksTest < ActionController::TestCase
     assert_nil cookies[:request_method]
   end
 
-  test "sets xhr redirected to header on redirect requests coming from turbolinks" do
+  test "sets xhr redirected to header on redirect requests coming from plumlinks" do
     get :redirect_to_same_origin
     get :simple_action
     assert_nil @response.headers['X-XHR-Redirected-To']
@@ -80,7 +80,7 @@ class TurbolinksTest < ActionController::TestCase
     assert_equal 'http://test.host/path', @response.headers['X-XHR-Redirected-To']
   end
 
-  test "changes status to 403 on turbolinks requests redirecting to different origin" do
+  test "changes status to 403 on plumlinks requests redirecting to different origin" do
     get :redirect_to_different_host
     assert_response :redirect
 
@@ -118,12 +118,12 @@ class TurbolinksTest < ActionController::TestCase
   end
 end
 
-class TurbolinksIntegrationTest < ActionDispatch::IntegrationTest
+class PlumlinksIntegrationTest < ActionDispatch::IntegrationTest
   setup do
     @session = open_session
   end
 
-  test "sets xhr redirected to header on redirect requests coming from turbolinks" do
+  test "sets xhr redirected to header on redirect requests coming from plumlinks" do
     get '/redirect_hash'
     get response.location
     assert_nil response.headers['X-XHR-Redirected-To']
@@ -133,7 +133,7 @@ class TurbolinksIntegrationTest < ActionDispatch::IntegrationTest
     assert_nil response.headers['X-XHR-Redirected-To']
 
     get response.location, nil, { 'HTTP_X_XHR_REFERER' => nil }
-    assert_equal 'http://www.example.com/turbolinks/simple_action', response.headers['X-XHR-Redirected-To']
+    assert_equal 'http://www.example.com/plumlinks/simple_action', response.headers['X-XHR-Redirected-To']
     assert_response :ok
 
     get '/redirect_path', nil, { 'HTTP_X_XHR_REFERER' => 'http://www.example.com/' }
@@ -141,7 +141,7 @@ class TurbolinksIntegrationTest < ActionDispatch::IntegrationTest
     assert_nil response.headers['X-XHR-Redirected-To']
 
     get response.location, nil, { 'HTTP_X_XHR_REFERER' => nil }
-    assert_equal 'http://www.example.com/turbolinks/simple_action', response.headers['X-XHR-Redirected-To']
+    assert_equal 'http://www.example.com/plumlinks/simple_action', response.headers['X-XHR-Redirected-To']
     assert_response :ok
   end
 end

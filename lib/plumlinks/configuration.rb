@@ -1,4 +1,4 @@
-module Turbolinks
+module Plumlinks
   class Configuration
     attr_accessor :track_assets
 

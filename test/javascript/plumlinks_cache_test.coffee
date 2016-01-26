@@ -1,6 +1,6 @@
 assert = chai.assert
 
-suite 'Turbolinks.cache()', ->
+suite 'Plumlinks.cache()', ->
   setup (done) ->
     @iframe = document.createElement('iframe')
     @iframe.style.display = 'none'
@@ -9,7 +9,7 @@ suite 'Turbolinks.cache()', ->
     @iframe.onload = =>
       @window = @iframe.contentWindow
       @document = @window.document
-      @Turbolinks = @window.Turbolinks
+      @Plumlinks = @window.Plumlinks
       @$ = (selector) => @document.querySelector(selector)
       done()
 
@@ -17,9 +17,9 @@ suite 'Turbolinks.cache()', ->
     document.body.removeChild(@iframe)
 
   test "cache can only be set the first time", (done) ->
-    @Turbolinks.cache('cachekey','hit')
-    assert.equal(@Turbolinks.cache('cachekey'), 'hit')
+    @Plumlinks.cache('cachekey','hit')
+    assert.equal(@Plumlinks.cache('cachekey'), 'hit')
 
-    @Turbolinks.cache('cachekey','miss')
-    assert.equal(@Turbolinks.cache('cachekey'), 'hit')
+    @Plumlinks.cache('cachekey','miss')
+    assert.equal(@Plumlinks.cache('cachekey'), 'hit')
     done()

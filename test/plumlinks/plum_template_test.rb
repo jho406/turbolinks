@@ -4,7 +4,7 @@ require "active_model"
 require "action_view"
 require "action_view/testing/resolvers"
 require "active_support/cache"
-require "turbolinks/kbuilder_template"
+require "plumlinks/plum_template"
 
 BLOG_POST_PARTIAL = <<-JBUILDER
   json.extract! blog_post, :id, :body
@@ -33,44 +33,44 @@ blog_authors = [ "David Heinemeier Hansson", "Pavel Pravosud" ].cycle
 BLOG_POST_COLLECTION = Array.new(10){ |i| BlogPost.new(i+1, "post body #{i+1}", blog_authors.next) }
 COLLECTION_COLLECTION = Array.new(5){ |i| Collection.new(i+1, "collection #{i+1}") }
 
-ActionView::Template.register_template_handler :kbuilder, Turbolinks::KbuilderHandler
+ActionView::Template.register_template_handler :plum, Plumlinks::KbuilderHandler
 
 PARTIALS = {
-  "_partial.js.kbuilder"  => "foo ||= 'hello'; json.content foo",
-  "_blog_post.js.kbuilder" => BLOG_POST_PARTIAL,
-  "_profile.js.kbuilder" => PROFILE_PARTIAL,
-  "_footer.js.kbuilder" => FOOTER_PARTIAL,
-  "_collection.js.kbuilder" => COLLECTION_PARTIAL
+  "_partial.js.plum"  => "foo ||= 'hello'; json.content foo",
+  "_blog_post.js.plum" => BLOG_POST_PARTIAL,
+  "_profile.js.plum" => PROFILE_PARTIAL,
+  "_footer.js.plum" => FOOTER_PARTIAL,
+  "_collection.js.plum" => COLLECTION_PARTIAL
 }
 
 def strip_format(str)
   str.strip_heredoc.gsub(/\n\s*/, "")
 end
 
-class KbuilderTemplateTest < ActionView::TestCase
+class PlumTemplateTest < ActionView::TestCase
   setup do
     self.request_forgery = false
-    Turbolinks.configuration.track_assets = []
+    Plumlinks.configuration.track_assets = []
 
     # this is a stub. Normally this would be set by the
     # controller locals
-    self.turbolinks = {}
+    self.plumlinks = {}
 
     @context = self
     Rails.cache.clear
   end
 
-  cattr_accessor :request_forgery, :turbolinks
+  cattr_accessor :request_forgery, :plumlinks
   self.request_forgery = false
 
   def jbuild(source)
     @rendered = []
     partials = PARTIALS.clone
-    partials["test.js.kbuilder"] = source
+    partials["test.js.plum"] = source
     resolver = ActionView::FixtureResolver.new(partials)
     lookup_context.view_paths = [resolver]
     lookup_context.formats = [:js]
-    template = ActionView::Template.new(source, "test", Turbolinks::KbuilderHandler, virtual_path: "test")
+    template = ActionView::Template.new(source, "test", Plumlinks::KbuilderHandler, virtual_path: "test")
     template.render(self, {}).strip
   end
 
@@ -105,7 +105,7 @@ class KbuilderTemplateTest < ActionView::TestCase
   end
 
   test "render with asset tracking" do
-    Turbolinks.configuration.track_assets = ['test.js', 'test.css']
+    Plumlinks.configuration.track_assets = ['test.js', 'test.css']
 
     result = jbuild(<<-TEMPLATE)
       json.content "hello"
@@ -139,9 +139,9 @@ class KbuilderTemplateTest < ActionView::TestCase
     assert_equal expected, result
   end
 
-  test "wrapping jbuilder contents inside Turbolinks with additional options" do
-    Turbolinks.configuration.track_assets = ['test.js', 'test.css']
-    self.turbolinks = { title: 'this is fun' }
+  test "wrapping jbuilder contents inside Plumlinks with additional options" do
+    Plumlinks.configuration.track_assets = ['test.js', 'test.css']
+    self.plumlinks = { title: 'this is fun' }
 
     result = jbuild(<<-TEMPLATE)
       json.content "hello"
@@ -246,8 +246,8 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.cache("fbf68bd43dba9d0054ad02b65b7bb4aa", {"email":"test@test.com"});
-        return ({"data":{"profile":Turbolinks.cache("fbf68bd43dba9d0054ad02b65b7bb4aa")}});
+        Plumlinks.cache("fbf68bd43dba9d0054ad02b65b7bb4aa", {"email":"test@test.com"});
+        return ({"data":{"profile":Plumlinks.cache("fbf68bd43dba9d0054ad02b65b7bb4aa")}});
       })()
     JS
 
@@ -289,9 +289,9 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.cache("0d6be77bebdef3fee771f21b49d51806", {"terms":"You agree"});
-        Turbolinks.cache("c88c9332e539d4f3740f3c44575a1ebc", {"terms":"You agree"});
-        return ({"data":[Turbolinks.cache("0d6be77bebdef3fee771f21b49d51806"),Turbolinks.cache("c88c9332e539d4f3740f3c44575a1ebc")]});
+        Plumlinks.cache("0d6be77bebdef3fee771f21b49d51806", {"terms":"You agree"});
+        Plumlinks.cache("c88c9332e539d4f3740f3c44575a1ebc", {"terms":"You agree"});
+        return ({"data":[Plumlinks.cache("0d6be77bebdef3fee771f21b49d51806"),Plumlinks.cache("c88c9332e539d4f3740f3c44575a1ebc")]});
       })()
     JS
 
@@ -303,7 +303,7 @@ class KbuilderTemplateTest < ActionView::TestCase
   #   result = jbuild(<<-JBUILDER)
   #     json.collection collection: BLOG_POST_COLLECTION, partial: "collection", as: :collection
   #   JBUILDER
-  #   expected = "Turbolinks.replace([{\"id\":1,\"body\":\"post body 1\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":2,\"body\":\"post body 2\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}},{\"id\":3,\"body\":\"post body 3\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":4,\"body\":\"post body 4\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}},{\"id\":5,\"body\":\"post body 5\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":6,\"body\":\"post body 6\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}},{\"id\":7,\"body\":\"post body 7\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":8,\"body\":\"post body 8\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}},{\"id\":9,\"body\":\"post body 9\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":10,\"body\":\"post body 10\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}}]);"
+  #   expected = "Plumlinks.replace([{\"id\":1,\"body\":\"post body 1\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":2,\"body\":\"post body 2\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}},{\"id\":3,\"body\":\"post body 3\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":4,\"body\":\"post body 4\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}},{\"id\":5,\"body\":\"post body 5\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":6,\"body\":\"post body 6\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}},{\"id\":7,\"body\":\"post body 7\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":8,\"body\":\"post body 8\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}},{\"id\":9,\"body\":\"post body 9\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":10,\"body\":\"post body 10\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}}]);"
   #   assert_equal expected, result
   # end
   #
@@ -394,8 +394,8 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.cache("420dd59aa351baf103b4184869dfe516", 32);
-        return ({"data":{"hello":Turbolinks.cache("420dd59aa351baf103b4184869dfe516")}});
+        Plumlinks.cache("420dd59aa351baf103b4184869dfe516", 32);
+        return ({"data":{"hello":Plumlinks.cache("420dd59aa351baf103b4184869dfe516")}});
       })()
     JS
 
@@ -415,9 +415,9 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.cache("31a0b2d69da777bb2dcf027350566f1d", {"top":"hello4"});
-        Turbolinks.cache("e9b9b9b98dafc029c4e814b091e90a7a", {"top":"hello5"});
-        return ({"data":{"hello":[Turbolinks.cache("31a0b2d69da777bb2dcf027350566f1d"),Turbolinks.cache("e9b9b9b98dafc029c4e814b091e90a7a")]}});
+        Plumlinks.cache("31a0b2d69da777bb2dcf027350566f1d", {"top":"hello4"});
+        Plumlinks.cache("e9b9b9b98dafc029c4e814b091e90a7a", {"top":"hello5"});
+        return ({"data":{"hello":[Plumlinks.cache("31a0b2d69da777bb2dcf027350566f1d"),Plumlinks.cache("e9b9b9b98dafc029c4e814b091e90a7a")]}});
       })()
     JS
 
@@ -441,11 +441,11 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.cache("31a0b2d69da777bb2dcf027350566f1d", {"top":"hello"});
-        Turbolinks.cache("e9b9b9b98dafc029c4e814b091e90a7a", {"top":"hello"});
-        Turbolinks.cache("4237e6f58bfe464b27ee270b55c12e84", {"bottom":"hello"});
-        Turbolinks.cache("34cfb415aba6256e9aaf661a8697248c", {"bottom":"hello"});
-        return ({"data":{"hello":[Turbolinks.cache("31a0b2d69da777bb2dcf027350566f1d"),Turbolinks.cache("e9b9b9b98dafc029c4e814b091e90a7a"),3,4,Turbolinks.cache("4237e6f58bfe464b27ee270b55c12e84"),Turbolinks.cache("34cfb415aba6256e9aaf661a8697248c")]}});
+        Plumlinks.cache("31a0b2d69da777bb2dcf027350566f1d", {"top":"hello"});
+        Plumlinks.cache("e9b9b9b98dafc029c4e814b091e90a7a", {"top":"hello"});
+        Plumlinks.cache("4237e6f58bfe464b27ee270b55c12e84", {"bottom":"hello"});
+        Plumlinks.cache("34cfb415aba6256e9aaf661a8697248c", {"bottom":"hello"});
+        return ({"data":{"hello":[Plumlinks.cache("31a0b2d69da777bb2dcf027350566f1d"),Plumlinks.cache("e9b9b9b98dafc029c4e814b091e90a7a"),3,4,Plumlinks.cache("4237e6f58bfe464b27ee270b55c12e84"),Plumlinks.cache("34cfb415aba6256e9aaf661a8697248c")]}});
       })()
     JS
 
@@ -468,10 +468,10 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.cache("527312c467060937453434d11496f10f", {"subcontent":"inner"});
-        Turbolinks.cache("423c34f3270addc1369ee6d95d662c04", {"subcontent":"other"});
-        Turbolinks.cache("64af83f0566cd020f44ca0b25121fc58", {"content":Turbolinks.cache("527312c467060937453434d11496f10f"),"other":Turbolinks.cache("423c34f3270addc1369ee6d95d662c04")});
-        return ({"data":{"hello":Turbolinks.cache("64af83f0566cd020f44ca0b25121fc58")}});
+        Plumlinks.cache("527312c467060937453434d11496f10f", {"subcontent":"inner"});
+        Plumlinks.cache("423c34f3270addc1369ee6d95d662c04", {"subcontent":"other"});
+        Plumlinks.cache("64af83f0566cd020f44ca0b25121fc58", {"content":Plumlinks.cache("527312c467060937453434d11496f10f"),"other":Plumlinks.cache("423c34f3270addc1369ee6d95d662c04")});
+        return ({"data":{"hello":Plumlinks.cache("64af83f0566cd020f44ca0b25121fc58")}});
       })()
     JS
 
@@ -513,8 +513,8 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.cache("423c34f3270addc1369ee6d95d662c04", {"content":"hello"});
-        return ({"data":{"comments":[Turbolinks.cache("423c34f3270addc1369ee6d95d662c04"),{"content":"world"}]}});
+        Plumlinks.cache("423c34f3270addc1369ee6d95d662c04", {"content":"hello"});
+        return ({"data":{"comments":[Plumlinks.cache("423c34f3270addc1369ee6d95d662c04"),{"content":"world"}]}});
       })()
     JS
 
@@ -538,8 +538,8 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.cache("c6eb1da804069b92da0553e647a6770a", {"name":"Cache"});
-        return ({"data":{"post":Turbolinks.cache("c6eb1da804069b92da0553e647a6770a")}});
+        Plumlinks.cache("c6eb1da804069b92da0553e647a6770a", {"name":"Cache"});
+        return ({"data":{"post":Plumlinks.cache("c6eb1da804069b92da0553e647a6770a")}});
       })()
     JS
 
@@ -557,8 +557,8 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.cache("c6eb1da804069b92da0553e647a6770a", ["a","b","c"]);
-        return ({"data":{"content":Turbolinks.cache("c6eb1da804069b92da0553e647a6770a")}});
+        Plumlinks.cache("c6eb1da804069b92da0553e647a6770a", ["a","b","c"]);
+        return ({"data":{"content":Plumlinks.cache("c6eb1da804069b92da0553e647a6770a")}});
       })()
     JS
 
@@ -633,8 +633,8 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.cache("fedd00e5759ffda2b4ac1aeb6f2a7dde", {"id":1,"body":"post body 1","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        return ({"data":{"post":Turbolinks.cache("fedd00e5759ffda2b4ac1aeb6f2a7dde")}});
+        Plumlinks.cache("fedd00e5759ffda2b4ac1aeb6f2a7dde", {"id":1,"body":"post body 1","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        return ({"data":{"post":Plumlinks.cache("fedd00e5759ffda2b4ac1aeb6f2a7dde")}});
       })()
     JS
 
@@ -655,8 +655,8 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.cache("fedd00e5759ffda2b4ac1aeb6f2a7dde", {"id":1,"body":"hit","author":{"first_name":"John","last_name":"Smith"}});
-        return ({"data":{"post":Turbolinks.cache("fedd00e5759ffda2b4ac1aeb6f2a7dde")}});
+        Plumlinks.cache("fedd00e5759ffda2b4ac1aeb6f2a7dde", {"id":1,"body":"hit","author":{"first_name":"John","last_name":"Smith"}});
+        return ({"data":{"post":Plumlinks.cache("fedd00e5759ffda2b4ac1aeb6f2a7dde")}});
       })()
     JS
 
@@ -672,17 +672,17 @@ class KbuilderTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Turbolinks.cache("0d6be77bebdef3fee771f21b49d51806", {"id":1,"body":"post body 1","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Turbolinks.cache("c88c9332e539d4f3740f3c44575a1ebc", {"id":2,"body":"post body 2","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        Turbolinks.cache("f693f9f35d5cd7fa1df4d6cb05f0dd64", {"id":3,"body":"post body 3","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Turbolinks.cache("306d22c07d0ed0080656222b634a23fd", {"id":4,"body":"post body 4","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        Turbolinks.cache("599510241b78966805152d3f10379bdc", {"id":5,"body":"post body 5","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Turbolinks.cache("37741607162f895d17d45ec9ff75d4dc", {"id":6,"body":"post body 6","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        Turbolinks.cache("65e8f91af9ffe9989cb759345dcb7d26", {"id":7,"body":"post body 7","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Turbolinks.cache("ca627b17e0fe8b9560ec1e0911099762", {"id":8,"body":"post body 8","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        Turbolinks.cache("63543700a921958662967cc003f0dc06", {"id":9,"body":"post body 9","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Turbolinks.cache("277a88c729950f01f14013d13dedf37d", {"id":10,"body":"post body 10","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        return ({"data":[Turbolinks.cache("0d6be77bebdef3fee771f21b49d51806"),Turbolinks.cache("c88c9332e539d4f3740f3c44575a1ebc"),Turbolinks.cache("f693f9f35d5cd7fa1df4d6cb05f0dd64"),Turbolinks.cache("306d22c07d0ed0080656222b634a23fd"),Turbolinks.cache("599510241b78966805152d3f10379bdc"),Turbolinks.cache("37741607162f895d17d45ec9ff75d4dc"),Turbolinks.cache("65e8f91af9ffe9989cb759345dcb7d26"),Turbolinks.cache("ca627b17e0fe8b9560ec1e0911099762"),Turbolinks.cache("63543700a921958662967cc003f0dc06"),Turbolinks.cache("277a88c729950f01f14013d13dedf37d")]});
+        Plumlinks.cache("0d6be77bebdef3fee771f21b49d51806", {"id":1,"body":"post body 1","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Plumlinks.cache("c88c9332e539d4f3740f3c44575a1ebc", {"id":2,"body":"post body 2","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        Plumlinks.cache("f693f9f35d5cd7fa1df4d6cb05f0dd64", {"id":3,"body":"post body 3","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Plumlinks.cache("306d22c07d0ed0080656222b634a23fd", {"id":4,"body":"post body 4","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        Plumlinks.cache("599510241b78966805152d3f10379bdc", {"id":5,"body":"post body 5","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Plumlinks.cache("37741607162f895d17d45ec9ff75d4dc", {"id":6,"body":"post body 6","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        Plumlinks.cache("65e8f91af9ffe9989cb759345dcb7d26", {"id":7,"body":"post body 7","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Plumlinks.cache("ca627b17e0fe8b9560ec1e0911099762", {"id":8,"body":"post body 8","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        Plumlinks.cache("63543700a921958662967cc003f0dc06", {"id":9,"body":"post body 9","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Plumlinks.cache("277a88c729950f01f14013d13dedf37d", {"id":10,"body":"post body 10","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        return ({"data":[Plumlinks.cache("0d6be77bebdef3fee771f21b49d51806"),Plumlinks.cache("c88c9332e539d4f3740f3c44575a1ebc"),Plumlinks.cache("f693f9f35d5cd7fa1df4d6cb05f0dd64"),Plumlinks.cache("306d22c07d0ed0080656222b634a23fd"),Plumlinks.cache("599510241b78966805152d3f10379bdc"),Plumlinks.cache("37741607162f895d17d45ec9ff75d4dc"),Plumlinks.cache("65e8f91af9ffe9989cb759345dcb7d26"),Plumlinks.cache("ca627b17e0fe8b9560ec1e0911099762"),Plumlinks.cache("63543700a921958662967cc003f0dc06"),Plumlinks.cache("277a88c729950f01f14013d13dedf37d")]});
       })()
     JS
 

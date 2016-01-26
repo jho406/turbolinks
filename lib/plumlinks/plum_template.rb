@@ -1,21 +1,21 @@
 require 'jbuilder'
 require 'digest/md5'
 require 'action_view'
-require 'turbolinks/digestor'
+require 'plumlinks/digestor'
 
-module Turbolinks
-  class KbuilderTemplate < ::Jbuilder
-    include ::Turbolinks::PartialDigestor
+module Plumlinks
+  class PlumTemplate < ::Jbuilder
+    include ::Plumlinks::PartialDigestor
 
     class << self
       attr_accessor :template_lookup_options
     end
 
-    self.template_lookup_options = { handlers: [:kbuilder] }
+    self.template_lookup_options = { handlers: [:plum] }
 
     class Digest
       def initialize(digest)
-        @digest = "Turbolinks.cache(\"#{digest}\")"
+        @digest = "Plumlinks.cache(\"#{digest}\")"
       end
 
       def to_json(*)
@@ -114,7 +114,7 @@ module Turbolinks
     end
 
     def target!
-      js = _turbolinks_return(@attributes)
+      js = _plumlinks_return(@attributes)
       @js.push(js)
       "(function(){#{@js.join}})()"
     end
@@ -156,7 +156,7 @@ module Turbolinks
           ::Rails.cache.fetch(key, options) do
             result = yield self
             if result !=BLANK
-              @js << _turbolinks_set_cache(key, result)
+              @js << _plumlinks_set_cache(key, result)
               @js.join
             else
               BLANK
@@ -175,11 +175,11 @@ module Turbolinks
         end
       end
 
-      def _turbolinks_set_cache(key, value)
-        "Turbolinks.cache(\"#{key}\", #{_dump(value)});"
+      def _plumlinks_set_cache(key, value)
+        "Plumlinks.cache(\"#{key}\", #{_dump(value)});"
       end
 
-      def _turbolinks_return(results)
+      def _plumlinks_return(results)
         "return (#{_dump(results)});"
       end
 
@@ -216,7 +216,7 @@ module Turbolinks
 
       def _render_partial_with_options(options)
         options.reverse_merge! locals: {}
-        options.reverse_merge! ::Turbolinks::KbuilderTemplate.template_lookup_options
+        options.reverse_merge! ::Plumlinks::PlumTemplate.template_lookup_options
         as = options[:as]
 
         if options.key?(:collection)
@@ -309,11 +309,11 @@ module Turbolinks
 
     def self.call(template)
       # this juggling is required to keep line numbers right in the error
-      %{__already_defined = defined?(json); json||=::Turbolinks::KbuilderTemplate.new(self);#{template.source}
+      %{__already_defined = defined?(json); json||=::Plumlinks::PlumTemplate.new(self);#{template.source}
         if !(__already_defined && __already_defined != "method")
         json.merge!({data: json.empty!})
-          if defined?(turbolinks) && turbolinks
-            turbolinks.each do |k, v|
+          if defined?(plumlinks) && plumlinks
+            plumlinks.each do |k, v|
               json.set! k, v
             end
           end
@@ -322,9 +322,9 @@ module Turbolinks
             json.csrf_token form_authenticity_token
           end
 
-          if ::Turbolinks.configuration.track_assets.any?
+          if ::Plumlinks.configuration.track_assets.any?
             json.assets do
-              json.array! (::Turbolinks.configuration.track_assets || []).map{|assets|
+              json.array! (::Plumlinks.configuration.track_assets || []).map{|assets|
                 asset_path(assets)
               }
             end

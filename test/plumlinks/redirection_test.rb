@@ -10,20 +10,20 @@ class RedirectController < TestController
     raise "redirect_to should return a truthy value"
   end
 
-  def redirect_to_url_string_with_turbolinks
-    redirect_to 'http://example.com', turbolinks: true
+  def redirect_to_url_string_with_plumlinks
+    redirect_to 'http://example.com', plumlinks: true
   end
 
   def redirect_to_url_hash
     redirect_to action: 'action'
   end
 
-  def redirect_to_url_hash_with_turbolinks
-    redirect_to({action: 'action'}, turbolinks: true)
+  def redirect_to_url_hash_with_plumlinks
+    redirect_to({action: 'action'}, plumlinks: true)
   end
 
-  def redirect_to_path_with_turbolinks_false
-    redirect_to '/path', turbolinks: false
+  def redirect_to_path_with_plumlinks_false
+    redirect_to '/path', plumlinks: false
   end
 
   def redirect_to_path_and_custom_status
@@ -39,33 +39,33 @@ class RedirectionTest < ActionController::TestCase
     assert_redirected_to '/path'
   end
 
-  test "redirect to url string with turbolinks" do
-    get :redirect_to_url_string_with_turbolinks
-    assert_turbolinks_visit 'http://example.com'
+  test "redirect to url string with plumlinks" do
+    get :redirect_to_url_string_with_plumlinks
+    assert_plumlinks_visit 'http://example.com'
   end
 
-  test "redirect to url hash with turbolinks" do
-    get :redirect_to_url_hash_with_turbolinks
-    assert_turbolinks_visit 'http://test.host/redirect/action'
+  test "redirect to url hash with plumlinks" do
+    get :redirect_to_url_hash_with_plumlinks
+    assert_plumlinks_visit 'http://test.host/redirect/action'
   end
 
-  test "redirect to url string via xhr and post redirects via turbolinks" do
+  test "redirect to url string via xhr and post redirects via plumlinks" do
     xhr :post, :redirect_to_url_string
-    assert_turbolinks_visit 'http://example.com'
+    assert_plumlinks_visit 'http://example.com'
   end
 
-  test "test redirect to url hash via xhr and put redirects via turbolinks" do
+  test "test redirect to url hash via xhr and put redirects via plumlinks" do
     xhr :put, :redirect_to_url_hash
-    assert_turbolinks_visit 'http://test.host/redirect/action'
+    assert_plumlinks_visit 'http://test.host/redirect/action'
   end
 
-  test "redirect to path and custom status via xhr and delete redirects via turbolinks" do
+  test "redirect to path and custom status via xhr and delete redirects via plumlinks" do
     xhr :delete, :redirect_to_path_and_custom_status
-    assert_turbolinks_visit 'http://test.host/path'
+    assert_plumlinks_visit 'http://test.host/path'
   end
 
-  test "redirect to via xhr and post with turbolinks false does normal redirect" do
-    xhr :post, :redirect_to_path_with_turbolinks_false
+  test "redirect to via xhr and post with plumlinks false does normal redirect" do
+    xhr :post, :redirect_to_path_with_plumlinks_false
     assert_redirected_to 'http://test.host/path'
   end
 
@@ -87,10 +87,10 @@ class RedirectionTest < ActionController::TestCase
 
   private
 
-  def assert_turbolinks_visit(url, change = nil)
+  def assert_plumlinks_visit(url, change = nil)
     change = ", #{change}" if change
     assert_response 200
-    assert_equal "Turbolinks.visit('#{url}'#{change});", @response.body
+    assert_equal "Plumlinks.visit('#{url}'#{change});", @response.body
     assert_equal 'text/javascript', @response.content_type
   end
 end

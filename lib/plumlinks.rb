@@ -1,16 +1,16 @@
-require 'turbolinks/version'
-require 'turbolinks/xhr_headers'
-require 'turbolinks/xhr_redirect'
-require 'turbolinks/xhr_url_for'
-require 'turbolinks/cookies'
-require 'turbolinks/x_domain_blocker'
-require 'turbolinks/redirection'
-require 'turbolinks/helpers'
-require 'turbolinks/configuration'
-require 'turbolinks/kbuilder_template'
-require 'turbolinks/digestor'
+require 'plumlinks/version'
+require 'plumlinks/xhr_headers'
+require 'plumlinks/xhr_redirect'
+require 'plumlinks/xhr_url_for'
+require 'plumlinks/cookies'
+require 'plumlinks/x_domain_blocker'
+require 'plumlinks/redirection'
+require 'plumlinks/helpers'
+require 'plumlinks/configuration'
+require 'plumlinks/plum_template'
+require 'plumlinks/digestor'
 
-module Turbolinks
+module Plumlinks
   module Controller
     include XHRHeaders, Cookies, XDomainBlocker, Redirection, Helpers
 
@@ -24,21 +24,21 @@ module Turbolinks
       end
 
       if base.respond_to?(:helper_method)
-        base.helper_method :turbolinks_tag
-        base.helper_method :turbolinks_snippet
+        base.helper_method :plumlinks_tag
+        base.helper_method :plumlinks_snippet
       end
     end
   end
 
   class Engine < ::Rails::Engine
-    config.turbolinks = ActiveSupport::OrderedOptions.new
-    config.turbolinks.auto_include = true
+    config.plumlinks = ActiveSupport::OrderedOptions.new
+    config.plumlinks.auto_include = true
 
-    initializer :turbolinks do |app|
+    initializer :plumlinks do |app|
       ActiveSupport.on_load(:action_controller) do
         next if self != ActionController::Base
 
-        if app.config.turbolinks.auto_include
+        if app.config.plumlinks.auto_include
           include Controller
         end
 
@@ -56,9 +56,9 @@ module Turbolinks
       end
 
       ActiveSupport.on_load(:action_view) do
-        ActionView::Template.register_template_handler :kbuilder, Turbolinks::KbuilderHandler
-        require 'turbolinks/dependency_tracker'
-        require 'turbolinks/active_support'
+        ActionView::Template.register_template_handler :plum, Plumlinks::KbuilderHandler
+        require 'plumlinks/dependency_tracker'
+        require 'plumlinks/active_support'
 
         (ActionView::RoutingUrlFor rescue ActionView::Helpers::UrlHelper).module_eval do
           prepend XHRUrlFor

@@ -15,7 +15,7 @@ rescue LoadError
 end
 
 if dependency_tracker
-  class Turbolinks::KbuilderTemplate
+  class Plumlinks::PlumTemplate
     module DependencyTrackerMethods
       # Matches:
       #   json.partial! partial: "comments/comment"
@@ -41,7 +41,7 @@ if dependency_tracker
     end
   end
 
-  ::Turbolinks::DependencyTracker = Class.new(dependency_tracker::ERBTracker)
-  ::Turbolinks::DependencyTracker.send :include, ::Turbolinks::KbuilderTemplate::DependencyTrackerMethods
-  dependency_tracker.register_tracker :kbuilder, ::Turbolinks::DependencyTracker
+  ::Plumlinks::DependencyTracker = Class.new(dependency_tracker::ERBTracker)
+  ::Plumlinks::DependencyTracker.send :include, ::Plumlinks::PlumTemplate::DependencyTrackerMethods
+  dependency_tracker.register_tracker :plum, ::Plumlinks::DependencyTracker
 end
