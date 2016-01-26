@@ -79,6 +79,7 @@ fetchReplacement = (url, options) ->
   xhr.open 'GET', url.formatForXHR(cache: options.cacheRequest), true
   xhr.setRequestHeader 'Accept', 'text/javascript, application/x-javascript, application/javascript'
   xhr.setRequestHeader 'X-XHR-Referer', referer
+  xhr.setRequestHeader 'X-Requested-With', 'XMLHttpRequest'
 
   xhr.onload = ->
     triggerEvent EVENTS.RECEIVE, url: url.absolute
