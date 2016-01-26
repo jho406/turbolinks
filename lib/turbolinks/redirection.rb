@@ -37,6 +37,12 @@ module Turbolinks
       end
 
       super(*args, render_options, &block)
+
+      if turbolinks && (request.xhr? && !request.get?) && request.format == :js
+        @turbolinks = self.response_body[0]
+        self.response_body = [turbolinks_snippet]
+      end
+
       self.response_body
     end
   end

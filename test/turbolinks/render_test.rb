@@ -65,7 +65,7 @@ class RenderTest < ActionController::TestCase
   test "render action via xhr and put js" do
     @request.accept = 'application/javascript'
     xhr :put, :simple_render_with_turbolinks
-    assert_turbolinks_js({author: "john smith"})
+    assert_turbolinks_replace_js({author: "john smith"})
   end
 
   test "render with turbolinks false" do
@@ -96,6 +96,12 @@ class RenderTest < ActionController::TestCase
   def assert_turbolinks_js(content)
     assert_response 200
     assert_equal '(function(){return ({"data":' + content.to_json + ',"csrf_token":"secret","assets":["/app.js"]});})()', @response.body
+    assert_equal 'text/javascript', @response.content_type
+  end
+
+  def assert_turbolinks_replace_js(content)
+    assert_response 200
+    assert_equal 'Turbolinks.replace((function(){return ({"data":' + content.to_json + ',"csrf_token":"secret","assets":["/app.js"]});})());', @response.body
     assert_equal 'text/javascript', @response.content_type
   end
 
