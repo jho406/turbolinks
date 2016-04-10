@@ -229,9 +229,6 @@ popCookie = (name) ->
   document.cookie = name + '=; expires=Thu, 01-Jan-70 00:00:01 GMT; path=/'
   value
 
-uniqueId = ->
-  new Date().getTime().toString(36)
-
 triggerEvent = (name, data) ->
   if typeof Prototype isnt 'undefined'
     Event.fire document, name, data, true
