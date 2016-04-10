@@ -1,3 +1,7 @@
+#= require_tree ./plumlinks
+#= require_self
+
+
 atomCache               = {}
 pageCache               = {}
 pageCacheSize           = 20
@@ -257,21 +261,6 @@ cache = (key, value) ->
   return atomCache[key] if value == null
   atomCache[key] ||= value
 
-CSRFToken =
-  get: ->
-    node:   tag = document.querySelector 'meta[name="csrf-token"]'
-    token:  tag?.getAttribute? 'content'
-
-  update: (latest) ->
-    current = @get()
-    if current.token? and latest? and current.token isnt latest
-      current.node.setAttribute 'content', latest
-
-# The ComponentUrl class converts a basic URL string into an object
-# that behaves similarly to document.location.
-#
-# If an instance is created from a relative URL, the current document
-# is used to fill in the missing attributes (protocol, host, port).
 class ComponentUrl
   constructor: (@original = document.location.href) ->
     return @original if @original.constructor is ComponentUrl
