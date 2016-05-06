@@ -93,7 +93,7 @@ fetchReplacement = (url, options) ->
       reflectRedirectedUrl()
       withDefaults(nextPage)
       changePage(nextPage, options)
-      updateScrollPosition(options.scroll)
+      #updateScrollPosition(options.scroll)
       triggerEvent EVENTS.LOAD, currentPage
 
       if options.showProgressBar

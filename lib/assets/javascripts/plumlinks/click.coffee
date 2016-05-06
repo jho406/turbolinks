@@ -16,7 +16,7 @@ class window.Click
     return if @event.defaultPrevented
     @_extractLink()
     if @_validForPlumlinks()
-      visit @link.href
+      Plumlinks.visit @link.href
       @event.preventDefault()
 
   _extractLink: ->
