@@ -72,7 +72,43 @@ withDefaults = (page) =>
       positionX: 0
       csrf_token: null
 
+onLoadEnd = => 
+  xhr = null
+
+visitingURL = null
+onLoadSuccess = =>
+  url = visitingURL
+  triggerEvent EVENTS.RECEIVE, url: url.absolute
+
+  if nextPage = processResponse()
+    reflectNewUrl url
+    reflectRedirectedUrl()
+    withDefaults(nextPage)
+    changePage(nextPage, options)
+    #updateScrollPosition(options.scroll)
+    triggerEvent EVENTS.LOAD, currentPage
+
+    if options.showProgressBar
+      progressBar?.done()
+    constrainPageCacheTo(pageCacheSize)
+  else
+    progressBar?.done()
+    document.location.href = crossOriginRedirect() or url.absolute
+
+onProgress = (event) =>
+  percent = if event.lengthComputable
+    event.loaded / event.total * 100
+  else
+    progressBar.value + (100 - progressBar.value) / 10
+  
+  progressBar.advanceTo(percent)
+
+onError = =>
+  document.location.href = url.absolute
+
+
 fetchReplacement = (url, options) ->
+  visitingURL = url
   options.cacheRequest ?= requestCachingEnabled
   options.showProgressBar ?= true
 
@@ -85,34 +121,10 @@ fetchReplacement = (url, options) ->
   xhr.setRequestHeader 'X-XHR-Referer', referer
   xhr.setRequestHeader 'X-Requested-With', 'XMLHttpRequest'
 
-  xhr.onload = ->
-    triggerEvent EVENTS.RECEIVE, url: url.absolute
-
-    if nextPage = processResponse()
-      reflectNewUrl url
-      reflectRedirectedUrl()
-      withDefaults(nextPage)
-      changePage(nextPage, options)
-      #updateScrollPosition(options.scroll)
-      triggerEvent EVENTS.LOAD, currentPage
-
-      if options.showProgressBar
-        progressBar?.done()
-      constrainPageCacheTo(pageCacheSize)
-    else
-      progressBar?.done()
-      document.location.href = crossOriginRedirect() or url.absolute
-
-  if progressBar and options.showProgressBar
-    xhr.onprogress = (event) =>
-      percent = if event.lengthComputable
-        event.loaded / event.total * 100
-      else
-        progressBar.value + (100 - progressBar.value) / 10
-      progressBar.advanceTo(percent)
-
-  xhr.onloadend = -> xhr = null
-  xhr.onerror   = -> document.location.href = url.absolute
+  xhr.onload = onLoadSuccess
+  xhr.onprogress = onProgress if progressBar and options.showProgressBar 
+  xhr.onloadend = onLoadEnd
+  xhr.onerror = onError
   xhr.send()
 
 fetchHistory = (cachedPage, options = {}) ->
