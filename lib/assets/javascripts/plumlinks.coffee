@@ -58,19 +58,6 @@ disableRequestCaching = (disable = true) ->
   requestCachingEnabled = not disable
   disable
 
-withDefaults = (page) =>
-    currentUrl = new ComponentUrl currentBrowserState.url
-
-    reverseMerge page,
-      url: currentUrl.relative
-      cachedAt: new Date().getTime()
-      assets: []
-      data: {}
-      title: ''
-      positionY: 0
-      positionX: 0
-      csrf_token: null
-
 onLoadEnd = => remote = null
 
 onLoadSuccess = (url, options) =>
@@ -79,7 +66,7 @@ onLoadSuccess = (url, options) =>
   if nextPage = processResponse()
     reflectNewUrl url
     reflectRedirectedUrl()
-    withDefaults(nextPage)
+    Utils.withDefaults(nextPage, currentBrowserState)
     changePage(nextPage, options)
     #updateScrollPosition(options.scroll)
     triggerEvent EVENTS.LOAD, currentPage
@@ -116,6 +103,7 @@ fetchReplacement = (url, options) ->
   remote?.abort()
   remote = new Remote(url, delegate, cache: options.cacheRequest, referer: referer)
   remote.send()
+
 fetchHistory = (cachedPage, options = {}) ->
   remote?.abort()
   changePage(cachedPage, options)
@@ -129,7 +117,7 @@ cacheCurrentPage = ->
   return unless currentPage
   currentUrl = new ComponentUrl currentBrowserState.url
 
-  merge currentPage,
+  Utils.merge currentPage,
     cachedAt: new Date().getTime()
     positionY: window.pageYOffset
     positionX: window.pageXOffset
@@ -154,19 +142,9 @@ constrainPageCacheTo = (limit) ->
     delete pageCache[key]
 
 replace = (nextPage, options = {}) ->
-  withDefaults(nextPage)
+  Utils.withDefaults(nextPage, currentBrowserState)
   changePage(nextPage, options)
   triggerEvent EVENTS.LOAD, currentPage
-
-reverseMerge = (dest, obj) ->
-  for k, v of obj
-    dest[k] = v if !dest.hasOwnProperty(k)
-  dest
-
-merge = (dest, obj) ->
-  for k, v of obj
-    dest[k] = v
-  dest
 
 changePage = (nextPage, options) ->
   if currentPage and assetsChanged(nextPage)
@@ -183,11 +161,7 @@ changePage = (nextPage, options) ->
 assetsChanged = (nextPage) ->
   loadedAssets ||= currentPage.assets
   fetchedAssets  = nextPage.assets
-  fetchedAssets.length isnt loadedAssets.length or intersection(fetchedAssets, loadedAssets).length isnt loadedAssets.length
-
-intersection = (a, b) ->
-  [a, b] = [b, a] if a.length > b.length
-  value for value in a when value in b
+  fetchedAssets.length isnt loadedAssets.length or Utils.intersection(fetchedAssets, loadedAssets).length isnt loadedAssets.length
 
 reflectNewUrl = (url) ->
   if (url = new ComponentUrl url).absolute not in [referer, document.location.href]
@@ -219,17 +193,6 @@ updateScrollPosition = (position) ->
     else
       window.scrollTo 0, 0
 
-clone = (original) ->
-  return original if not original? or typeof original isnt 'object'
-  copy = new original.constructor()
-  copy[key] = clone value for key, value of original
-  copy
-
-popCookie = (name) ->
-  value = document.cookie.match(new RegExp(name+"=(\\w+)"))?[1].toUpperCase() or ''
-  document.cookie = name + '=; expires=Thu, 01-Jan-70 00:00:01 GMT; path=/'
-  value
-#
 triggerEvent = (name, data) ->
   if typeof Prototype isnt 'undefined'
     Event.fire document, name, data, true
@@ -283,24 +246,10 @@ initializePlumlinks = ->
   window.addEventListener 'hashchange', rememberCurrentUrlAndState, false
   window.addEventListener 'popstate', onHistoryChange, false
 
-browserSupportsPushState = window.history and 'pushState' of window.history and 'state' of window.history
-
-# Copied from https://github.com/Modernizr/Modernizr/blob/master/feature-detects/history.js
-ua = navigator.userAgent
-browserIsBuggy =
-  (ua.indexOf('Android 2.') != -1 or ua.indexOf('Android 4.0') != -1) and
-  ua.indexOf('Mobile Safari') != -1 and
-  ua.indexOf('Chrome') == -1 and
-  ua.indexOf('Windows Phone') == -1
-
-requestMethodIsSafe = popCookie('request_method') in ['GET','']
-
-browserSupportsPlumlinks = browserSupportsPushState and !browserIsBuggy and requestMethodIsSafe
-
 browserSupportsCustomEvents =
   document.addEventListener and document.createEvent
 
-if browserSupportsPlumlinks
+if Utils.browserSupportsPlumlinks
   visit = fetch
   initializePlumlinks()
 else
@@ -330,6 +279,6 @@ else
   disableRequestCaching,
   ProgressBar: ProgressBarAPI,
   allowLinkExtensions: Link.allowExtensions,
-  supported: browserSupportsPlumlinks,
-  EVENTS: clone(EVENTS)
+  supported: Utils.browserSupportsPlumlinks(),
+  EVENTS: Utils.clone(EVENTS)
 }
