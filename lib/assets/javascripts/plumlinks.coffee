@@ -43,7 +43,7 @@ fetch = (url, options = {}) ->
     reflectNewUrl(url)
     fetchHistory restorePoint
     options.showProgressBar = false
-    options.scroll = false
+    # options.scroll = false
 
   fetchReplacement url, options
 
@@ -132,7 +132,7 @@ fetchHistory = (cachedPage, options = {}) ->
   changePage(cachedPage, options)
 
   progressBar?.done()
-  updateScrollPosition(options.scroll)
+  # updateScrollPosition(options.scroll)
   triggerEvent EVENTS.RESTORE
   triggerEvent EVENTS.LOAD, cachedPage
 
@@ -287,7 +287,7 @@ onHistoryChange = (event) ->
     newUrl = new ComponentUrl(event.state.url)
 
     if newUrl.withoutHash() is previousUrl.withoutHash()
-      updateScrollPosition()
+      # updateScrollPosition()
     else if restorePoint = pageCache[newUrl.absolute]
       cacheCurrentPage()
       currentPage = restorePoint
