@@ -1,7 +1,6 @@
 #= require_tree ./plumlinks
 #= require_self
 
-
 atomCache               = {}
 pageCache               = {}
 pageCacheSize           = 20
@@ -17,7 +16,7 @@ loadedAssets            = null
 
 referer                 = null
 
-xhr                     = null
+remote                  = null
 
 EVENTS =
   BEFORE_CHANGE:  'plumlinks:click'
@@ -72,7 +71,7 @@ withDefaults = (page) =>
       positionX: 0
       csrf_token: null
 
-onLoadEnd = => xhr = null
+onLoadEnd = => remote = null
 
 onLoadSuccess = (url, options) =>
   triggerEvent EVENTS.RECEIVE, url: url.absolute
@@ -103,27 +102,22 @@ onProgress = (event) =>
 onError = =>
   document.location.href = url.absolute
 
-
 fetchReplacement = (url, options) ->
   options.cacheRequest ?= requestCachingEnabled
   options.showProgressBar ?= true
 
-  triggerEvent EVENTS.FETCH, url: url.absolute
-  xhr?.abort()
-  xhr = new XMLHttpRequest
-  xhr.open 'GET', url.formatForXHR(cache: options.cacheRequest), true
-  xhr.setRequestHeader 'Accept', 'text/javascript, application/x-javascript, application/javascript'
-  xhr.setRequestHeader 'X-XHR-Referer', referer
-  xhr.setRequestHeader 'X-Requested-With', 'XMLHttpRequest'
-  xhr.onload = () -> 
+  delegate = {}
+  delegate.onerror = onError
+  delegate.onloadend = onLoadEnd
+  delegate.onload = () ->
     onLoadSuccess(url, options)
-  xhr.onprogress = onProgress if progressBar and options.showProgressBar 
-  xhr.onloadend = onLoadEnd
-  xhr.onerror = onError
-  xhr.send()
 
+  triggerEvent EVENTS.FETCH, url: url.absolute
+  remote?.abort()
+  remote = new Remote(url, delegate, cache: options.cacheRequest, referer: referer)
+  remote.send()
 fetchHistory = (cachedPage, options = {}) ->
-  xhr?.abort()
+  remote?.abort()
   changePage(cachedPage, options)
 
   progressBar?.done()
@@ -200,13 +194,13 @@ reflectNewUrl = (url) ->
     window.history.pushState { plumlinks: true, url: url.absolute }, '', url.absolute
 
 reflectRedirectedUrl = ->
-  if location = xhr.getResponseHeader 'X-XHR-Redirected-To'
+  if location = remote.xhr.getResponseHeader 'X-XHR-Redirected-To'
     location = new ComponentUrl location
     preservedHash = if location.hasNoHash() then document.location.hash else ''
     window.history.replaceState window.history.state, '', location.href + preservedHash
 
 crossOriginRedirect = ->
-  redirect if (redirect = xhr.getResponseHeader('Location'))? and (new ComponentUrl(redirect)).crossOrigin()
+  redirect if (redirect = remote.xhr.getResponseHeader('Location'))? and (new ComponentUrl(redirect)).crossOrigin()
 
 rememberReferer = ->
   referer = document.location.href
@@ -235,7 +229,7 @@ popCookie = (name) ->
   value = document.cookie.match(new RegExp(name+"=(\\w+)"))?[1].toUpperCase() or ''
   document.cookie = name + '=; expires=Thu, 01-Jan-70 00:00:01 GMT; path=/'
   value
-
+#
 triggerEvent = (name, data) ->
   if typeof Prototype isnt 'undefined'
     Event.fire document, name, data, true
@@ -249,17 +243,8 @@ pageChangePrevented = (url) ->
   !triggerEvent EVENTS.BEFORE_CHANGE, url: url
 
 processResponse = ->
-  clientOrServerError = ->
-    400 <= xhr.status < 600
-  validContent = ->
-    (contentType = xhr.getResponseHeader('Content-Type'))? and
-      contentType.match /^(?:text\/javascript|application\/x-javascript|application\/javascript)(?:;|$)/
-  downloadingFile = ->
-    (disposition = xhr.getResponseHeader('Content-Disposition'))? and
-      disposition.match /^attachment/
-
-  if not clientOrServerError() and validContent() and not downloadingFile()
-    return new Function("'use strict'; return " + xhr.responseText )();
+  if remote.hasValidResponse()
+    return remote.content()
 
 cache = (key, value) ->
   return atomCache[key] if value == null
