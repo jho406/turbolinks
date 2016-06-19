@@ -45,7 +45,8 @@ popCookie = (name) ->
 
 requestMethodIsSafe = -> popCookie('request_method') in ['GET','']
 
-browserSupportsPlumlinks = -> browserSupportsPushState and !browserIsBuggy and requestMethodIsSafe
+browserSupportsPlumlinks = -> 
+  browserSupportsPushState() and !browserIsBuggy() and requestMethodIsSafe()
 
 intersection = (a, b) ->
   [a, b] = [b, a] if a.length > b.length
