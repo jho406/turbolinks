@@ -72,12 +72,9 @@ withDefaults = (page) =>
       positionX: 0
       csrf_token: null
 
-onLoadEnd = => 
-  xhr = null
+onLoadEnd = => xhr = null
 
-visitingURL = null
-onLoadSuccess = =>
-  url = visitingURL
+onLoadSuccess = (url, options) =>
   triggerEvent EVENTS.RECEIVE, url: url.absolute
 
   if nextPage = processResponse()
@@ -108,20 +105,18 @@ onError = =>
 
 
 fetchReplacement = (url, options) ->
-  visitingURL = url
   options.cacheRequest ?= requestCachingEnabled
   options.showProgressBar ?= true
 
   triggerEvent EVENTS.FETCH, url: url.absolute
-
   xhr?.abort()
   xhr = new XMLHttpRequest
   xhr.open 'GET', url.formatForXHR(cache: options.cacheRequest), true
   xhr.setRequestHeader 'Accept', 'text/javascript, application/x-javascript, application/javascript'
   xhr.setRequestHeader 'X-XHR-Referer', referer
   xhr.setRequestHeader 'X-Requested-With', 'XMLHttpRequest'
-
-  xhr.onload = onLoadSuccess
+  xhr.onload = () -> 
+    onLoadSuccess(url, options)
   xhr.onprogress = onProgress if progressBar and options.showProgressBar 
   xhr.onloadend = onLoadEnd
   xhr.onerror = onError
