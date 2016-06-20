@@ -38,7 +38,6 @@ class window.Controller
       @reflectNewUrl(url)
       @fetchHistory restorePoint
       options.showProgressBar = false
-      # options.scroll = false
 
     @fetchReplacement url, options
 
@@ -64,7 +63,6 @@ class window.Controller
       @reflectRedirectedUrl()
       Utils.withDefaults(nextPage, @currentBrowserState)
       @changePage(nextPage, options)
-      #updateScrollPosition(options.scroll)
       @triggerEvent Plumlinks.EVENTS.LOAD, @currentPage
 
       if options.showProgressBar
@@ -105,7 +103,6 @@ class window.Controller
     @changePage(cachedPage, options)
 
     @progressBar?.done()
-    # updateScrollPosition(options.scroll)
     @triggerEvent Plumlinks.EVENTS.RESTORE
     @triggerEvent Plumlinks.EVENTS.LOAD, cachedPage
 
@@ -179,16 +176,6 @@ class window.Controller
     window.history.replaceState { plumlinks: true, url: document.location.href }, '', document.location.href
     @currentBrowserState = window.history.state
 
-  updateScrollPosition: (position) =>
-    if Array.isArray(position)
-      window.scrollTo position[0], position[1]
-    else if position isnt false
-      if document.location.hash
-        document.location.href = document.location.href
-        @rememberCurrentUrlAndState()
-      else
-        window.scrollTo 0, 0
-
   triggerEvent: (name, data) =>
     if typeof Prototype isnt 'undefined'
       Event.fire document, name, data, true
@@ -214,12 +201,10 @@ class window.Controller
       previousUrl = new ComponentUrl(@currentBrowserState.url)
       newUrl = new ComponentUrl(event.state.url)
 
-      if newUrl.withoutHash() is previousUrl.withoutHash()
-        # updateScrollPosition()
-      else if restorePoint = @pageCache[newUrl.absolute]
+      if restorePoint = @pageCache[newUrl.absolute]
         @cacheCurrentPage()
         @currentPage = restorePoint
-        @fetchHistory @currentPage, scroll: [@currentPage.positionX, @currentPage.positionY]
+        @fetchHistory @currentPage
       else
         @fetch event.target.location.href
 
