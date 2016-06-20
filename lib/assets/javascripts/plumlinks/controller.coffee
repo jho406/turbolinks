@@ -10,7 +10,6 @@ class window.Controller
     @requestCachingEnabled = true
 
     @progressBar = null
-    @progressBarDelay = 400
 
     @currentPage = null
     @currentBrowserState = null
@@ -33,7 +32,7 @@ class window.Controller
     @cacheCurrentPage()
 
     @rememberReferer()
-    @progressBar?.start(delay: @progressBarDelay)
+    @progressBar?.start()
     if @transitionCacheEnabled and restorePoint = @transitionCacheFor(url.absolute)
       @reflectNewUrl(url)
       @fetchHistory restorePoint
@@ -73,12 +72,7 @@ class window.Controller
       document.location.href = @crossOriginRedirect() or url.absolute
 
   onProgress: (event) =>
-    percent = if event.lengthComputable
-      event.loaded / event.total * 100
-    else
-      @progressBar.value + (100 - @progressBar.value) / 10
-    
-    @progressBar.advanceTo(percent)
+    @progress.advanceFromEvent(event)
 
   onError: =>
     document.location.href = url.absolute

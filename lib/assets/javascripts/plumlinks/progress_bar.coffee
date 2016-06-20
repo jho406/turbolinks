@@ -9,6 +9,7 @@ class window.ProgressBar
     @content = ''
     @speed = 300
     @opacity = originalOpacity
+    @delay = 400
     @install()
 
   install: ->
@@ -24,11 +25,11 @@ class window.ProgressBar
 
   start: ({delay} = {})->
     clearTimeout(@displayTimeout)
-    if delay
+    if @delay
       @display = false
       @displayTimeout = setTimeout =>
         @display = true
-      , delay
+      , @delay
     else
       @display = true
 
@@ -48,10 +49,20 @@ class window.ProgressBar
       else if @value > 0
         @_startTrickle()
 
+  advanceFromEvent: (event) =>
+    percent = if event.lengthComputable
+      event.loaded / event.total * 100
+    else
+      @value + (100 - @progressBar.value) / 10
+    @advanceTo(percent)
+
   done: ->
     if @value > 0
       @advanceTo(100)
       @_finish()
+
+  setDelay: (milliseconds) =>
+    @delay = milliseconds
 
   _finish: ->
     @fadeTimer = setTimeout =>
