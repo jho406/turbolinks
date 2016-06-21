@@ -9,7 +9,7 @@ EVENTS =
   RESTORE:        'plumlinks:restore'
 
 progressBar = null
-
+controller = new Controller
 ProgressBarAPI =
   enable: ->
     progressBar ?= new ProgressBar 'html'
@@ -22,14 +22,12 @@ ProgressBarAPI =
   done: -> progressBar?.done()
 
 initializePlumlinks = ->
-  controller = new Controller
-  controller.rememberCurrentUrlAndState()
   ProgressBarAPI.enable()
   controller.progressBar = progressBar
 
   document.addEventListener 'click', Click.installHandlerLast, true
-  window.addEventListener 'hashchange', controller.rememberCurrentUrlAndState, false
-  window.addEventListener 'popstate', controller.onHistoryChange, false
+  window.addEventListener 'hashchange', controller.history.rememberCurrentUrlAndState, false
+  window.addEventListener 'popstate', controller.history.onHistoryChange, false
 
 browserSupportsCustomEvents =
   document.addEventListener and document.createEvent
@@ -60,7 +58,7 @@ else
   visit,
   replace: controller.replace,
   cache: controller.cache,
-  pagesCached: controller.pagesCached,
+  pagesCached: controller.history.pagesCached,
   enableTransitionCache: controller.enableTransitionCache,
   disableRequestCaching: controller.disableRequestCaching,
   ProgressBar: ProgressBarAPI,

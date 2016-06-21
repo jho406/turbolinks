@@ -1,14 +1,14 @@
 class window.Remote
-  constructor: (url, @delegate, @opts) ->
+  constructor: (url, referer, @delegate, @opts) ->
     @xhr = new XMLHttpRequest
     @xhr.open 'GET', url.formatForXHR(cache: @opts.cacheRequest), true
     @xhr.setRequestHeader 'Accept', 'text/javascript, application/x-javascript, application/javascript'
     @xhr.setRequestHeader 'X-XHR-Referer', @opts.referer
     @xhr.setRequestHeader 'X-Requested-With', 'XMLHttpRequest'
-    @xhr.onload = @delegate.onload
+    @xhr.onload = => @delegate.onLoad(url, @opts)
     # @xhr.onprogress = @onProgress if progressBar and options.showProgressBar 
-    @xhr.onloadend = @delegate.onloadend
-    @xhr.onerror = @delegate.onerror
+    @xhr.onloadend = @delegate.onLoadEnd
+    @xhr.onerror = @delegate.onError
 
   send: () ->
     @xhr.send()
@@ -18,10 +18,10 @@ class window.Remote
 
   hasValidResponse: ->
     not @clientOrServerError() and @validContent() and not @downloadingFile()
-  
+
   content: ->
     new Function("'use strict'; return " + @xhr.responseText )();
-  
+
   clientOrServerError: ->
     400 <= @xhr.status < 600
 

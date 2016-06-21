@@ -3,22 +3,21 @@ PAGE_CACHE_SIZE = 20
 class window.Controller
   constructor: ->
     @atomCache = {}
-    @pageCache = {}
-    @pageCacheSize = PAGE_CACHE_SIZE
-
+    @history = new Pistory(this)
     @transitionCacheEnabled = false
     @requestCachingEnabled = true
 
     @progressBar = null
 
-    @currentPage = null
-    @currentBrowserState = null
     @loadedAssets = null
 
     @referer = null
     @remote = null
+    
+    @history.rememberCurrentUrlAndState()
 
-    @rememberCurrentUrlAndState()
+  currentPage: =>
+    @history.currentPage
 
   fetch: (url, options = {}) =>
     url = new ComponentUrl url
@@ -29,22 +28,18 @@ class window.Controller
       document.location.href = url.absolute
       return
 
-    @cacheCurrentPage()
+    @history.cacheCurrentPage()
 
     @rememberReferer()
     @progressBar?.start()
-    if @transitionCacheEnabled and restorePoint = @transitionCacheFor(url.absolute)
-      @reflectNewUrl(url)
-      @fetchHistory restorePoint
+    
+    if @transitionCacheEnabled and restorePoint = @history.transitionCacheFor(url.absolute)
+      @history.reflectNewUrl(url)
+      @fetchHistory(restorePoint)
       options.showProgressBar = false
 
     @fetchReplacement url, options
-
-  transitionCacheFor: (url) =>
-    return if url is @currentBrowserState.url
-    cachedPage = @pageCache[url]
-    cachedPage if cachedPage and !cachedPage.transitionCacheDisabled
-
+  
   enableTransitionCache: (enable = true) =>
     @transitionCacheEnabled = enable
 
@@ -54,19 +49,20 @@ class window.Controller
 
   onLoadEnd: => @remote = null
 
-  onLoadSuccess: (url, options) =>
+  onLoad: (url, options) =>
+    
     @triggerEvent Plumlinks.EVENTS.RECEIVE, url: url.absolute
 
     if nextPage = @processResponse()
-      @reflectNewUrl url
-      @reflectRedirectedUrl()
-      Utils.withDefaults(nextPage, @currentBrowserState)
+      @history.reflectNewUrl url
+      @history.reflectRedirectedUrl(@remote.xhr)
+      Utils.withDefaults(nextPage, @history.currentBrowserState)
       @changePage(nextPage, options)
-      @triggerEvent Plumlinks.EVENTS.LOAD, @currentPage
+      @triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
 
       if options.showProgressBar
         @progressBar?.done()
-      @constrainPageCacheTo(@pageCacheSize)
+      @history.constrainPageCacheTo
     else
       @progressBar?.done()
       document.location.href = @crossOriginRedirect() or url.absolute
@@ -81,17 +77,12 @@ class window.Controller
     options.cacheRequest ?= @requestCachingEnabled
     options.showProgressBar ?= true
 
-    delegate = {}
-    delegate.onerror = @onError
-    delegate.onloadend = @onLoadEnd
-    delegate.onload = () =>
-      @onLoadSuccess(url, options)
-
     @triggerEvent Plumlinks.EVENTS.FETCH, url: url.absolute
     @remote?.abort()
-    @remote = new Remote(url, delegate, cache: options.cacheRequest, referer: @referer)
+    @remote = new Remote(url, @referer, @, options)
     @remote.send()
 
+  #history
   fetchHistory: (cachedPage, options = {}) =>
     @remote?.abort()
     @changePage(cachedPage, options)
@@ -100,75 +91,33 @@ class window.Controller
     @triggerEvent Plumlinks.EVENTS.RESTORE
     @triggerEvent Plumlinks.EVENTS.LOAD, cachedPage
 
-  cacheCurrentPage: =>
-    return unless @currentPage
-    currentUrl = new ComponentUrl @currentBrowserState.url
-
-    Utils.merge @currentPage,
-      cachedAt: new Date().getTime()
-      positionY: window.pageYOffset
-      positionX: window.pageXOffset
-      url: currentUrl.relative
-
-    @pageCache[currentUrl.absolute] = @currentPage
-
-  removeCurrentPageFromCache: =>
-    delete @pageCache[new ComponentUrl(@currentBrowserState.url).absolute]
-
-  pagesCached: (size = @pageCacheSize) =>
-    @pageCacheSize = parseInt(size) if /^[\d]+$/.test size
-
-  constrainPageCacheTo: (limit) =>
-    pageCacheKeys = Object.keys @pageCache
-
-    cacheTimesRecentFirst = pageCacheKeys.map (url) =>
-      @pageCache[url].cachedAt
-    .sort (a, b) -> b - a
-
-    for key in pageCacheKeys when @pageCache[key].cachedAt <= cacheTimesRecentFirst[limit]
-      delete @pageCache[key]
-
   replace: (nextPage, options = {}) =>
-    Utils.withDefaults(nextPage, @currentBrowserState)
+    Utils.withDefaults(nextPage, @history.currentBrowserState)
     @changePage(nextPage, options)
-    @triggerEvent Plumlinks.EVENTS.LOAD, @currentPage
+    @triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
 
   changePage: (nextPage, options) =>
-    if @currentPage and @assetsChanged(nextPage)
+    if @currentPage() and @assetsChanged(nextPage)
       document.location.reload()
       return
 
-    @currentPage = nextPage
-    @currentPage.title = options.title ? @currentPage.title
-    document.title = @currentPage.title if @currentPage.title isnt false
+    @history.currentPage = nextPage
+    @history.currentPage.title = options.title ? @currentPage().title
+    document.title = @currentPage().title if @currentPage().title isnt false
 
-    CSRFToken.update @currentPage.csrf_token if @currentPage.csrf_token?
-    @currentBrowserState = window.history.state
+    CSRFToken.update @currentPage().csrf_token if @currentPage().csrf_token?
+    @history.currentBrowserState = window.history.state
 
   assetsChanged: (nextPage) =>
-    @loadedAssets ||= @currentPage.assets
+    @loadedAssets ||= @currentPage().assets
     fetchedAssets = nextPage.assets
     fetchedAssets.length isnt @loadedAssets.length or Utils.intersection(fetchedAssets, @loadedAssets).length isnt @loadedAssets.length
-
-  reflectNewUrl: (url) =>
-    if (url = new ComponentUrl url).absolute not in [@referer, document.location.href]
-      window.history.pushState { plumlinks: true, url: url.absolute }, '', url.absolute
-
-  reflectRedirectedUrl: =>
-    if location = @remote.xhr.getResponseHeader 'X-XHR-Redirected-To'
-      location = new ComponentUrl location
-      preservedHash = if location.hasNoHash() then document.location.hash else ''
-      window.history.replaceState window.history.state, '', location.href + preservedHash
 
   crossOriginRedirect: =>
     redirect if (redirect = @remote.xhr.getResponseHeader('Location'))? and (new ComponentUrl(redirect)).crossOrigin()
 
   rememberReferer: =>
     @referer = document.location.href
-
-  rememberCurrentUrlAndState: =>
-    window.history.replaceState { plumlinks: true, url: document.location.href }, '', document.location.href
-    @currentBrowserState = window.history.state
 
   triggerEvent: (name, data) =>
     if typeof Prototype isnt 'undefined'
@@ -189,16 +138,4 @@ class window.Controller
   cache: (key, value) =>
     return @atomCache[key] if value == null
     @atomCache[key] ||= value
-
-  onHistoryChange: (event) =>
-    if event.state?.plumlinks && event.state.url != @currentBrowserState.url
-      previousUrl = new ComponentUrl(@currentBrowserState.url)
-      newUrl = new ComponentUrl(event.state.url)
-
-      if restorePoint = @pageCache[newUrl.absolute]
-        @cacheCurrentPage()
-        @currentPage = restorePoint
-        @fetchHistory @currentPage
-      else
-        @fetch event.target.location.href
 
