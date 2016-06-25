@@ -52,6 +52,17 @@ intersection = (a, b) ->
   [a, b] = [b, a] if a.length > b.length
   value for value in a when value in b
 
+
+triggerEvent = (name, data) =>
+  if typeof Prototype isnt 'undefined'
+    Event.fire document, name, data, true
+
+  event = document.createEvent 'Events'
+  event.data = data if data
+  event.initEvent name, true, true
+  document.dispatchEvent event
+
+
 @Utils = 
   reverseMerge: reverseMerge
   merge: merge
@@ -59,5 +70,6 @@ intersection = (a, b) ->
   withDefaults: withDefaults
   browserSupportsPlumlinks: browserSupportsPlumlinks
   intersection: intersection
-
+  triggerEvent: triggerEvent
+  
 

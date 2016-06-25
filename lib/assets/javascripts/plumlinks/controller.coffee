@@ -50,15 +50,15 @@ class window.Controller
   onLoadEnd: => @remote = null
 
   onLoad: (url, options) =>
-    
-    @triggerEvent Plumlinks.EVENTS.RECEIVE, url: url.absolute
+
+    Utils.triggerEvent Plumlinks.EVENTS.RECEIVE, url: url.absolute
 
     if nextPage = @processResponse()
       @history.reflectNewUrl url
       @history.reflectRedirectedUrl(@remote.xhr)
       Utils.withDefaults(nextPage, @history.currentBrowserState)
       @changePage(nextPage, options)
-      @triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
+      Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
 
       if options.showProgressBar
         @progressBar?.done()
@@ -77,7 +77,7 @@ class window.Controller
     options.cacheRequest ?= @requestCachingEnabled
     options.showProgressBar ?= true
 
-    @triggerEvent Plumlinks.EVENTS.FETCH, url: url.absolute
+    Utils.triggerEvent Plumlinks.EVENTS.FETCH, url: url.absolute
     @remote?.abort()
     @remote = new Remote(url, @referer, @, options)
     @remote.send()
@@ -88,13 +88,13 @@ class window.Controller
     @changePage(cachedPage, options)
 
     @progressBar?.done()
-    @triggerEvent Plumlinks.EVENTS.RESTORE
-    @triggerEvent Plumlinks.EVENTS.LOAD, cachedPage
+    Utils.triggerEvent Plumlinks.EVENTS.RESTORE
+    Utils.triggerEvent Plumlinks.EVENTS.LOAD, cachedPage
 
   replace: (nextPage, options = {}) =>
     Utils.withDefaults(nextPage, @history.currentBrowserState)
     @changePage(nextPage, options)
-    @triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
+    Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
 
   changePage: (nextPage, options) =>
     if @currentPage() and @assetsChanged(nextPage)
@@ -119,17 +119,8 @@ class window.Controller
   rememberReferer: =>
     @referer = document.location.href
 
-  triggerEvent: (name, data) =>
-    if typeof Prototype isnt 'undefined'
-      Event.fire document, name, data, true
-
-    event = document.createEvent 'Events'
-    event.data = data if data
-    event.initEvent name, true, true
-    document.dispatchEvent event
-
   pageChangePrevented: (url) =>
-    !@triggerEvent Plumlinks.EVENTS.BEFORE_CHANGE, url: url
+    !Utils.triggerEvent Plumlinks.EVENTS.BEFORE_CHANGE, url: url
 
   processResponse: ->
     if @remote.hasValidResponse()
