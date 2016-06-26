@@ -105,7 +105,7 @@ class window.Controller
     document.title = @currentPage().title if @currentPage().title isnt false
 
     CSRFToken.update @currentPage().csrf_token if @currentPage().csrf_token?
-    @history.currentBrowserState = window.history.state
+    @history.updateCurrentBrowserState()
 
   assetsChanged: (nextPage) =>
     @loadedAssets ||= @currentPage().assets

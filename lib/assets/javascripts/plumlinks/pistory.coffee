@@ -64,3 +64,6 @@ class window.Pistory
   reflectNewUrl: (url) =>
     if (url = new ComponentUrl url).absolute not in [@referer, document.location.href]
       window.history.pushState { plumlinks: true, url: url.absolute }, '', url.absolute
+
+  updateCurrentBrowserState: =>
+    @currentBrowserState = window.history.state
