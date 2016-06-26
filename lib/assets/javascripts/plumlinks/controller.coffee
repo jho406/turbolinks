@@ -47,32 +47,6 @@ class window.Controller
     @requestCachingEnabled = not disable
     disable
 
-  onLoadEnd: => @remote = null
-
-  onLoad: (url, options) =>
-
-    Utils.triggerEvent Plumlinks.EVENTS.RECEIVE, url: url.absolute
-
-    if nextPage = @processResponse()
-      @history.reflectNewUrl url
-      @history.reflectRedirectedUrl(@remote.xhr)
-      Utils.withDefaults(nextPage, @history.currentBrowserState)
-      @changePage(nextPage, options)
-      Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
-
-      if options.showProgressBar
-        @progressBar?.done()
-      @history.constrainPageCacheTo
-    else
-      @progressBar?.done()
-      document.location.href = @crossOriginRedirect() or url.absolute
-
-  onProgress: (event) =>
-    @progress.advanceFromEvent(event)
-
-  onError: =>
-    document.location.href = url.absolute
-
   fetchReplacement: (url, options) =>
     options.cacheRequest ?= @requestCachingEnabled
     options.showProgressBar ?= true
@@ -140,4 +114,31 @@ class window.Controller
 
     link = new Link(target)
     fetch(link.href)
+
+#events
+  onLoadEnd: => @remote = null
+
+  onLoad: (url, options) =>
+
+    Utils.triggerEvent Plumlinks.EVENTS.RECEIVE, url: url.absolute
+
+    if nextPage = @processResponse()
+      @history.reflectNewUrl url
+      @history.reflectRedirectedUrl(@remote.xhr)
+      Utils.withDefaults(nextPage, @history.currentBrowserState)
+      @changePage(nextPage, options)
+      Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
+
+      if options.showProgressBar
+        @progressBar?.done()
+      @history.constrainPageCacheTo
+    else
+      @progressBar?.done()
+      document.location.href = @crossOriginRedirect() or url.absolute
+
+  onProgress: (event) =>
+    @progress.advanceFromEvent(event)
+
+  onError: =>
+    document.location.href = url.absolute
 
