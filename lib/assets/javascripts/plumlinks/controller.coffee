@@ -35,7 +35,7 @@ class window.Controller
 
     if @transitionCacheEnabled and restorePoint = @history.transitionCacheFor(url.absolute)
       @history.reflectNewUrl(url)
-      @fetchHistory(restorePoint)
+      @restore(restorePoint)
       options.showProgressBar = false
 
     @fetchReplacement url, options
@@ -82,8 +82,7 @@ class window.Controller
     @remote = new Remote(url, @referer, @, options)
     @remote.send()
 
-  #history
-  fetchHistory: (cachedPage, options = {}) =>
+  restore: (cachedPage, options = {}) =>
     @remote?.abort()
     @changePage(cachedPage, options)
 
