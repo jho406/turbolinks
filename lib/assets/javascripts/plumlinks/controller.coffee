@@ -13,7 +13,7 @@ class window.Controller
 
     @referer = null
     @remote = null
-    
+
     @history.rememberCurrentUrlAndState()
 
   currentPage: =>
@@ -32,14 +32,14 @@ class window.Controller
 
     @rememberReferer()
     @progressBar?.start()
-    
+
     if @transitionCacheEnabled and restorePoint = @history.transitionCacheFor(url.absolute)
       @history.reflectNewUrl(url)
       @fetchHistory(restorePoint)
       options.showProgressBar = false
 
     @fetchReplacement url, options
-  
+
   enableTransitionCache: (enable = true) =>
     @transitionCacheEnabled = enable
 
@@ -129,4 +129,16 @@ class window.Controller
   cache: (key, value) =>
     return @atomCache[key] if value == null
     @atomCache[key] ||= value
+
+  clickedOrSubmitted: (ev) =>
+    target = ev.target
+    httpRequestType = getRemoteAttr(target, 'pm-remote')
+
+    valid_link = !(target.nodeName is 'A' and target.href.length isnt 0)
+
+    return unless httpRequestType && valid_link
+    ev.preventDefault()
+
+    link = new Link(target)
+    fetch(link.href)
 

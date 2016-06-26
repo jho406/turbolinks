@@ -21,11 +21,14 @@ ProgressBarAPI =
   advanceTo: (value) -> progressBar?.advanceTo(value)
   done: -> progressBar?.done()
 
+clickHandle= (e) ->
+  controller.clickOrSubmitted(e)
+
 initializePlumlinks = ->
   ProgressBarAPI.enable()
   controller.progressBar = progressBar
 
-  document.addEventListener 'click', Click.installHandlerLast, true
+  document.addEventListener 'click', clickHandle, true
   window.addEventListener 'hashchange', controller.history.rememberCurrentUrlAndState, false
   window.addEventListener 'popstate', controller.history.onHistoryChange, false
 
