@@ -13,7 +13,7 @@ class window.Pistory
       if restorePoint = @pageCache[newUrl.absolute]
         @cacheCurrentPage()
         @currentPage = restorePoint
-        @delegate.fetchHistory @currentPage
+        @delegate.restore(@currentPage)
       else
         @fetch event.target.location.href
 
