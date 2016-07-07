@@ -9,8 +9,6 @@ class window.Controller
 
     @progressBar = null
 
-    @loadedAssets = null
-
     @referer = null
     @remote = null
 
@@ -58,7 +56,7 @@ class window.Controller
 
   restore: (cachedPage, options = {}) =>
     @remote?.abort()
-    @changePage(cachedPage, options)
+    @history.changePage(cachedPage, options)
 
     @progressBar?.done()
     Utils.triggerEvent Plumlinks.EVENTS.RESTORE
@@ -66,25 +64,8 @@ class window.Controller
 
   replace: (nextPage, options = {}) =>
     Utils.withDefaults(nextPage, @history.currentBrowserState)
-    @changePage(nextPage, options)
+    @history.changePage(nextPage, options)
     Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
-
-  changePage: (nextPage, options) =>
-    if @currentPage() and @assetsChanged(nextPage)
-      document.location.reload()
-      return
-
-    @history.currentPage = nextPage
-    @history.currentPage.title = options.title ? @currentPage().title
-    document.title = @currentPage().title if @currentPage().title isnt false
-
-    CSRFToken.update @currentPage().csrf_token if @currentPage().csrf_token?
-    @history.updateCurrentBrowserState()
-
-  assetsChanged: (nextPage) =>
-    @loadedAssets ||= @currentPage().assets
-    fetchedAssets = nextPage.assets
-    fetchedAssets.length isnt @loadedAssets.length or Utils.intersection(fetchedAssets, @loadedAssets).length isnt @loadedAssets.length
 
   crossOriginRedirect: =>
     redirect if (redirect = @remote.xhr.getResponseHeader('Location'))? and (new ComponentUrl(redirect)).crossOrigin()
@@ -115,7 +96,7 @@ class window.Controller
     link = new Link(target)
     fetch(link.href)
 
-#events
+  # Events
   onLoadEnd: => @remote = null
 
   onLoad: (url, options) =>
@@ -126,7 +107,7 @@ class window.Controller
       @history.reflectNewUrl url
       @history.reflectRedirectedUrl(@remote.xhr)
       Utils.withDefaults(nextPage, @history.currentBrowserState)
-      @changePage(nextPage, options)
+      @history.changePage(nextPage, options)
       Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
 
       if options.showProgressBar

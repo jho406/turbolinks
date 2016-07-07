@@ -4,6 +4,7 @@ class window.Pistory
     @currentBrowserState = null
     @pageCacheSize = 20 
     @currentPage = null
+    @loadedAssets= null
 
   onHistoryChange: (event) =>
     if event.state?.plumlinks && event.state.url != @currentBrowserState.url
@@ -50,7 +51,6 @@ class window.Pistory
 
     @pageCache[currentUrl.absolute] = @currentPage
 
-
   reflectRedirectedUrl: (xhr)=>
     if location = xhr.getResponseHeader 'X-XHR-Redirected-To'
       location = new ComponentUrl location
@@ -67,3 +67,21 @@ class window.Pistory
 
   updateCurrentBrowserState: =>
     @currentBrowserState = window.history.state
+
+  changePage: (nextPage, options) =>
+    if @currentPage and @assetsChanged(nextPage)
+      document.location.reload()
+      return
+
+    @currentPage = nextPage
+    @currentPage.title = options.title ? @currentPage.title
+    document.title = @currentPage.title if @currentPage.title isnt false
+
+    CSRFToken.update @currentPage.csrf_token if @currentPage.csrf_token?
+    @updateCurrentBrowserState()
+
+  assetsChanged: (nextPage) =>
+    @loadedAssets ||= @currentPage.assets
+    fetchedAssets = nextPage.assets
+    fetchedAssets.length isnt @loadedAssets.length or Utils.intersection(fetchedAssets, @loadedAssets).length isnt @loadedAssets.length
+
