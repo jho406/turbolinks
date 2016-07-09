@@ -41,9 +41,9 @@
 #
 #   new TurboGraft.Remote(options, form, target)
 #
-# TurboGraft.handlers.remoteMethodHandler = (ev) ->
+# remoteMethodHandler = (ev) ->
 #   target = ev.clickTarget
-#   httpRequestType = TurboGraft.getTGAttribute(target, 'tg-remote')
+#   httpRequestType = getTGAttribute(target, 'tg-remote')
 #
 #   return unless httpRequestType
 #   ev.preventDefault()
@@ -52,11 +52,11 @@
 #   remote.submit()
 #   return
 #
-# TurboGraft.handlers.remoteFormHandler = (ev) ->
+# remoteFormHandler = (ev) ->
 #   target = ev.target
 #   method = target.getAttribute('method')
 #
-#   return unless TurboGraft.hasTGAttribute(target, 'tg-remote')
+#   return unless hasTGAttribute(target, 'tg-remote')
 #   ev.preventDefault()
 #
 #   remote = setupRemoteFromTarget(target, method, target)
@@ -78,7 +78,7 @@
 #
 #       target = target.parentNode
 #
-# documentListenerForButtons('click', TurboGraft.handlers.remoteMethodHandler, true)
+# documentListenerForButtons('click', remoteMethodHandler, true)
 #
 # document.addEventListener "submit", (ev) ->
-#   TurboGraft.handlers.remoteFormHandler(ev)
+#   remoteFormHandler(ev)

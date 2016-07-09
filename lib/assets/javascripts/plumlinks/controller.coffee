@@ -10,7 +10,7 @@ class window.Controller
     @progressBar = null
 
     @referer = null
-    @remote = null
+    @http = null
 
     @history.rememberCurrentUrlAndState()
 
@@ -19,7 +19,6 @@ class window.Controller
 
   fetch: (url, options = {}) =>
     url = new ComponentUrl url
-
     return if @pageChangePrevented(url.absolute)
 
     if url.crossOrigin()
@@ -45,17 +44,21 @@ class window.Controller
     @requestCachingEnabled = not disable
     disable
 
+  remote: (options, form, target) =>
+    data = @createPayload(form, options.actualRequestType, options.httpRequestType)
+    @fetch(options.httpUrl, {payload: data})
+
   fetchReplacement: (url, options) =>
     options.cacheRequest ?= @requestCachingEnabled
     options.showProgressBar ?= true
 
     Utils.triggerEvent Plumlinks.EVENTS.FETCH, url: url.absolute
-    @remote?.abort()
-    @remote = new Remote(url, @referer, @, options)
-    @remote.send()
+    @http?.abort()
+    @http = new Remote(url, @referer, @, options)
+    @http.send(options.payload)
 
   restore: (cachedPage, options = {}) =>
-    @remote?.abort()
+    @http?.abort()
     @history.changePage(cachedPage, options)
 
     @progressBar?.done()
@@ -68,7 +71,7 @@ class window.Controller
     Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
 
   crossOriginRedirect: =>
-    redirect if (redirect = @remote.xhr.getResponseHeader('Location'))? and (new ComponentUrl(redirect)).crossOrigin()
+    redirect if (redirect = @http.xhr.getResponseHeader('Location'))? and (new ComponentUrl(redirect)).crossOrigin()
 
   rememberReferer: =>
     @referer = document.location.href
@@ -77,35 +80,22 @@ class window.Controller
     !Utils.triggerEvent Plumlinks.EVENTS.BEFORE_CHANGE, url: url
 
   processResponse: ->
-    if @remote.hasValidResponse()
-      return @remote.content()
+    if @http.hasValidResponse()
+      return @http.content()
 
   cache: (key, value) =>
     return @atomCache[key] if value == null
     @atomCache[key] ||= value
 
-  clickedOrSubmitted: (ev) =>
-    target = ev.target
-    httpRequestType = getRemoteAttr(target, 'pm-remote')
-
-    valid_link = !(target.nodeName is 'A' and target.href.length isnt 0)
-
-    return unless httpRequestType && valid_link
-    ev.preventDefault()
-
-    link = new Link(target)
-    fetch(link.href)
-
   # Events
-  onLoadEnd: => @remote = null
+  onLoadEnd: => @http = null
 
   onLoad: (url, options) =>
-
     Utils.triggerEvent Plumlinks.EVENTS.RECEIVE, url: url.absolute
 
     if nextPage = @processResponse()
       @history.reflectNewUrl url
-      @history.reflectRedirectedUrl(@remote.xhr)
+      @history.reflectRedirectedUrl(@http.xhr)
       Utils.withDefaults(nextPage, @history.currentBrowserState)
       @history.changePage(nextPage, options)
       Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
@@ -123,3 +113,57 @@ class window.Controller
   onError: =>
     document.location.href = url.absolute
 
+  # other
+  #
+
+  formAppend: (uriEncoded, key, value) ->
+    uriEncoded += "&" if uriEncoded.length
+    uriEncoded += "#{encodeURIComponent(key)}=#{encodeURIComponent(value)}"
+
+  formDataAppend: (formData, input) ->
+    if input.type == 'file'
+      for file in input.files
+        formData.append(input.name, file)
+    else
+      formData.append(input.name, input.value)
+    formData
+
+  nativeEncodeForm: (form) ->
+    formData = new FormData
+    @_iterateOverFormInputs form, (input) =>
+      formData = @formDataAppend(formData, input)
+    formData
+
+  _iterateOverFormInputs: (form, callback) ->
+    inputs = @_enabledInputs(form)
+    for input in inputs
+      inputEnabled = !input.disabled
+      radioOrCheck = (input.type == 'checkbox' || input.type == 'radio')
+
+      if inputEnabled && input.name
+        if (radioOrCheck && input.checked) || !radioOrCheck
+          callback(input)
+
+  _enabledInputs: (form) ->
+    selector = "input:not([type='reset']):not([type='button']):not([type='submit']):not([type='image']), select, textarea"
+    inputs = Array::slice.call(form.querySelectorAll(selector))
+
+    return inputs
+
+  createPayload: (form, requestType, actualRequestType) ->
+    if form
+      if @useNativeEncoding || form.querySelectorAll("[type='file'][name]").length > 0
+        formData = @nativeEncodeForm(form)
+      else # for much smaller payloads
+        formData = @uriEncodeForm(form)
+    else
+      formData = ''
+
+    if formData not instanceof FormData
+      formData = @formAppend(formData, "_method", requestType) if formData.indexOf("_method") == -1 && requestType && actualRequestType != 'GET'
+
+  uriEncodeForm: (form) ->
+    formData = ""
+    @_iterateOverFormInputs form, (input) =>
+      formData = @formAppend(formData, input.name, input.value)
+    formData
