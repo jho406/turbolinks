@@ -1,7 +1,8 @@
 class window.Remote
   constructor: (url, referer, @delegate, @opts) ->
+    requestMethod = @opts.requestMethod || 'GET'
     @xhr = new XMLHttpRequest
-    @xhr.open 'GET', url.formatForXHR(cache: @opts.cacheRequest), true
+    @xhr.open requestMethod, url.formatForXHR(cache: @opts.cacheRequest), true
     @xhr.setRequestHeader 'Accept', 'text/javascript, application/x-javascript, application/javascript'
     @xhr.setRequestHeader 'X-XHR-Referer', @opts.referer
     @xhr.setRequestHeader 'X-Requested-With', 'XMLHttpRequest'
@@ -11,7 +12,7 @@ class window.Remote
     @xhr.onerror = @delegate.onError
 
   send: () ->
-    @xhr.send()
+    @xhr.send.apply(@xhr, arguments)
 
   abort: () ->
     @xhr.abort()

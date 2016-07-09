@@ -45,8 +45,8 @@ class window.Controller
     disable
 
   remote: (options, form, target) =>
-    data = @createPayload(form, options.actualRequestType, options.httpRequestType)
-    @fetch(options.httpUrl, {payload: data})
+    data = @createPayload(form, options.actualRequestType, options.httpRequestType, options.useNativeEncoding)
+    @fetch(options.httpUrl, {payload: data, requestMethod: options.actualRequestType})
 
   fetchReplacement: (url, options) =>
     options.cacheRequest ?= @requestCachingEnabled
@@ -152,15 +152,13 @@ class window.Controller
 
   createPayload: (form, requestType, actualRequestType) ->
     if form
-      if @useNativeEncoding || form.querySelectorAll("[type='file'][name]").length > 0
         formData = @nativeEncodeForm(form)
-      else # for much smaller payloads
-        formData = @uriEncodeForm(form)
     else
       formData = ''
 
     if formData not instanceof FormData
       formData = @formAppend(formData, "_method", requestType) if formData.indexOf("_method") == -1 && requestType && actualRequestType != 'GET'
+    return formData
 
   uriEncodeForm: (form) ->
     formData = ""

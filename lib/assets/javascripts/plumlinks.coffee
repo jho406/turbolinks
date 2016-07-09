@@ -107,8 +107,7 @@ remoteFormHandler = (ev) ->
   return unless hasTGAttribute(target, 'plumlinks-remote')
   ev.preventDefault()
 
-  remote = setupRemoteFromTarget(target, method, target)
-  remote.submit()
+  setupRemoteFromTarget(target, method, target)
   return
 
 documentListenerForButtons = (eventType, handler, useCapture = false) ->
