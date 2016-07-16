@@ -16,7 +16,7 @@ class window.Controller
   currentPage: =>
     @history.currentPage
 
-  fetch: (url, options = {}) =>
+  request: (url, options = {}) =>
     url = new ComponentUrl url
     return if @pageChangePrevented(url.absolute)
 
@@ -48,9 +48,6 @@ class window.Controller
   disableRequestCaching: (disable = true) =>
     @requestCachingEnabled = not disable
     disable
-
-  remote: (url, method, data) =>
-    @fetch(url, {payload: data, requestMethod: method})
 
   restore: (cachedPage, options = {}) =>
     @http?.abort()

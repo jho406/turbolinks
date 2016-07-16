@@ -32,7 +32,7 @@ browserSupportsCustomEvents =
   document.addEventListener and document.createEvent
 
 if Utils.browserSupportsPlumlinks()
-  visit = controller.fetch
+  visit = controller.request
   initializePlumlinks()
 else
   visit = (url = document.location.href) -> document.location.href = url
@@ -57,7 +57,7 @@ remoteHandler = (ev) ->
   method = remote.actualRequestType
   payload = remote.payload
 
-  controller.remote(url, method, payload)
+  controller.request(url, {requestMethod: method, payload: payload})
   return
 
 documentListenerForLinks = (eventType, handler, useCapture = false) ->
