@@ -62,7 +62,7 @@ suite 'Plumlinks.Attribute', ->
 
   test "form with plumlinks-remote ", (done) ->
     html = """
-      <form data-plumlinks-remote method='post'>
+      <form data-plumlinks-remote method='post' action='/'>
         <input type='file' name='foo'><input type='text' name='bar' value='fizzbuzz'>
       </form>
     """
@@ -71,9 +71,21 @@ suite 'Plumlinks.Attribute', ->
     payload = remote.payload
     assert.isTrue (payload instanceof @window.FormData)
     assert.equal payload.get('bar'), 'fizzbuzz'
+    assert.equal remote.httpUrl, '/'
     done()
 
   test "isValid with a valid form", (done) ->
+    html = """
+      <form data-plumlinks-remote method='post' action='/'>
+        <input type='file' name='foo'><input type='text' name='bar' value='fizzbuzz'>
+      </form>
+    """
+    target = createTarget(html)
+    remote = new @window.Attribute(target)
+    assert.isTrue remote.isValid()
+    done()
+
+  test "isValid with an invalid form (missing action)", (done) ->
     html = """
       <form data-plumlinks-remote method='post'>
         <input type='file' name='foo'><input type='text' name='bar' value='fizzbuzz'>
@@ -81,7 +93,34 @@ suite 'Plumlinks.Attribute', ->
     """
     target = createTarget(html)
     remote = new @window.Attribute(target)
-    assert.isTrue remote.isValid
-    assert.equal payload.get('bar'), 'fizzbuzz'
+    assert.isFalse remote.isValid()
     done()
 
+  test "isValid with an invalid form (missing data-plumlinks-remote)", (done) ->
+    html = """
+      <form method='post' action='/'>
+        <input type='file' name='foo'><input type='text' name='bar' value='fizzbuzz'>
+      </form>
+    """
+    target = createTarget(html)
+    remote = new @window.Attribute(target)
+    assert.isFalse remote.isValid()
+    done()
+
+  test "isValid with a valid link", (done) ->
+    html = """
+      <a href="/test" data-plumlinks-remote='POST'></a>
+    """
+    target = createTarget(html)
+    remote = new @window.Attribute(target)
+    assert.isTrue remote.isValid()
+    done()
+  
+  test "isValid with a invalid link (missing data-plumlinks-remoet)", (done) ->
+    html = """
+      <a href="/test"></a>
+    """
+    target = createTarget(html)
+    remote = new @window.Attribute(target)
+    assert.isFalse remote.isValid()
+    done()

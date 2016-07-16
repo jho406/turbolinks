@@ -1,6 +1,5 @@
 class window.Attribute
   constructor: (target, opts={})->
-    @useNativeEncoding = opts.useNativeEncoding ? true
     @target = target
     @payload = null
 
@@ -8,29 +7,37 @@ class window.Attribute
       @httpRequestType = @getTGAttribute(target, 'plumlinks-remote') || 'GET'
     if target.tagName == 'FORM'
       @httpRequestType = target.getAttribute('method') || @getTGAttribute(target, 'plumlinks-remote')
+      @payload = @createPayload(target)
 
     @httpUrl = target.getAttribute('href') || target.getAttribute('action')
     @actualRequestType = if @httpRequestType?.toLowerCase() == 'get' then 'GET' else 'POST'
 
-    @payload = @createPayload(target)
-    # if @payload && !(@payload instanceof FormData)
-    #   @httpUrl = @httpUrl + "?#{@payload}"
-    #
-
   createPayload: (form) ->
     if form
-      if @useNativeEncoding || form.querySelectorAll("[type='file'][name]").length > 0
         formData = @nativeEncodeForm(form)
-      else # for much smaller payloads
-        formData = @uriEncodeForm(form)
     else
       formData = ''
 
-    if formData not instanceof FormData
-      @contentType = "application/x-www-form-urlencoded; charset=UTF-8"
-      formData = @formAppend(formData, "_method", @httpRequestType) if formData.indexOf("_method") == -1 && @httpRequestType && @actualRequestType != 'GET'
+    # if formData not instanceof FormData
+    #   @contentType = "application/x-www-form-urlencoded; charset=UTF-8"
+    #   formData = @formAppend(formData, "_method", @httpRequestType) if formData.indexOf("_method") == -1 && @httpRequestType && @actualRequestType != 'GET'
 
     formData
+
+  isValid: =>
+   @isValidLink() || @isValidForm()
+
+  isValidLink: =>
+    if @target.tagName != 'A'
+      return false
+
+    @hasTGAttribute(@target, 'plumlinks-remote')
+
+  isValidForm: =>
+    if @target.tagName != 'FORM'
+      return false
+    @hasTGAttribute(@target, 'plumlinks-remote') &&
+    @target.getAttribute('action')?
 
   formAppend: (uriEncoded, key, value) ->
     uriEncoded += "&" if uriEncoded.length
@@ -98,3 +105,8 @@ class window.Attribute
       node.querySelectorAll("[#{tgAttr}=#{value}], [#{attr}=#{value}]")
     else
       node.querySelectorAll("[#{tgAttr}], [#{attr}]")
+
+
+  hasTGAttribute: (node, attr) ->
+    tgAttr = @tgAttribute(attr)
+    node.getAttribute(tgAttr)? || node.getAttribute(attr)?
