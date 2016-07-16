@@ -1,6 +1,6 @@
 assert = chai.assert
 
-suite 'Plumlinks.visit()', ->
+suite 'Plumlinks form', ->
   setup (done) ->
     @iframe = document.createElement('iframe')
     @iframe.setAttribute('scrolling', 'yes')
@@ -29,7 +29,7 @@ suite 'Plumlinks.visit()', ->
     @document.addEventListener 'plumlinks:request-start', =>
       requestStared = true
     @document.addEventListener 'plumlinks:request-end', =>
-      state = plumlinks: true, url: "#{location.protocol}//#{location.host}/javascript/iframe_with_link"
+      state = plumlinks: true, url: "#{location.protocol}//#{location.host}/javascript/iframe_with_form"
       assert.deepEqual @history.state, state
       assert.ok plumlinksClickFired
       assert.ok requestStared
@@ -37,7 +37,8 @@ suite 'Plumlinks.visit()', ->
     @document.addEventListener 'plumlinks:load', (event) =>
       assert.ok requestFinished
       assert.deepEqual event.data.data, { heading: "Some heading" }
-      state = plumlinks: true, url: "#{location.protocol}//#{location.host}/javascript/iframe_with_link"
+      state = plumlinks: true, url: "#{location.protocol}//#{location.host}/javascript/iframe_with_form"
+
       assert.deepEqual @history.state, state
       assert.equal @location.href, state.url
       assert.equal @$('meta[name="csrf-token"]').getAttribute('content'), 'token'

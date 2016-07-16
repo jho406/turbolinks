@@ -1,6 +1,6 @@
 assert = chai.assert
 
-suite 'Plumlinks.visit()', ->
+suite 'Plumlinks link test', ->
   setup (done) ->
     @iframe = document.createElement('iframe')
     @iframe.setAttribute('scrolling', 'yes')
