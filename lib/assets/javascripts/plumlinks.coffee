@@ -45,51 +45,19 @@ else
 #   Plumlinks.enableTransitionCache()
 #   Plumlinks.disableRequestCaching()
 #   Plumlinks.ProgressBar.enable()
-tgAttribute = (attr) ->
-  tgAttr = if attr[0...10] == 'plumlinks-'
-    "data-#{attr}"
-  else
-    "data-plumlinks-#{attr}"
 
-hasTGAttribute = (node, attr) ->
-  tgAttr = tgAttribute(attr)
-  node.getAttribute(tgAttr)? || node.getAttribute(attr)?
-
-hasClass = (node, search) ->
-  node.classList.contains(search)
-
-nodeIsDisabled = (node) ->
-   node.getAttribute('disabled') || hasClass(node, 'disabled')
-
-setupRemoteFromTarget = (target) ->
-  dataAttr = new Remote(target)
-
-  if dataAttr.isValid()
-    url = dataAttr.url
-    method = dataAttr.actualRequestType
-    payload = dataAttr.payload
-    controller.remote(url, method, payload)
-  else
-    throw new Error(
-      "Turbograft developer error: The element may be missing a method or action"
-    )
-
-remoteMethodHandler = (ev) ->
-  target = ev.clickTarget
-  return unless hasTGAttribute(target, 'plumlinks-remote')
-
-  ev.preventDefault()
-
-  setupRemoteFromTarget(target)
-  return
-
-remoteFormHandler = (ev) ->
+remoteHandler = (ev) ->
   target = ev.target
-  return unless hasTGAttribute(target, 'plumlinks-remote')
+  remote = new Remote(target)
+  return unless remote.isValid()
 
   ev.preventDefault()
 
-  setupRemoteFromTarget(target)
+  url = remote.url
+  method = remote.actualRequestType
+  payload = remote.payload
+
+  controller.remote(url, method, payload)
   return
 
 documentListenerForButtons = (eventType, handler, useCapture = false) ->
@@ -97,19 +65,19 @@ documentListenerForButtons = (eventType, handler, useCapture = false) ->
     target = ev.target
     while target != document && target?
       if target.nodeName == "A" || target.nodeName == "BUTTON"
-        isNodeDisabled = nodeIsDisabled(target)
-        ev.preventDefault() if isNodeDisabled
+        isNodeDisabled = target.getAttribute('disabled')
+        ev.preventDefault() if target.getAttribute('disabled')
         unless isNodeDisabled
-          ev.clickTarget = target
           handler(ev)
           return
 
       target = target.parentNode
 
-documentListenerForButtons('click', remoteMethodHandler, true)
+documentListenerForButtons('click', remoteHandler, true)
 
 document.addEventListener "submit", (ev) ->
-  remoteFormHandler(ev)
+  remoteHandler(ev)
+
 #   Plumlinks.ProgressBar.disable()
 #   Plumlinks.ProgressBar.start()
 #   Plumlinks.ProgressBar.advanceTo(80)

@@ -5,6 +5,7 @@ class window.Remote
 
     if target.tagName == 'A'
       @httpRequestType = @getTGAttribute(target, 'plumlinks-remote') || 'GET'
+
     if target.tagName == 'FORM'
       @httpRequestType = target.getAttribute('method') || @getTGAttribute(target, 'plumlinks-remote')
       @payload = @nativeEncodeForm(target)
