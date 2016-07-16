@@ -60,11 +60,11 @@ remoteHandler = (ev) ->
   controller.remote(url, method, payload)
   return
 
-documentListenerForButtons = (eventType, handler, useCapture = false) ->
+documentListenerForLinks = (eventType, handler, useCapture = false) ->
   document.addEventListener eventType, (ev) ->
     target = ev.target
     while target != document && target?
-      if target.nodeName == "A" || target.nodeName == "BUTTON"
+      if target.nodeName == "A"
         isNodeDisabled = target.getAttribute('disabled')
         ev.preventDefault() if target.getAttribute('disabled')
         unless isNodeDisabled
@@ -73,7 +73,7 @@ documentListenerForButtons = (eventType, handler, useCapture = false) ->
 
       target = target.parentNode
 
-documentListenerForButtons('click', remoteHandler, true)
+documentListenerForLinks('click', remoteHandler, true)
 
 document.addEventListener "submit", (ev) ->
   remoteHandler(ev)
