@@ -3,7 +3,7 @@ PAGE_CACHE_SIZE = 20
 class window.Controller
   constructor: ->
     @atomCache = {}
-    @history = new Pistory(this)
+    @history = new Snapshot(this)
     @transitionCacheEnabled = false
     @requestCachingEnabled = true
 

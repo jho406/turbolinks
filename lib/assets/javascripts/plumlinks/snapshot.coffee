@@ -1,4 +1,4 @@
-class window.Pistory
+class window.Snapshot
   constructor: (@delegate) ->
     @pageCache = {}
     @currentBrowserState = null
