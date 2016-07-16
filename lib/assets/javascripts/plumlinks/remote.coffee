@@ -1,3 +1,6 @@
+# move this back to controller
+# then put all the stuff dealing with dom extraction "others" to 
+# remote which replaces link
 class window.Remote
   constructor: (url, referer, @delegate, @opts) ->
     requestMethod = @opts.requestMethod || 'GET'

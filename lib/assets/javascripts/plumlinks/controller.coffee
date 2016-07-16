@@ -9,7 +9,6 @@ class window.Controller
 
     @progressBar = null
 
-    @referer = null
     @http = null
 
     @history.rememberCurrentUrlAndState()
@@ -26,8 +25,7 @@ class window.Controller
       return
 
     @history.cacheCurrentPage()
-
-    @rememberReferer()
+    @history.rememberReferer()
     @progressBar?.start()
 
     if @transitionCacheEnabled and restorePoint = @history.transitionCacheFor(url.absolute)
@@ -35,7 +33,14 @@ class window.Controller
       @restore(restorePoint)
       options.showProgressBar = false
 
-    @fetchReplacement url, options
+    options.cacheRequest ?= @requestCachingEnabled
+    options.showProgressBar ?= true
+
+    Utils.triggerEvent Plumlinks.EVENTS.FETCH, url: url.absolute
+
+    @http?.abort()
+    @http = new Remote(url, @history.referer, @, options)
+    @http.send(options.payload)
 
   enableTransitionCache: (enable = true) =>
     @transitionCacheEnabled = enable
@@ -44,18 +49,8 @@ class window.Controller
     @requestCachingEnabled = not disable
     disable
 
-  remote: (options, form, target) =>
-    data = @createPayload(form, options.actualRequestType, options.httpRequestType, options.useNativeEncoding)
-    @fetch(options.httpUrl, {payload: data, requestMethod: options.actualRequestType})
-
-  fetchReplacement: (url, options) =>
-    options.cacheRequest ?= @requestCachingEnabled
-    options.showProgressBar ?= true
-
-    Utils.triggerEvent Plumlinks.EVENTS.FETCH, url: url.absolute
-    @http?.abort()
-    @http = new Remote(url, @referer, @, options)
-    @http.send(options.payload)
+  remote: (url, method, data) =>
+    @fetch(url, {payload: data, requestMethod: method})
 
   restore: (cachedPage, options = {}) =>
     @http?.abort()
@@ -72,9 +67,6 @@ class window.Controller
 
   crossOriginRedirect: =>
     redirect if (redirect = @http.xhr.getResponseHeader('Location'))? and (new ComponentUrl(redirect)).crossOrigin()
-
-  rememberReferer: =>
-    @referer = document.location.href
 
   pageChangePrevented: (url) =>
     !Utils.triggerEvent Plumlinks.EVENTS.BEFORE_CHANGE, url: url
@@ -113,55 +105,3 @@ class window.Controller
   onError: =>
     document.location.href = url.absolute
 
-  # other
-  #
-
-  formAppend: (uriEncoded, key, value) ->
-    uriEncoded += "&" if uriEncoded.length
-    uriEncoded += "#{encodeURIComponent(key)}=#{encodeURIComponent(value)}"
-
-  formDataAppend: (formData, input) ->
-    if input.type == 'file'
-      for file in input.files
-        formData.append(input.name, file)
-    else
-      formData.append(input.name, input.value)
-    formData
-
-  nativeEncodeForm: (form) ->
-    formData = new FormData
-    @_iterateOverFormInputs form, (input) =>
-      formData = @formDataAppend(formData, input)
-    formData
-
-  _iterateOverFormInputs: (form, callback) ->
-    inputs = @_enabledInputs(form)
-    for input in inputs
-      inputEnabled = !input.disabled
-      radioOrCheck = (input.type == 'checkbox' || input.type == 'radio')
-
-      if inputEnabled && input.name
-        if (radioOrCheck && input.checked) || !radioOrCheck
-          callback(input)
-
-  _enabledInputs: (form) ->
-    selector = "input:not([type='reset']):not([type='button']):not([type='submit']):not([type='image']), select, textarea"
-    inputs = Array::slice.call(form.querySelectorAll(selector))
-
-    return inputs
-
-  createPayload: (form, requestType, actualRequestType) ->
-    if form
-        formData = @nativeEncodeForm(form)
-    else
-      formData = ''
-
-    if formData not instanceof FormData
-      formData = @formAppend(formData, "_method", requestType) if formData.indexOf("_method") == -1 && requestType && actualRequestType != 'GET'
-    return formData
-
-  uriEncodeForm: (form) ->
-    formData = ""
-    @_iterateOverFormInputs form, (input) =>
-      formData = @formAppend(formData, input.name, input.value)
-    formData

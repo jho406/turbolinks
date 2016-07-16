@@ -2,9 +2,13 @@ class window.Pistory
   constructor: (@delegate) ->
     @pageCache = {}
     @currentBrowserState = null
-    @pageCacheSize = 20 
+    @pageCacheSize = 20
     @currentPage = null
     @loadedAssets= null
+    @referer = null
+
+  rememberReferer: =>
+    @referer = document.location.href
 
   onHistoryChange: (event) =>
     if event.state?.plumlinks && event.state.url != @currentBrowserState.url

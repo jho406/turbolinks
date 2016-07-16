@@ -83,12 +83,11 @@ setupRemoteFromTarget = (target, httpRequestType, form = null) ->
   throw new Error("Turbograft developer error: You did not provide a URL ('#{urlAttribute}' attribute) for data-plumlinks-remote") unless httpUrl
   actualRequestType = if httpRequestType?.toLowerCase() == 'get' then 'GET' else 'POST'
 
-  options =
-    actualRequestType: actualRequestType
-    httpRequestType: httpRequestType
-    httpUrl: httpUrl
-
-  controller.remote(options, form, target)
+  dataAttr = new Attribute(target)
+  url = dataAttr.url
+  method = dataAttr.actualRequestType
+  payload = dataAttr.payload
+  controller.remote(url, method, payload)
 
 remoteMethodHandler = (ev) ->
   target = ev.clickTarget

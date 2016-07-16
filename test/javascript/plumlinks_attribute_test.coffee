@@ -40,7 +40,7 @@ suite 'Plumlinks.Attribute', ->
 
   test "link with plumlinks-remote attribute set to GET", (done) ->
     html = """
-      <a href="/test" data-plumlinks-remote></a>
+      <a href="/test" data-plumlinks-remote="GET"></a>
     """
     target = createTarget(html)
     remote = new @window.Attribute(target)
@@ -73,15 +73,15 @@ suite 'Plumlinks.Attribute', ->
     assert.equal payload.get('bar'), 'fizzbuzz'
     done()
 
-  test "form with plumlinks-remote with nativeEncodingFalse", (done) ->
+  test "isValid with a valid form", (done) ->
     html = """
-      <form data-plumlinks-remote action='/test' method='post'>
-        <input type='text' name='foo'><input type='text' name='bar' value='fizzbuzz'>
+      <form data-plumlinks-remote method='post'>
+        <input type='file' name='foo'><input type='text' name='bar' value='fizzbuzz'>
       </form>
     """
     target = createTarget(html)
-    remote = new @window.Attribute(target, {useNativeEncoding: false})
-    payload = remote.payload
-    assert.isFalse (payload instanceof @window.FormData)
-    assert.equal remote.httpUrl, '/test?foo=&bar=fizzbuzz&_method=post'
+    remote = new @window.Attribute(target)
+    assert.isTrue remote.isValid
+    assert.equal payload.get('bar'), 'fizzbuzz'
     done()
+
