@@ -51,25 +51,9 @@ tgAttribute = (attr) ->
   else
     "data-plumlinks-#{attr}"
 
-getTGAttribute = (node, attr) ->
-  tgAttr = tgAttribute(attr)
-  node.getAttribute(tgAttr) || node.getAttribute(attr)
-
-removeTGAttribute = (node, attr) ->
-  tgAttr = tgAttribute(attr)
-  node.removeAttribute(tgAttr)
-  node.removeAttribute(attr)
-
 hasTGAttribute = (node, attr) ->
   tgAttr = tgAttribute(attr)
   node.getAttribute(tgAttr)? || node.getAttribute(attr)?
-
-querySelectorAllTGAttribute = (node, attr, value = null) ->
-  tgAttr = tgAttribute(attr)
-  if value
-    node.querySelectorAll("[#{tgAttr}=#{value}], [#{attr}=#{value}]")
-  else
-    node.querySelectorAll("[#{tgAttr}], [#{attr}]")
 
 hasClass = (node, search) ->
   node.classList.contains(search)
@@ -77,36 +61,35 @@ hasClass = (node, search) ->
 nodeIsDisabled = (node) ->
    node.getAttribute('disabled') || hasClass(node, 'disabled')
 
-setupRemoteFromTarget = (target, httpRequestType, form = null) ->
-  httpUrl = target.getAttribute('href') || target.getAttribute('action')
-
-  throw new Error("Turbograft developer error: You did not provide a URL ('#{urlAttribute}' attribute) for data-plumlinks-remote") unless httpUrl
-  actualRequestType = if httpRequestType?.toLowerCase() == 'get' then 'GET' else 'POST'
-
+setupRemoteFromTarget = (target) ->
   dataAttr = new Attribute(target)
-  url = dataAttr.url
-  method = dataAttr.actualRequestType
-  payload = dataAttr.payload
-  controller.remote(url, method, payload)
+
+  if dataAttr.isValid()
+    url = dataAttr.url
+    method = dataAttr.actualRequestType
+    payload = dataAttr.payload
+    controller.remote(url, method, payload)
+  else
+    throw new Error(
+      "Turbograft developer error: The element may be missing a method or action"
+    )
 
 remoteMethodHandler = (ev) ->
   target = ev.clickTarget
-  httpRequestType = getTGAttribute(target, 'plumlinks-remote')
+  return unless hasTGAttribute(target, 'plumlinks-remote')
 
-  return unless httpRequestType
   ev.preventDefault()
 
-  setupRemoteFromTarget(target, httpRequestType)
+  setupRemoteFromTarget(target)
   return
 
 remoteFormHandler = (ev) ->
   target = ev.target
-  method = target.getAttribute('method')
-
   return unless hasTGAttribute(target, 'plumlinks-remote')
+
   ev.preventDefault()
 
-  setupRemoteFromTarget(target, method, target)
+  setupRemoteFromTarget(target)
   return
 
 documentListenerForButtons = (eventType, handler, useCapture = false) ->

@@ -7,22 +7,10 @@ class window.Attribute
       @httpRequestType = @getTGAttribute(target, 'plumlinks-remote') || 'GET'
     if target.tagName == 'FORM'
       @httpRequestType = target.getAttribute('method') || @getTGAttribute(target, 'plumlinks-remote')
-      @payload = @createPayload(target)
+      @payload = @nativeEncodeForm(target)
 
     @httpUrl = target.getAttribute('href') || target.getAttribute('action')
     @actualRequestType = if @httpRequestType?.toLowerCase() == 'get' then 'GET' else 'POST'
-
-  createPayload: (form) ->
-    if form
-        formData = @nativeEncodeForm(form)
-    else
-      formData = ''
-
-    # if formData not instanceof FormData
-    #   @contentType = "application/x-www-form-urlencoded; charset=UTF-8"
-    #   formData = @formAppend(formData, "_method", @httpRequestType) if formData.indexOf("_method") == -1 && @httpRequestType && @actualRequestType != 'GET'
-
-    formData
 
   isValid: =>
    @isValidLink() || @isValidForm()
