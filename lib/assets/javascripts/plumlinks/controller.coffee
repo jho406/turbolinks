@@ -25,7 +25,6 @@ class window.Controller
       return
 
     @history.cacheCurrentPage()
-    @history.rememberReferer()
     @progressBar?.start()
 
     if @transitionCacheEnabled and restorePoint = @history.transitionCacheFor(url.absolute)
@@ -39,7 +38,7 @@ class window.Controller
     Utils.triggerEvent Plumlinks.EVENTS.FETCH, url: url.absolute
 
     @http?.abort()
-    @http = @createRequest(url, @history.referer, options)
+    @http = @createRequest(url, options)
     @http.send(options.payload)
 
   enableTransitionCache: (enable = true) =>
@@ -102,12 +101,12 @@ class window.Controller
   onError: =>
     document.location.href = url.absolute
 
-  createRequest: (url, referer, opts)=>
+  createRequest: (url, opts)=>
     requestMethod = opts.requestMethod || 'GET'
     xhr = new XMLHttpRequest
     xhr.open requestMethod, url.formatForXHR(cache: opts.cacheRequest), true
     xhr.setRequestHeader 'Accept', 'text/javascript, application/x-javascript, application/javascript'
-    xhr.setRequestHeader 'X-XHR-Referer', opts.referer
+    xhr.setRequestHeader 'X-XHR-Referer', document.location.href
     xhr.setRequestHeader 'X-Requested-With', 'XMLHttpRequest'
     xhr.onload = => @onLoad(url, opts)
     # xhr.onprogress = @onProgress if progressBar and options.showProgressBar

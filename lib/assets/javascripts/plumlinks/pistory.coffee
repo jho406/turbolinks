@@ -5,10 +5,6 @@ class window.Pistory
     @pageCacheSize = 20
     @currentPage = null
     @loadedAssets= null
-    @referer = null
-
-  rememberReferer: =>
-    @referer = document.location.href
 
   onHistoryChange: (event) =>
     if event.state?.plumlinks && event.state.url != @currentBrowserState.url
@@ -66,7 +62,7 @@ class window.Pistory
     @currentBrowserState = window.history.state
 
   reflectNewUrl: (url) =>
-    if (url = new ComponentUrl url).absolute not in [@referer, document.location.href]
+    if (url = new ComponentUrl url).absolute != document.location.href
       window.history.pushState { plumlinks: true, url: url.absolute }, '', url.absolute
 
   updateCurrentBrowserState: =>
