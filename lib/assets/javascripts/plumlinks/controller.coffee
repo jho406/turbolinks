@@ -39,7 +39,7 @@ class window.Controller
     Utils.triggerEvent Plumlinks.EVENTS.FETCH, url: url.absolute
 
     @http?.abort()
-    @http = new Remote(url, @history.referer, @, options)
+    @http = @createRequest(url, @history.referer, options)
     @http.send(options.payload)
 
   enableTransitionCache: (enable = true) =>
@@ -66,14 +66,14 @@ class window.Controller
     Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
 
   crossOriginRedirect: =>
-    redirect if (redirect = @http.xhr.getResponseHeader('Location'))? and (new ComponentUrl(redirect)).crossOrigin()
+    redirect if (redirect = @http.getResponseHeader('Location'))? and (new ComponentUrl(redirect)).crossOrigin()
 
   pageChangePrevented: (url) =>
     !Utils.triggerEvent Plumlinks.EVENTS.BEFORE_CHANGE, url: url
 
   processResponse: ->
-    if @http.hasValidResponse()
-      return @http.content()
+    if @hasValidResponse(@http)
+      return @responseContent(@http)
 
   cache: (key, value) =>
     return @atomCache[key] if value == null
@@ -87,7 +87,7 @@ class window.Controller
 
     if nextPage = @processResponse()
       @history.reflectNewUrl url
-      @history.reflectRedirectedUrl(@http.xhr)
+      @history.reflectRedirectedUrl(@http)
       Utils.withDefaults(nextPage, @history.currentBrowserState)
       @history.changePage(nextPage, options)
       Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
@@ -104,4 +104,36 @@ class window.Controller
 
   onError: =>
     document.location.href = url.absolute
+
+  createRequest: (url, referer, opts)=>
+    requestMethod = opts.requestMethod || 'GET'
+    xhr = new XMLHttpRequest
+    xhr.open requestMethod, url.formatForXHR(cache: opts.cacheRequest), true
+    xhr.setRequestHeader 'Accept', 'text/javascript, application/x-javascript, application/javascript'
+    xhr.setRequestHeader 'X-XHR-Referer', opts.referer
+    xhr.setRequestHeader 'X-Requested-With', 'XMLHttpRequest'
+    xhr.onload = => @onLoad(url, opts)
+    # xhr.onprogress = @onProgress if progressBar and options.showProgressBar
+    xhr.onloadend = @onLoadEnd
+    xhr.onerror = @onError
+    xhr
+
+
+  hasValidResponse: (xhr) ->
+    not @clientOrServerError(xhr) and @validContent(xhr) and not @downloadingFile(xhr)
+
+  responseContent: (xhr) ->
+    new Function("'use strict'; return " + xhr.responseText )();
+
+  clientOrServerError: (xhr) ->
+    400 <= xhr.status < 600
+
+  validContent: (xhr) ->
+    (contentType = xhr.getResponseHeader('Content-Type'))? and
+      contentType.match /^(?:text\/javascript|application\/x-javascript|application\/javascript)(?:;|$)/
+
+  downloadingFile: (xhr) ->
+    (disposition = xhr.getResponseHeader('Content-Disposition'))? and
+      disposition.match /^attachment/
+
 
