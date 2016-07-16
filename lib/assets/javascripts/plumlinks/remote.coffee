@@ -1,4 +1,4 @@
-class window.Attribute
+class window.Remote
   constructor: (target, opts={})->
     @target = target
     @payload = null

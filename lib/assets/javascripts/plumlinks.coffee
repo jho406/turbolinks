@@ -62,7 +62,7 @@ nodeIsDisabled = (node) ->
    node.getAttribute('disabled') || hasClass(node, 'disabled')
 
 setupRemoteFromTarget = (target) ->
-  dataAttr = new Attribute(target)
+  dataAttr = new Remote(target)
 
   if dataAttr.isValid()
     url = dataAttr.url

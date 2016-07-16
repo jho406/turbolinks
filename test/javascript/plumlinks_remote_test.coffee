@@ -5,7 +5,7 @@ createTarget = (html) ->
   testDiv.innerHTML = html
   return testDiv.firstChild
 
-suite 'Plumlinks.Attribute', ->
+suite 'Plumlinks.Remote', ->
   setup (done) ->
     @iframe = document.createElement('iframe')
     @iframe.setAttribute('scrolling', 'yes')
@@ -32,7 +32,7 @@ suite 'Plumlinks.Attribute', ->
       <a href="/test" data-plumlinks-remote></a>
     """
     target = createTarget(html)
-    remote = new @window.Attribute(target)
+    remote = new @window.Remote(target)
     assert.equal remote.httpUrl, '/test'
     assert.equal remote.actualRequestType, 'GET'
     assert.equal remote.httpRequestType, 'GET'
@@ -43,7 +43,7 @@ suite 'Plumlinks.Attribute', ->
       <a href="/test" data-plumlinks-remote="GET"></a>
     """
     target = createTarget(html)
-    remote = new @window.Attribute(target)
+    remote = new @window.Remote(target)
     assert.equal remote.httpUrl, '/test'
     assert.equal remote.actualRequestType, 'GET'
     assert.equal remote.httpRequestType, 'GET'
@@ -54,7 +54,7 @@ suite 'Plumlinks.Attribute', ->
       <a href="/test" data-plumlinks-remote='POST'></a>
     """
     target = createTarget(html)
-    remote = new @window.Attribute(target)
+    remote = new @window.Remote(target)
     assert.equal remote.httpUrl, '/test'
     assert.equal remote.actualRequestType, 'POST'
     assert.equal remote.httpRequestType, 'POST'
@@ -67,7 +67,7 @@ suite 'Plumlinks.Attribute', ->
       </form>
     """
     target = createTarget(html)
-    remote = new @window.Attribute(target)
+    remote = new @window.Remote(target)
     payload = remote.payload
     assert.isTrue (payload instanceof @window.FormData)
     assert.equal payload.get('bar'), 'fizzbuzz'
@@ -81,7 +81,7 @@ suite 'Plumlinks.Attribute', ->
       </form>
     """
     target = createTarget(html)
-    remote = new @window.Attribute(target)
+    remote = new @window.Remote(target)
     assert.isTrue remote.isValid()
     done()
 
@@ -92,7 +92,7 @@ suite 'Plumlinks.Attribute', ->
       </form>
     """
     target = createTarget(html)
-    remote = new @window.Attribute(target)
+    remote = new @window.Remote(target)
     assert.isFalse remote.isValid()
     done()
 
@@ -103,7 +103,7 @@ suite 'Plumlinks.Attribute', ->
       </form>
     """
     target = createTarget(html)
-    remote = new @window.Attribute(target)
+    remote = new @window.Remote(target)
     assert.isFalse remote.isValid()
     done()
 
@@ -112,7 +112,7 @@ suite 'Plumlinks.Attribute', ->
       <a href="/test" data-plumlinks-remote='POST'></a>
     """
     target = createTarget(html)
-    remote = new @window.Attribute(target)
+    remote = new @window.Remote(target)
     assert.isTrue remote.isValid()
     done()
   
@@ -121,6 +121,6 @@ suite 'Plumlinks.Attribute', ->
       <a href="/test"></a>
     """
     target = createTarget(html)
-    remote = new @window.Attribute(target)
+    remote = new @window.Remote(target)
     assert.isFalse remote.isValid()
     done()
