@@ -10,9 +10,14 @@ class window.ProgressBar
     @speed = 300
     @opacity = originalOpacity
     @delay = 400
+    @active = null
     @install()
 
   install: ->
+    if @active
+      return
+
+    @active = true
     @element = document.querySelector(@elementSelector)
     @element.classList.add(className)
     @styleElement = document.createElement('style')
@@ -20,6 +25,10 @@ class window.ProgressBar
     @_updateStyle()
 
   uninstall: ->
+    if !@active
+      return
+
+    @active = false
     @element.classList.remove(className)
     document.head.removeChild(@styleElement)
 

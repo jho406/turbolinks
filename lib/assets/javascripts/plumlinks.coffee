@@ -8,23 +8,20 @@ EVENTS =
   LOAD:           'plumlinks:load'
   RESTORE:        'plumlinks:restore'
 
-progressBar = null
 controller = new Controller
+progressBar = controller.progressBar
 ProgressBarAPI =
   enable: ->
-    progressBar ?= new ProgressBar 'html'
+    progressBar.install()
   disable: ->
-    progressBar?.uninstall()
-    progressBar = null
+    progressBar.uninstall()
   setDelay: (value) -> progressBar.setDelay(value)
-  start: (options) -> ProgressBarAPI.enable().start(options)
-  advanceTo: (value) -> progressBar?.advanceTo(value)
-  done: -> progressBar?.done()
+  start: (options) -> progressBar.start(options)
+  advanceTo: (value) -> progressBar.advanceTo(value)
+  done: -> progressBar.done()
 
 initializePlumlinks = ->
   ProgressBarAPI.enable()
-  controller.progressBar = progressBar
-
   window.addEventListener 'hashchange', controller.history.rememberCurrentUrlAndState, false
   window.addEventListener 'popstate', controller.history.onHistoryChange, false
 

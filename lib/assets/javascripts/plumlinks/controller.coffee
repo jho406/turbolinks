@@ -7,7 +7,7 @@ class window.Controller
     @transitionCacheEnabled = false
     @requestCachingEnabled = true
 
-    @progressBar = null
+    @progressBar = new ProgressBar 'html'
 
     @http = null
 
