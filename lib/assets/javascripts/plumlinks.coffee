@@ -10,6 +10,7 @@ EVENTS =
 
 controller = new Controller
 progressBar = controller.progressBar
+
 ProgressBarAPI =
   enable: ->
     progressBar.install()
@@ -33,15 +34,6 @@ if Utils.browserSupportsPlumlinks()
   initializePlumlinks()
 else
   visit = (url = document.location.href) -> document.location.href = url
-
-# Public API
-#   Plumlinks.visit(url)
-#   Plumlinks.replace(html)
-#   Plumlinks.pagesCached()
-#   Plumlinks.pagesCached(20)
-#   Plumlinks.enableTransitionCache()
-#   Plumlinks.disableRequestCaching()
-#   Plumlinks.ProgressBar.enable()
 
 remoteHandler = (ev) ->
   target = ev.target
@@ -74,14 +66,6 @@ documentListenerForLinks('click', remoteHandler, true)
 
 document.addEventListener "submit", (ev) ->
   remoteHandler(ev)
-
-#   Plumlinks.ProgressBar.disable()
-#   Plumlinks.ProgressBar.start()
-#   Plumlinks.ProgressBar.advanceTo(80)
-#   Plumlinks.ProgressBar.done()
-#   Plumlinks.allowLinkExtensions('md')
-#   Plumlinks.supported
-#   Plumlinks.EVENTS
 
 @Plumlinks = {
   visit,

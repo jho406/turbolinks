@@ -114,7 +114,6 @@ class window.Controller
     xhr.onerror = @onError
     xhr
 
-
   hasValidResponse: (xhr) ->
     not @clientOrServerError(xhr) and @validContent(xhr) and not @downloadingFile(xhr)
 
