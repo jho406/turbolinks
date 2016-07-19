@@ -96,7 +96,7 @@ class window.Controller
       document.location.href = @crossOriginRedirect() or url.absolute
 
   onProgress: (event) =>
-    @progress.advanceFromEvent(event)
+    @progressBar.advanceFromEvent(event)
 
   onError: =>
     document.location.href = url.absolute
@@ -109,7 +109,7 @@ class window.Controller
     xhr.setRequestHeader 'X-XHR-Referer', document.location.href
     xhr.setRequestHeader 'X-Requested-With', 'XMLHttpRequest'
     xhr.onload = => @onLoad(url, opts)
-    # xhr.onprogress = @onProgress if progressBar and options.showProgressBar
+    xhr.onprogress = @onProgress if @progressBar and opts.showProgressBar
     xhr.onloadend = @onLoadEnd
     xhr.onerror = @onError
     xhr
