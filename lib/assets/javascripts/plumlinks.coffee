@@ -53,7 +53,7 @@ remoteHandler = (ev) ->
 
   ev.preventDefault()
 
-  url = remote.url
+  url = remote.httpUrl
   method = remote.actualRequestType
   payload = remote.payload
 
@@ -94,7 +94,6 @@ document.addEventListener "submit", (ev) ->
   enableTransitionCache: controller.enableTransitionCache,
   disableRequestCaching: controller.disableRequestCaching,
   ProgressBar: ProgressBarAPI,
-  allowLinkExtensions: Link.allowExtensions,
   supported: Utils.browserSupportsPlumlinks(),
   EVENTS: Utils.clone(EVENTS)
 }
