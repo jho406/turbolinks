@@ -37,9 +37,14 @@ class window.Controller
 
     Utils.triggerEvent Plumlinks.EVENTS.FETCH, url: url.absolute
 
-    @http?.abort()
-    @http = @createRequest(url, options)
-    @http.send(options.payload)
+    if options.isAsync
+      options.showProgressBar = false
+      @createRequest(url, options)
+        .send(options.payload)
+    else
+      @http?.abort()
+      @http = @createRequest(url, options)
+      @http.send(options.payload)
 
   enableTransitionCache: (enable = true) =>
     @transitionCacheEnabled = enable
@@ -67,9 +72,9 @@ class window.Controller
   pageChangePrevented: (url) =>
     !Utils.triggerEvent Plumlinks.EVENTS.BEFORE_CHANGE, url: url
 
-  processResponse: ->
-    if @hasValidResponse(@http)
-      return @responseContent(@http)
+  processResponse: (xhr) ->
+    if @hasValidResponse(xhr)
+      return @responseContent(xhr)
 
   cache: (key, value) =>
     return @atomCache[key] if value == null
@@ -78,12 +83,11 @@ class window.Controller
   # Events
   onLoadEnd: => @http = null
 
-  onLoad: (url, options) =>
+  onLoad: (xhr, url, options) =>
     Utils.triggerEvent Plumlinks.EVENTS.RECEIVE, url: url.absolute
-
-    if nextPage = @processResponse()
+    if nextPage = @processResponse(xhr)
       @history.reflectNewUrl url
-      @history.reflectRedirectedUrl(@http)
+      @history.reflectRedirectedUrl(xhr)
       Utils.withDefaults(nextPage, @history.currentBrowserState)
       @history.changePage(nextPage, options)
       Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
@@ -108,7 +112,8 @@ class window.Controller
     xhr.setRequestHeader 'Accept', 'text/javascript, application/x-javascript, application/javascript'
     xhr.setRequestHeader 'X-XHR-Referer', document.location.href
     xhr.setRequestHeader 'X-Requested-With', 'XMLHttpRequest'
-    xhr.onload = => @onLoad(url, opts)
+    xhr.onload = =>
+      @onLoad(` this `, url, opts)
     xhr.onprogress = @onProgress if @progressBar and opts.showProgressBar
     xhr.onloadend = @onLoadEnd
     xhr.onerror = @onError

@@ -207,3 +207,10 @@ suite 'Plumlinks.visit()', ->
       assert.equal(@Plumlinks.cache('cachekey'), 'legal footer')
       done()
     @Plumlinks.visit('iframe4')
+
+  test "the async option allows request to run seperate from the main XHR", (done) ->
+    @document.addEventListener 'plumlinks:load', =>
+      assert.equal @Plumlinks.controller.http, null
+      done()
+
+    @Plumlinks.visit('iframe2', isAsync: true)

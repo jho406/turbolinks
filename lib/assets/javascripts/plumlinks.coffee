@@ -68,6 +68,7 @@ document.addEventListener "submit", (ev) ->
   remoteHandler(ev)
 
 @Plumlinks = {
+  controller,
   visit,
   replace: controller.replace,
   cache: controller.cache,

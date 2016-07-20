@@ -10,6 +10,8 @@ class window.Remote
       @httpRequestType = target.getAttribute('method') || @getTGAttribute(target, 'plumlinks-remote')
       @payload = @nativeEncodeForm(target)
 
+    @isAsync =  @getTGAttribute(target, 'plumlinks-remote-async') || false
+
     @httpUrl = target.getAttribute('href') || target.getAttribute('action')
     @actualRequestType = if @httpRequestType?.toLowerCase() == 'get' then 'GET' else 'POST'
 
