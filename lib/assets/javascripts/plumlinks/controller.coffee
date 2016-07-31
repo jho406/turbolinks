@@ -73,10 +73,6 @@ class window.Controller
   pageChangePrevented: (url) =>
     !Utils.triggerEvent Plumlinks.EVENTS.BEFORE_CHANGE, url: url
 
-  processResponse: (xhr) ->
-    if @hasValidResponse(xhr)
-      return @responseContent(xhr)
-
   cache: (key, value) =>
     return @atomCache[key] if value == null
     @atomCache[key] ||= value
@@ -119,6 +115,10 @@ class window.Controller
     xhr.onloadend = @onLoadEnd
     xhr.onerror = @onError
     xhr
+
+  processResponse: (xhr) ->
+    if @hasValidResponse(xhr)
+      return @responseContent(xhr)
 
   hasValidResponse: (xhr) ->
     not @clientOrServerError(xhr) and @validContent(xhr) and not @downloadingFile(xhr)
