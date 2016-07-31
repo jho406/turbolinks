@@ -214,3 +214,59 @@ suite 'Plumlinks.visit()', ->
       done()
 
     @Plumlinks.visit('iframe2', isAsync: true)
+  test "the async options will use a parallel queue that onloads in order", (done) ->
+    response = '''
+      (function() {
+        return {
+          data: { heading: 'Some heading' },
+          title: 'title',
+          csrf_token: 'token',
+          assets: ['application-123.js', 'application-123.js']
+        };
+      })();
+    '''
+    xhr = sinon.useFakeXMLHttpRequest()
+    @window.XMLHttpRequest = xhr
+    requests = []
+    xhr.onCreate = (xhr) ->
+      requests.push(xhr)
+
+    @Plumlinks.visit('/', isAsync: true)
+    @Plumlinks.visit('/', isAsync: true)
+    assert.equal @Plumlinks.controller.pq.dll.length, 2
+    requests[1].respond(200, { "Content-Type": "application/javascript" }, response)
+
+    assert.equal @Plumlinks.controller.pq.dll.length, 2
+    requests[0].respond(200, { "Content-Type": "application/javascript" }, response)
+
+    assert.equal @Plumlinks.controller.pq.dll.length, 0
+    done()
+
+
+  test "the async options will use a parallel queue that onloads in order 2", (done) ->
+    response = '''
+      (function() {
+        return {
+          data: { heading: 'Some heading' },
+          title: 'title',
+          csrf_token: 'token',
+          assets: ['application-123.js', 'application-123.js']
+        };
+      })();
+    '''
+    xhr = sinon.useFakeXMLHttpRequest()
+    @window.XMLHttpRequest = xhr
+    requests = []
+    xhr.onCreate = (xhr) ->
+      requests.push(xhr)
+
+    @Plumlinks.visit('/', isAsync: true)
+    @Plumlinks.visit('/', isAsync: true)
+    assert.equal @Plumlinks.controller.pq.dll.length, 2
+    requests[0].respond(200, { "Content-Type": "application/javascript" }, response)
+
+    assert.equal @Plumlinks.controller.pq.dll.length, 1
+    requests[1].respond(200, { "Content-Type": "application/javascript" }, response)
+
+    assert.equal @Plumlinks.controller.pq.dll.length, 0
+    done()

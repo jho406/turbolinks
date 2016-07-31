@@ -8,7 +8,7 @@ class window.Controller
     @requestCachingEnabled = true
 
     @progressBar = new ProgressBar 'html'
-
+    @pq = new ParallelQueue
     @http = null
 
     @history.rememberCurrentUrlAndState()
@@ -39,8 +39,9 @@ class window.Controller
 
     if options.isAsync
       options.showProgressBar = false
-      @createRequest(url, options)
-        .send(options.payload)
+      req = @createRequest(url, options)
+      @pq.push(req)
+      req.send(options.payload)
     else
       @http?.abort()
       @http = @createRequest(url, options)
