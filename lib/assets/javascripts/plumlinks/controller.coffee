@@ -43,6 +43,7 @@ class window.Controller
       @pq.push(req)
       req.send(options.payload)
     else
+      @pq.drain()
       @http?.abort()
       @http = @createRequest(url, options)
       @http.send(options.payload)
