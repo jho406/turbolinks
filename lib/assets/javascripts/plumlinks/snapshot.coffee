@@ -51,19 +51,14 @@ class window.Snapshot
 
     @pageCache[currentUrl.absolute] = @currentPage
 
-  reflectRedirectedUrl: (xhr)=>
-    if location = xhr.getResponseHeader 'X-XHR-Redirected-To'
-      location = new ComponentUrl location
-      preservedHash = if location.hasNoHash() then document.location.hash else ''
-      window.history.replaceState window.history.state, '', location.href + preservedHash
-
   rememberCurrentUrlAndState: =>
     window.history.replaceState { plumlinks: true, url: document.location.href }, '', document.location.href
     @currentBrowserState = window.history.state
 
   reflectNewUrl: (url) =>
     if (url = new ComponentUrl url).absolute != document.location.href
-      window.history.pushState { plumlinks: true, url: url.absolute }, '', url.absolute
+      preservedHash = if location.hasNoHash() then document.location.hash else ''
+      window.history.pushState { plumlinks: true, url: url.absolute + preservedHash }, '', url.absolute
 
   updateCurrentBrowserState: =>
     @currentBrowserState = window.history.state

@@ -85,7 +85,6 @@ class window.Controller
     Utils.triggerEvent Plumlinks.EVENTS.RECEIVE, url: url.absolute
     if nextPage = @processResponse(xhr)
       @history.reflectNewUrl url
-      @history.reflectRedirectedUrl(xhr)
       Utils.withDefaults(nextPage, @history.currentBrowserState)
       @history.changePage(nextPage, options)
       Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
@@ -111,7 +110,11 @@ class window.Controller
     xhr.setRequestHeader 'X-XHR-Referer', document.location.href
     xhr.setRequestHeader 'X-Requested-With', 'XMLHttpRequest'
     xhr.onload = =>
-      @onLoad(` this `, url, opts)
+      self = ` this `
+      redirectedUrl = self.getResponseheader 'X-XHR-Redirected-To'
+      actualUrl = redirectedURL || url
+
+      @onLoad(self, actualUrl, opts)
     xhr.onprogress = @onProgress if @progressBar and opts.showProgressBar
     xhr.onloadend = @onLoadEnd
     xhr.onerror = @onError
