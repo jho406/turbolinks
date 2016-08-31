@@ -32,7 +32,10 @@ class window.ParallelQueue
     # data-precendence
     # async allowed as long as its the same root component.
     @active = false
-    @dll.each (xhr)->
-      xhr.abort()
-    @dll.reset()
+    node = @dll.head
+    while(node)
+      qxhr = node.element
+      qxhr.abort()
+      node = node.next
+    @dll = new DoublyLinkedList
 

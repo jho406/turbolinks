@@ -115,8 +115,8 @@ class window.Controller
     xhr.setRequestHeader 'X-Requested-With', 'XMLHttpRequest'
     xhr.onload = =>
       self = ` this `
-      redirectedUrl = self.getResponseheader 'X-XHR-Redirected-To'
-      actualUrl = redirectedURL || url
+      redirectedUrl = self.getResponseHeader 'X-XHR-Redirected-To'
+      actualUrl = redirectedUrl || url
 
       @onLoad(self, actualUrl, opts)
     xhr.onprogress = @onProgress if @progressBar and opts.showProgressBar

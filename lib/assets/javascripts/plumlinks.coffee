@@ -1,3 +1,4 @@
+#= export Plumlinks
 #= require_tree ./plumlinks
 #= require_self
 #

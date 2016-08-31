@@ -57,7 +57,7 @@ class window.Snapshot
 
   reflectNewUrl: (url) =>
     if (url = new ComponentUrl url).absolute != document.location.href
-      preservedHash = if location.hasNoHash() then document.location.hash else ''
+      preservedHash = if url.hasNoHash() then document.location.hash else ''
       window.history.pushState { plumlinks: true, url: url.absolute + preservedHash }, '', url.absolute
 
   updateCurrentBrowserState: =>
