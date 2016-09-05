@@ -62,7 +62,7 @@ class window.ProgressBar
     percent = if event.lengthComputable
       event.loaded / event.total * 100
     else
-      @value + (100 - @progressBar.value) / 10
+      @value + (100 - @value) / 10
     @advanceTo(percent)
 
   done: ->

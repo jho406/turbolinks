@@ -11,12 +11,9 @@
     body:before { content: ''; display: block; width: 1000px; height: 1000px; }
   </style>
   <script>
-    Plumlinks.replace({
-      data: { heading: 'Some heading' },
-      title: 'title',
-      csrf_token: 'token',
-      assets: ['application-123.js', 'application-123.js']
-    });
+    Plumlinks.replace(
+      <%= File.read(File.join(File.expand_path(File.dirname(__FILE__)),'session.js')) %>
+      );
   </script>
 </head>
 <body>

@@ -1,0 +1,19 @@
+load_paths:
+  - lib/assets/javascripts
+  - jtest/src
+  - jtest/vendor
+
+logical_paths:
+  - plumlinks.js
+  - test.js
+  - sinon-1.17.5.js
+  - sinon-qunit-1.0.0.js
+
+build:
+  logical_paths:
+    - plumlinks.js
+  path: dist
+  js_compressor: uglifier
+
+plugins:
+  sprockets_override_accept:
