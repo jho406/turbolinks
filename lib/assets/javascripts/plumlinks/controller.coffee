@@ -84,7 +84,7 @@ class window.Controller
   onLoad: (xhr, url, options) =>
     Utils.triggerEvent Plumlinks.EVENTS.RECEIVE, url: url.absolute
     if nextPage = @processResponse(xhr)
-      if options.isAsync && url.pathname != @currentPage.url.pathname
+      if options.isAsync && url.pathname != @currentPage().url
         console.warn("async response path is different from current page path")
         return
 

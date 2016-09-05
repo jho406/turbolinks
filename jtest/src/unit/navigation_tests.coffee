@@ -137,4 +137,118 @@ testWithSession "calling preventDefault on the before-change event cancels the v
     done = null
   @Plumlinks.visit('success')
 
+testWithSession "doesn't pushState when URL is the same", (assert) ->
+  done = assert.async()
+  # Get rid of history.back() sideeffect
+  @history.pushState({}, "", "session");
+
+  load = 0
+  @document.addEventListener 'plumlinks:load', =>
+    load += 1
+    if load is 1
+      assert.equal @history.length, @originalHistoryLength
+      setTimeout (=> @Plumlinks.visit('session#test')), 0
+    else if load is 2
+      setTimeout (=>
+        assert.equal @history.length, @originalHistoryLength + 1
+        done()
+      ), 0
+  @originalHistoryLength = @history.length
+  @Plumlinks.visit('session')
+
+testWithSession "with #anchor and history.back()", (assert) ->
+  done = assert.async()
+  hashchange = 0
+  load = 0
+
+  @window.addEventListener 'hashchange', =>
+    hashchange += 1
+  @document.addEventListener 'plumlinks:load', =>
+    load += 1
+    if load is 1
+      assert.equal hashchange, 1
+      setTimeout (=> @history.back()), 0
+  @document.addEventListener 'plumlinks:restore', =>
+    assert.equal hashchange, 1
+    done()
+  @location.href = "#{@location.href}#change"
+  setTimeout (=> @Plumlinks.visit('success#permanent')), 0
+
+testWithSession "js responses with Plumlinks.cache caches correctly", (assert) ->
+  done = assert.async()
+  @window.addEventListener 'plumlinks:load', (event) =>
+    assert.equal(event.data.data.footer, 'some cached content')
+    assert.equal(@Plumlinks.cache('cachekey'), 'some cached content')
+    done()
+  @Plumlinks.visit('success_with_russian_doll')
+
+testWithSession "the async option allows request to run seperate from the main XHR", (assert) ->
+  done = assert.async()
+  @document.addEventListener 'plumlinks:load', =>
+    console.log('hi')
+    assert.equal @Plumlinks.controller.http, null
+    done()
+
+  @Plumlinks.visit('session', isAsync: true)
+
+testWithSession "the async options will use a parallel queue that onloads in order", (assert) ->
+  done = assert.async()
+
+  response = '''
+    (function() {
+      return {
+        data: { heading: 'Some heading' },
+        title: 'title',
+        csrf_token: 'token',
+        assets: ['application-123.js', 'application-123.js']
+      };
+    })();
+  '''
+  xhr = sinon.useFakeXMLHttpRequest()
+  @window.XMLHttpRequest = xhr
+  requests = []
+  xhr.onCreate = (xhr) ->
+    requests.push(xhr)
+
+  @Plumlinks.visit('/', isAsync: true)
+  @Plumlinks.visit('/', isAsync: true)
+  assert.equal @Plumlinks.controller.pq.dll.length, 2
+  requests[1].respond(200, { "Content-Type": "application/javascript" }, response)
+
+  assert.equal @Plumlinks.controller.pq.dll.length, 2
+  requests[0].respond(200, { "Content-Type": "application/javascript" }, response)
+
+  assert.equal @Plumlinks.controller.pq.dll.length, 0
+  done()
+testWithSession "the async options will use a parallel queue that onloads in order 2", (assert) ->
+  done = assert.async()
+  response = '''
+    (function() {
+      return {
+        data: { heading: 'Some heading' },
+        title: 'title',
+        csrf_token: 'token',
+        assets: ['application-123.js', 'application-123.js']
+      };
+    })();
+  '''
+  xhr = sinon.useFakeXMLHttpRequest()
+  @window.XMLHttpRequest = xhr
+  requests = []
+  xhr.onCreate = (xhr) ->
+    requests.push(xhr)
+
+  @Plumlinks.visit('/', isAsync: true)
+  @Plumlinks.visit('/', isAsync: true)
+  assert.equal @Plumlinks.controller.pq.dll.length, 2
+  requests[0].respond(200, { "Content-Type": "application/javascript" }, response)
+
+  assert.equal @Plumlinks.controller.pq.dll.length, 1
+  requests[1].respond(200, { "Content-Type": "application/javascript" }, response)
+
+  assert.equal @Plumlinks.controller.pq.dll.length, 0
+  done()
+
+
+
 
