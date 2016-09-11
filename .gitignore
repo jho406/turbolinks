@@ -3,3 +3,4 @@ node_modules
 pkg/
 test/log/
 /vendor
+tmp/

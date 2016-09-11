@@ -1,7 +1,7 @@
 load_paths:
   - lib/assets/javascripts
-  - test/src
-  - test/vendor
+  - test/javascript/src
+  - test/javascirpt/vendor
 
 logical_paths:
   - plumlinks.js
