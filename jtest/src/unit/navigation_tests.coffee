@@ -220,6 +220,7 @@ testWithSession "the async options will use a parallel queue that onloads in ord
 
   assert.equal @Plumlinks.controller.pq.dll.length, 0
   done()
+
 testWithSession "the async options will use a parallel queue that onloads in order 2", (assert) ->
   done = assert.async()
   response = '''
