@@ -1,4 +1,4 @@
-require_relative "test_helper"
+require "test_helper"
 require "mocha/setup"
 require "active_model"
 require "action_view"

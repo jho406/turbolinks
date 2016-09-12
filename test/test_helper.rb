@@ -16,18 +16,20 @@ module Rails
   end
 end
 
-class TestApplication < Rails::Application
-  config.secret_token = Digest::SHA1.hexdigest(Time.now.to_s)
-  config.secret_key_base = SecureRandom.hex
-  config.eager_load = false
-  config.plumlinks.auto_include = false
+if !defined? TestApplication
+  class TestApplication < Rails::Application
+    config.secret_token = Digest::SHA1.hexdigest(Time.now.to_s)
+    config.secret_key_base = SecureRandom.hex
+    config.eager_load = false
+    config.plumlinks.auto_include = false
 
-  initialize!
+    initialize!
 
-  routes.draw do
-    get 'redirect_path', to: redirect('/plumlinks/simple_action')
-    get 'redirect_hash', to: redirect(path: '/plumlinks/simple_action')
-    get ':controller(/:action)'
+    routes.draw do
+      get 'redirect_path', to: redirect('/plumlinks/simple_action')
+      get 'redirect_hash', to: redirect(path: '/plumlinks/simple_action')
+      get ':controller(/:action)'
+    end
   end
 end
 
