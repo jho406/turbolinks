@@ -5,7 +5,10 @@ class window.Remote
     @contentType = "text/plain; charset=UTF-8"
 
     if target.tagName == 'A'
-      @httpRequestType = @getTGAttribute(target, 'plumlinks-remote') || 'GET'
+      @httpRequestType = @getTGAttribute(target, 'plumlinks-remote')
+
+      if @httpRequestType not in ['GET', 'PUT', 'POST', 'DELETE']
+         @httpRequestType = 'GET'
 
     if target.tagName == 'FORM'
       @httpRequestType = target.getAttribute('method') || @getTGAttribute(target, 'plumlinks-remote')

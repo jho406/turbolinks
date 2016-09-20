@@ -16,6 +16,7 @@ class window.Snapshot
         @currentPage = restorePoint
         @delegate.restore(@currentPage)
       else
+        #TODO: this is wrong
         @fetch event.target.location.href
 
   constrainPageCacheTo: (limit = 20) =>
