@@ -46,8 +46,9 @@ remoteHandler = (ev) ->
   url = remote.httpUrl
   method = remote.actualRequestType
   payload = remote.payload
+  contentType = remote.contentType
 
-  controller.request(url, {requestMethod: method, payload: payload})
+  controller.request(url, {requestMethod: method, payload: payload, contentType: contentType })
   return
 
 documentListenerForLinks = (eventType, handler, useCapture = false) ->

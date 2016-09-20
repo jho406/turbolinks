@@ -1,7 +1,8 @@
 class window.Remote
   constructor: (target, opts={})->
     @target = target
-    @payload = null
+    @payload = ''
+    @contentType = "text/plain; charset=UTF-8"
 
     if target.tagName == 'A'
       @httpRequestType = @getTGAttribute(target, 'plumlinks-remote') || 'GET'
@@ -9,6 +10,10 @@ class window.Remote
     if target.tagName == 'FORM'
       @httpRequestType = target.getAttribute('method') || @getTGAttribute(target, 'plumlinks-remote')
       @payload = @nativeEncodeForm(target)
+
+    if @payload not instanceof FormData
+      @contentType = "application/x-www-form-urlencoded; charset=UTF-8"
+      @payload= @formAppend(@payload, "_method", @httpRequestType) if @payload.indexOf("_method") == -1 && @httpRequestType && @actualRequestType != 'GET'
 
     @isAsync =  @getTGAttribute(target, 'plumlinks-remote-async') || false
 

@@ -83,7 +83,12 @@ class window.Controller
 
   onLoad: (xhr, url, options) =>
     Utils.triggerEvent Plumlinks.EVENTS.RECEIVE, url: url.absolute
-    if nextPage = @processResponse(xhr)
+    nextPage =  @processResponse(xhr)
+
+    if xhr.status == 0
+      return
+
+    if nextPage
       if options.isAsync && url.pathname != @currentPage().url
         console.warn("async response path is different from current page path")
         return
@@ -113,6 +118,11 @@ class window.Controller
     xhr.setRequestHeader 'Accept', 'text/javascript, application/x-javascript, application/javascript'
     xhr.setRequestHeader 'X-XHR-Referer', document.location.href
     xhr.setRequestHeader 'X-Requested-With', 'XMLHttpRequest'
+    xhr.setRequestHeader 'Content-Type', opts.contentType
+
+    csrfToken = CSRFToken.get().token
+    xhr.setRequestHeader('X-CSRF-Token', csrfToken) if csrfToken
+
     xhr.onload = =>
       self = ` this `
       redirectedUrl = self.getResponseHeader 'X-XHR-Redirected-To'

@@ -11,5 +11,9 @@ module Plumlinks
         "Plumlinks.replace(#{@plumlinks});".html_safe
       end
     end
+
+    def use_plumlinks_html
+      @_use_plumlinks_html = true
+    end
   end
 end
