@@ -6,22 +6,33 @@ class window.Remote
 
     if target.tagName == 'A'
       @httpRequestType = @getTGAttribute(target, 'plumlinks-remote')
+      @httpRequestType ?= ''
+      @httpRequestType = @httpRequestType.toUpperCase()
 
-      if @httpRequestType not in ['GET', 'PUT', 'POST', 'DELETE']
+      if @httpRequestType.toUpperCase() not in ['GET', 'PUT', 'POST', 'DELETE']
          @httpRequestType = 'GET'
 
     if target.tagName == 'FORM'
+      @contentType = "application/x-www-form-urlencoded; charset=UTF-8"
       @httpRequestType = target.getAttribute('method') || @getTGAttribute(target, 'plumlinks-remote')
+      @httpRequestType ?= ''
+      @httpRequestType = @httpRequestType.toUpperCase()
+
+      if @httpRequestType.toUpperCase() not in ['GET', 'PUT', 'POST', 'DELETE']
+         @httpRequestType = 'POST'
+
       @payload = @nativeEncodeForm(target)
 
-    if @payload not instanceof FormData
-      @contentType = "application/x-www-form-urlencoded; charset=UTF-8"
-      @payload= @formAppend(@payload, "_method", @httpRequestType) if @payload.indexOf("_method") == -1 && @httpRequestType && @actualRequestType != 'GET'
 
     @isAsync =  @getTGAttribute(target, 'plumlinks-remote-async') || false
 
     @httpUrl = target.getAttribute('href') || target.getAttribute('action')
     @actualRequestType = if @httpRequestType?.toLowerCase() == 'get' then 'GET' else 'POST'
+
+    if @payload not instanceof FormData
+      if @payload.indexOf("_method") == -1 && @httpRequestType && @actualRequestType != 'GET'
+        @contentType = "application/x-www-form-urlencoded; charset=UTF-8"
+        @payload= @formAppend(@payload, "_method", @httpRequestType)
 
   isValid: =>
    @isValidLink() || @isValidForm()
