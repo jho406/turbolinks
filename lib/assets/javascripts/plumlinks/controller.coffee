@@ -118,7 +118,7 @@ class window.Controller
     xhr.setRequestHeader 'Accept', 'text/javascript, application/x-javascript, application/javascript'
     xhr.setRequestHeader 'X-XHR-Referer', document.location.href
     xhr.setRequestHeader 'X-Requested-With', 'XMLHttpRequest'
-    xhr.setRequestHeader 'Content-Type', opts.contentType
+    xhr.setRequestHeader 'Content-Type', opts.contentType if opts.contentType
 
     csrfToken = CSRFToken.get().token
     xhr.setRequestHeader('X-CSRF-Token', csrfToken) if csrfToken

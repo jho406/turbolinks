@@ -2,9 +2,9 @@ class window.Remote
   constructor: (target, opts={})->
     @target = target
     @payload = ''
-    @contentType = "text/plain; charset=UTF-8"
 
     if target.tagName == 'A'
+      @contentType = "text/plain; charset=UTF-8"
       @httpRequestType = @getTGAttribute(target, 'plumlinks-remote')
       @httpRequestType ?= ''
       @httpRequestType = @httpRequestType.toUpperCase()
@@ -13,7 +13,6 @@ class window.Remote
          @httpRequestType = 'GET'
 
     if target.tagName == 'FORM'
-      @contentType = "application/x-www-form-urlencoded; charset=UTF-8"
       @httpRequestType = target.getAttribute('method') || @getTGAttribute(target, 'plumlinks-remote')
       @httpRequestType ?= ''
       @httpRequestType = @httpRequestType.toUpperCase()
@@ -32,7 +31,10 @@ class window.Remote
     if @payload not instanceof FormData
       if @payload.indexOf("_method") == -1 && @httpRequestType && @actualRequestType != 'GET'
         @contentType = "application/x-www-form-urlencoded; charset=UTF-8"
-        @payload= @formAppend(@payload, "_method", @httpRequestType)
+        @payload = @formAppend(@payload, "_method", @httpRequestType)
+    else
+      if '_method' not in Array.from(@payload.keys()) && @httpRequestType && @actualRequestType != 'GET'
+        @payload = @formAppend(@payload, "_method", @httpRequestType)
 
   isValid: =>
    @isValidLink() || @isValidForm()
@@ -52,12 +54,6 @@ class window.Remote
   formAppend: (uriEncoded, key, value) ->
     uriEncoded += "&" if uriEncoded.length
     uriEncoded += "#{encodeURIComponent(key)}=#{encodeURIComponent(value)}"
-
-  uriEncodeForm: (form) ->
-    formData = ""
-    @_iterateOverFormInputs form, (input) =>
-      formData = @formAppend(formData, input.name, input.value)
-    formData
 
   formDataAppend: (formData, input) ->
     if input.type == 'file'

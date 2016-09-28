@@ -1,23 +1,5 @@
 module Plumlinks
   module Redirection
-    def redirect_to(url = {}, response_status = {})
-      plumlinks = response_status.delete(:plumlinks)
-      plumlinks = (request.xhr? && !request.get?) if plumlinks.nil?
-
-      if plumlinks
-        response.content_type = Mime[:js]
-      end
-
-      return_value = super(url, response_status)
-
-      if plumlinks
-        self.status = 200
-        self.response_body = "Plumlinks.visit('#{location}');"
-      end
-
-      return_value
-    end
-
     def render(*args, &block)
       render_options = args.extract_options!
       plumlinks = render_options.delete(:plumlinks)
