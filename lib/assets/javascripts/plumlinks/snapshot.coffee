@@ -16,10 +16,9 @@ class window.Snapshot
         @currentPage = restorePoint
         @delegate.restore(@currentPage)
       else
-        #TODO: this is wrong
-        @fetch event.target.location.href
+        @delegate.request event.target.location.href
 
-  constrainPageCacheTo: (limit = 20) =>
+  constrainPageCacheTo: (limit = @pageCacheSize) =>
     pageCacheKeys = Object.keys @pageCache
 
     cacheTimesRecentFirst = pageCacheKeys.map (url) =>
@@ -33,9 +32,6 @@ class window.Snapshot
     return if url is @currentBrowserState.url
     cachedPage = @pageCache[url]
     cachedPage if cachedPage and !cachedPage.transitionCacheDisabled
-
-  removeCurrentPageFromCache: =>
-    delete @pageCache[new ComponentUrl(@currentBrowserState.url).absolute]
 
   pagesCached: (size = @pageCacheSize) =>
     @pageCacheSize = parseInt(size) if /^[\d]+$/.test size

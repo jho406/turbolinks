@@ -100,7 +100,7 @@ class window.Controller
 
       if options.showProgressBar
         @progressBar?.done()
-      @history.constrainPageCacheTo
+      @history.constrainPageCacheTo()
     else
       @progressBar?.done()
       document.location.href = @crossOriginRedirect() or url.absolute

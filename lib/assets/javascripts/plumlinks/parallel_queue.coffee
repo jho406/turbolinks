@@ -36,6 +36,7 @@ class window.ParallelQueue
     while(node)
       qxhr = node.element
       qxhr.abort()
+      qxhr._isDone = true
       node = node.next
     @dll = new DoublyLinkedList
 
