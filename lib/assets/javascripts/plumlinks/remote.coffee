@@ -4,12 +4,11 @@ class window.Remote
     @payload = ''
 
     if target.tagName == 'A'
-      @contentType = "text/plain; charset=UTF-8"
       @httpRequestType = @getTGAttribute(target, 'plumlinks-remote')
       @httpRequestType ?= ''
       @httpRequestType = @httpRequestType.toUpperCase()
 
-      if @httpRequestType.toUpperCase() not in ['GET', 'PUT', 'POST', 'DELETE']
+      if @httpRequestType.toUpperCase() not in ['GET', 'PUT', 'POST', 'DELETE', 'PATCH']
          @httpRequestType = 'GET'
 
     if target.tagName == 'FORM'
@@ -17,7 +16,7 @@ class window.Remote
       @httpRequestType ?= ''
       @httpRequestType = @httpRequestType.toUpperCase()
 
-      if @httpRequestType.toUpperCase() not in ['GET', 'PUT', 'POST', 'DELETE']
+      if @httpRequestType.toUpperCase() not in ['GET', 'PUT', 'POST', 'DELETE', 'PATCH']
          @httpRequestType = 'POST'
 
       @payload = @nativeEncodeForm(target)
@@ -34,7 +33,7 @@ class window.Remote
         @payload = @formAppend(@payload, "_method", @httpRequestType)
     else
       if '_method' not in Array.from(@payload.keys()) && @httpRequestType && @actualRequestType != 'GET'
-        @payload = @formAppend(@payload, "_method", @httpRequestType)
+        @payload.append("_method", @httpRequestType)
 
   isValid: =>
    @isValidLink() || @isValidForm()

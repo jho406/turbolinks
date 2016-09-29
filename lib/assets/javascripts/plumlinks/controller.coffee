@@ -40,6 +40,7 @@ class window.Controller
     if options.isAsync
       options.showProgressBar = false
       req = @createRequest(url, options)
+      req.onError = -> {} # for now do nothing on errors
       @pq.push(req)
       req.send(options.payload)
     else
@@ -108,7 +109,7 @@ class window.Controller
   onProgress: (event) =>
     @progressBar.advanceFromEvent(event)
 
-  onError: =>
+  onError: (url) =>
     document.location.href = url.absolute
 
   createRequest: (url, opts)=>
@@ -131,7 +132,8 @@ class window.Controller
       @onLoad(self, actualUrl, opts)
     xhr.onprogress = @onProgress if @progressBar and opts.showProgressBar
     xhr.onloadend = @onLoadEnd
-    xhr.onerror = @onError
+    xhr.onerror = =>
+      @onError(url)
     xhr
 
   processResponse: (xhr) ->
