@@ -1,0 +1,59 @@
+module Plumlinks
+  module Generators
+    class InstallGenerator < ::Rails::Generators::Base
+       desc <<-DESC
+Description:
+    Copy plumlinks files to your application.
+DESC
+      def self.source_root
+        @source_root ||= File.expand_path(File.join(File.dirname(__FILE__), 'templates'))
+      end
+
+      def copy_view_component
+        copy_file 'view.js.jsx', 'app/assets/javascripts/components/view2.js.jsx'
+        copy_file 'boot.js', 'app/assets/javascripts/boot.js'
+      end
+
+      def create_views_and_layouts
+        empty_directory 'app/assets/javascripts/views'
+        empty_directory 'app/assets/javascripts/layouts'
+      end
+
+      def append_js_requires
+        app_js = "app/assets/javascripts/application.js"
+
+        if File.readlines("#{Rails.root}/#{app_js}").grep(/require_tree/).any?
+          inject_into_file app_js, before: '//= require_tree .' do
+            "//= require boot\n//= require_tree layouts\n//= require_tree views\n //= require_tree components \n"
+          end
+        end
+      end
+
+      def append_entry_point
+        app_html = 'app/views/layouts/application.html.erb'
+        js_tag = <<-JS_TAG
+  <script type="text/javascript">
+    document.addEventListener('plumlinks:load', function(event){
+      var props = {
+        view: event.data.view,
+        data:  event.data.data
+      }
+      ReactDOM.render(React.createElement(window.App.Components.View, props), document.getElementById('app'));
+    });
+
+    $(function(){ <%= plumlinks_snippet %> });
+
+  </script>
+        JS_TAG
+
+        inject_into_file app_html, before: '</head>' do
+          js_tag
+        end
+
+        inject_into_file app_html, after: '</head>' do
+          "<div id='app'></div>"
+        end
+      end
+    end
+  end
+end
