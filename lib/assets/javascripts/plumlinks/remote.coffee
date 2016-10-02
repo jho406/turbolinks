@@ -2,6 +2,7 @@ class window.Remote
   constructor: (target, opts={})->
     @target = target
     @payload = ''
+    @contentType = null
 
     if target.tagName == 'A'
       @httpRequestType = @getTGAttribute(target, 'plumlinks-remote')
@@ -32,7 +33,7 @@ class window.Remote
         @contentType = "application/x-www-form-urlencoded; charset=UTF-8"
         @payload = @formAppend(@payload, "_method", @httpRequestType)
     else
-      if '_method' not in Array.from(@payload.keys()) && @httpRequestType && @actualRequestType != 'GET'
+      if '_method' not in Array.from(@payload.keys()) && @httpRequestType not in ['GET', 'POST']
         @payload.append("_method", @httpRequestType)
 
   isValid: =>

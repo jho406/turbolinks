@@ -93,9 +93,9 @@ testWithSession "#payload will contain a _method when data-plumlinks-remote is s
   assert.equal remote.payload, "_method=PUT"
 
 
-testWithSession "#payload will not contain a _method when data-plumlinks-remote on a form is set to verbs unsupported by the browser (PUT, DELETE), the user will have to add an input manually", (assert) ->
+testWithSession "#payload will contain a _method when data-plumlinks-remote on a form is set to verbs unsupported by the browser (PUT, DELETE)", (assert) ->
   html = """
-    <form data-plumlinks-remote>
+    <form data-plumlinks-remote method='PUT'>
       <input type='file' name='foo'><input type='text' name='bar' value='fizzbuzz'>
     </form>
   """
@@ -103,27 +103,15 @@ testWithSession "#payload will not contain a _method when data-plumlinks-remote 
   remote = new @window.Remote(target)
   payload = Array.from(remote.payload.keys())
   assert.equal remote.actualRequestType, 'POST'
-  assert.notOk "_method" in payload
+  assert.ok "_method" in payload
 
-testWithSession "#payload will not contain a _method when data-plumlinks-remote on a form is set to verbs unsupported by the browser (PUT, DELETE), the user will have to add an input manually", (assert) ->
-  html = """
-    <form data-plumlinks-remote>
-      <input type='file' name='foo'><input type='text' name='bar' value='fizzbuzz'>
-    </form>
-  """
-  target = createTarget(html)
-  remote = new @window.Remote(target)
-  payload = Array.from(remote.payload.keys())
-  assert.equal remote.actualRequestType, 'POST'
-  assert.notOk "_method" in payload
-
-testWithSession "#contentType returns text/plain on links", (assert) ->
+testWithSession "#contentType returns null", (assert) ->
   html = """
     <a href="/test" data-plumlinks-remote></a>
   """
   target = createTarget(html)
   remote = new @window.Remote(target)
-  assert.equal remote.contentType, 'text/plain; charset=UTF-8'
+  assert.equal remote.contentType, null
 
 testWithSession "#contentType returns form-urlencoded on non-GET links", (assert) ->
   html = """
@@ -134,7 +122,7 @@ testWithSession "#contentType returns form-urlencoded on non-GET links", (assert
   assert.equal remote.contentType, 'application/x-www-form-urlencoded; charset=UTF-8'
 
 
-testWithSession "#contentType returns form-urlencoded on forms regardless of verb", (assert) ->
+testWithSession "#contentType returns null on forms regardless of verb", (assert) ->
   html = """
     <form data-plumlinks-remote>
       <input type='file' name='foo'><input type='text' name='bar' value='fizzbuzz'>
@@ -142,7 +130,7 @@ testWithSession "#contentType returns form-urlencoded on forms regardless of ver
   """
   target = createTarget(html)
   remote = new @window.Remote(target)
-  assert.equal remote.contentType, 'application/x-www-form-urlencoded; charset=UTF-8'
+  assert.equal remote.contentType, null
 
   html = """
     <form data-plumlinks-remote='GET'>
@@ -151,7 +139,7 @@ testWithSession "#contentType returns form-urlencoded on forms regardless of ver
   """
   target = createTarget(html)
   remote = new @window.Remote(target)
-  assert.equal remote.contentType, 'application/x-www-form-urlencoded; charset=UTF-8'
+  assert.equal remote.contentType, null
 
   html = """
     <form data-plumlinks-remote='PUT'>
@@ -160,7 +148,7 @@ testWithSession "#contentType returns form-urlencoded on forms regardless of ver
   """
   target = createTarget(html)
   remote = new @window.Remote(target)
-  assert.equal remote.contentType, 'application/x-www-form-urlencoded; charset=UTF-8'
+  assert.equal remote.contentType, null
 
   html = """
     <form data-plumlinks-remote='DELETE'>
@@ -169,7 +157,7 @@ testWithSession "#contentType returns form-urlencoded on forms regardless of ver
   """
   target = createTarget(html)
   remote = new @window.Remote(target)
-  assert.equal remote.contentType, 'application/x-www-form-urlencoded; charset=UTF-8'
+  assert.equal remote.contentType, null
 
 testWithSession "#isValid returns true with a valid form", (assert) ->
   html = """
