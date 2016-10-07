@@ -11,7 +11,6 @@ class window.DoublyLinkedList
       ele = @createNode(obj)
       ele.prev = @tail
       @tail = @tail.next = ele
-
       @length += 1
     else
       @head = @tail = @createNode(obj)
@@ -26,9 +25,9 @@ class window.DoublyLinkedList
         @tail.next = null
       @length -= 1
 
-      return element.element
+      element.element
     else
-      return null
+      null
 
   shift: ()->
     if (@head)
@@ -39,16 +38,15 @@ class window.DoublyLinkedList
         @head.prev = null
       @length -= 1
 
-      return element.element
+      element.element
     else
-      return null
+      null
 
   unshift: (obj)->
     if (@head)
       ele = @createNode(obj)
       ele.next = @head
       @head = @head.prev = ele
-
       @length += 1
     else
       @head = @tail = @createNode(obj)
