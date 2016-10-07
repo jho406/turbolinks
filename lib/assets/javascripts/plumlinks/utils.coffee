@@ -85,7 +85,7 @@ cloneByKeypath = (path, leaf, obj) ->
   if typeof path is "string"
     path = path.split('.')
     return cloneByKeypath(path, leaf, obj)
-  return obj if obj is undefined
+  return obj unless obj?
 
   head = path[0]
   child = obj[head]
@@ -96,34 +96,31 @@ cloneByKeypath = (path, leaf, obj) ->
 
   if isObject(obj)
     copy = {}
+    found = false
     for key, value of obj
       if key is head
         node = cloneByKeypath(remaining, leaf, child)
-        if node is child
-          return obj
-        else
-          copy[key] = node
+        found = true unless child is node
+        copy[key] = node
       else
         copy[key] = value
 
-    return copy
+    return if found then copy else obj
 
   else if isArray(obj)
     [attr, id] = head.split('=')
     id = parseInt(id) || 0
     copy = []
-
+    found = false
     for child in obj
       if child[attr] == id
-        val = cloneByKeypath(remaining, leaf, child)
-        if val is child or undefined
-          return obj
-        else
-          copy.push val
+        node = cloneByKeypath(remaining, leaf, child)
+        found = true unless child is node
+        copy.push node
       else
         copy.push child
 
-    return copy
+    return if found then copy else obj
   else
     obj
 

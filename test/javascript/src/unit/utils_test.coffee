@@ -1,29 +1,30 @@
 
 QUnit.module "Utils"
 
-testWithSession "without transitio", (assert) ->
+testWithSession "when the path parts are greater than avail", (assert) ->
   page = {}
   clone = @window.Utils.cloneByKeypath('a.b.c', 0 ,page)
   assert.strictEqual page, clone
 
 
-testWithSession "without transitio", (assert) ->
-  page = a: b: c: 3
-  clone = @window.Utils.cloneByKeypath('a.b.c', page)
+testWithSession "when its not a tree like structure", (assert) ->
+  page = null
+  clone = @window.Utils.cloneByKeypath('a.b.c', 0 , page)
   assert.strictEqual page, clone
 
-testWithSession "without transitio", (assert) ->
-  page = a: b: c: 4
-  clone = @window.Utils.cloneByKeypath('a.b.c', page)
+testWithSession "when the path does not exist", (assert) ->
+  page = a: b: c: d: 5
+  clone = @window.Utils.cloneByKeypath('a.b.z', foo: 'bar', page)
   assert.strictEqual page, clone
+  assert.propEqual page, clone
 
-testWithSession "adds a new graph", (assert) ->
+testWithSession "replaces the node at keypath", (assert) ->
   page = a: b: c: d: 5
   clone = @window.Utils.cloneByKeypath('a.b.c', foo: 'bar', page)
   assert.notStrictEqual page, clone
   assert.propEqual clone, a: b: c: foo: 'bar'
 
-testWithSession "adds a new graph", (assert) ->
+testWithSession "replaces the entire branch with new objects, but leave siblins alone", (assert) ->
   graft1 = c: d: e: 5
   graft2 = i: j: k: 10
 
@@ -40,7 +41,7 @@ testWithSession "adds a new graph", (assert) ->
       b: c: d: foo: 'bar'
       h: i: j: k: 10
 
-testWithSession "cloneing by array id", (assert) ->
+testWithSession "objects in arrays can be referenced using an id attribute", (assert) ->
   page = a: b: [
     {id: 1},
     {id: 2},
