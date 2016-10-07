@@ -1,32 +1,40 @@
 class window.Remote
+  SUPPORTED_METHODS = ['GET', 'PUT', 'POST', 'DELETE', 'PATCH']
+  FALLBACK_LINK_METHOD = 'GET'
+  FALLBACK_FORM_METHOD = 'POST'
+
   constructor: (target, opts={})->
     @target = target
     @payload = ''
     @contentType = null
+    @setRequestType(target)
+    @isAsync =  @getTGAttribute(target, 'plumlinks-remote-async') || false
+    @httpUrl = target.getAttribute('href') || target.getAttribute('action')
+    @setPayload(target)
 
+  setRequestType: (target)=>
     if target.tagName == 'A'
       @httpRequestType = @getTGAttribute(target, 'plumlinks-remote')
       @httpRequestType ?= ''
       @httpRequestType = @httpRequestType.toUpperCase()
 
-      if @httpRequestType.toUpperCase() not in ['GET', 'PUT', 'POST', 'DELETE', 'PATCH']
-         @httpRequestType = 'GET'
+      if @httpRequestType not in SUPPORTED_METHODS
+         @httpRequestType = FALLBACK_LINK_METHOD
 
     if target.tagName == 'FORM'
-      @httpRequestType = target.getAttribute('method') || @getTGAttribute(target, 'plumlinks-remote')
+      formActionMethod = target.getAttribute('method')
+      @httpRequestType = formActionMethod || @getTGAttribute(target, 'plumlinks-remote')
       @httpRequestType ?= ''
       @httpRequestType = @httpRequestType.toUpperCase()
 
-      if @httpRequestType.toUpperCase() not in ['GET', 'PUT', 'POST', 'DELETE', 'PATCH']
-         @httpRequestType = 'POST'
+      if @httpRequestType not in SUPPORTED_METHODS
+         @httpRequestType = FALLBACK_FORM_METHOD
 
+    @actualRequestType = if @httpRequestType == 'GET' then 'GET' else 'POST'
+
+  setPayload: (target)=>
+    if target.tagName == 'FORM'
       @payload = @nativeEncodeForm(target)
-
-
-    @isAsync =  @getTGAttribute(target, 'plumlinks-remote-async') || false
-
-    @httpUrl = target.getAttribute('href') || target.getAttribute('action')
-    @actualRequestType = if @httpRequestType?.toLowerCase() == 'get' then 'GET' else 'POST'
 
     if @payload not instanceof FormData
       if @payload.indexOf("_method") == -1 && @httpRequestType && @actualRequestType != 'GET'
@@ -103,7 +111,7 @@ class window.Remote
 
   getTGAttribute: (node, attr) ->
     tgAttr = @tgAttribute(attr)
-    node.getAttribute(tgAttr) || node.getAttribute(attr)
+    (node.getAttribute(tgAttr) || node.getAttribute(attr))
 
   querySelectorAllTGAttribute: (node, attr, value = null) ->
     tgAttr = @tgAttribute(attr)
@@ -111,7 +119,6 @@ class window.Remote
       node.querySelectorAll("[#{tgAttr}=#{value}], [#{attr}=#{value}]")
     else
       node.querySelectorAll("[#{tgAttr}], [#{attr}]")
-
 
   hasTGAttribute: (node, attr) ->
     tgAttr = @tgAttribute(attr)
