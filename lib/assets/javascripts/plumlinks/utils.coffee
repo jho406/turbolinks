@@ -75,7 +75,62 @@ documentListenerForLinks = (eventType, handler) ->
 
       target = target.parentNode
 
+isObject = (val) ->
+  Object.prototype.toString.call(val) is '[object Object]'
+
+isArray = (val) ->
+  Object.prototype.toString.call(val) is '[object Array]'
+
+cloneByKeypath = (path, leaf, obj) ->
+  if typeof path is "string"
+    path = path.split('.')
+    return cloneByKeypath(path, leaf, obj)
+  return obj if obj is undefined
+
+  head = path[0]
+  child = obj[head]
+  remaining = path.slice(1)
+
+  if path.length is 0
+    return leaf
+
+  if isObject(obj)
+    copy = {}
+    for key, value of obj
+      if key is head
+        node = cloneByKeypath(remaining, leaf, child)
+        if node is child
+          return obj
+        else
+          copy[key] = node
+      else
+        copy[key] = value
+
+    return copy
+
+  else if isArray(obj)
+    [attr, id] = head.split('=')
+    id = parseInt(id) || 0
+    copy = []
+
+    for child in obj
+      if child[attr] == id
+        val = cloneByKeypath(remaining, leaf, child)
+        if val is child or undefined
+          return obj
+        else
+          copy.push val
+      else
+        copy.push child
+
+    return copy
+  else
+    obj
+
+
+
 @Utils =
+  cloneByKeypath:cloneByKeypath
   documentListenerForLinks: documentListenerForLinks
   reverseMerge: reverseMerge
   merge: merge
