@@ -22,52 +22,32 @@ ProgressBarAPI =
   advanceTo: (value) -> progressBar.advanceTo(value)
   done: -> progressBar.done()
 
+remoteHandler = (ev) ->
+  target = ev.target
+  remote = new Remote(target)
+  return unless remote.isValid()
+  ev.preventDefault()
+
+  controller.request remote.httpUrl,
+    requestMethod: remote.actualRequestType
+    payload: remote.payload
+    contentType: remote.contentType
+
+browserSupportsCustomEvents =
+  document.addEventListener and document.createEvent
+
 initializePlumlinks = ->
   ProgressBarAPI.enable()
   window.addEventListener 'hashchange', controller.history.rememberCurrentUrlAndState, false
   window.addEventListener 'popstate', controller.history.onHistoryChange, false
-
-browserSupportsCustomEvents =
-  document.addEventListener and document.createEvent
+  Utils.documentListenerForLinks 'click', remoteHandler
+  document.addEventListener "submit", remoteHandler
 
 if Utils.browserSupportsPlumlinks()
   visit = controller.request
   initializePlumlinks()
 else
   visit = (url = document.location.href) -> document.location.href = url
-
-remoteHandler = (ev) ->
-  target = ev.target
-  remote = new Remote(target)
-  return unless remote.isValid()
-
-  ev.preventDefault()
-
-  url = remote.httpUrl
-  method = remote.actualRequestType
-  payload = remote.payload
-  contentType = remote.contentType
-
-  controller.request(url, {requestMethod: method, payload: payload, contentType: contentType })
-  return
-
-documentListenerForLinks = (eventType, handler, useCapture = false) ->
-  document.addEventListener eventType, (ev) ->
-    target = ev.target
-    while target != document && target?
-      if target.nodeName == "A"
-        isNodeDisabled = target.getAttribute('disabled')
-        ev.preventDefault() if target.getAttribute('disabled')
-        unless isNodeDisabled
-          handler(ev)
-          return
-
-      target = target.parentNode
-
-documentListenerForLinks('click', remoteHandler, true)
-
-document.addEventListener "submit", (ev) ->
-  remoteHandler(ev)
 
 @Plumlinks = {
   controller,

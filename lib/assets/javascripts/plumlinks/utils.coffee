@@ -45,7 +45,7 @@ popCookie = (name) ->
 
 requestMethodIsSafe = -> popCookie('request_method') in ['GET','']
 
-browserSupportsPlumlinks = -> 
+browserSupportsPlumlinks = ->
   browserSupportsPushState() and !browserIsBuggy() and requestMethodIsSafe()
 
 intersection = (a, b) ->
@@ -62,8 +62,21 @@ triggerEvent = (name, data) =>
   event.initEvent name, true, true
   document.dispatchEvent event
 
+documentListenerForLinks = (eventType, handler) ->
+  document.addEventListener eventType, (ev) ->
+    target = ev.target
+    while target != document && target?
+      if target.nodeName == "A"
+        isNodeDisabled = target.getAttribute('disabled')
+        ev.preventDefault() if target.getAttribute('disabled')
+        unless isNodeDisabled
+          handler(ev)
+          return
 
-@Utils = 
+      target = target.parentNode
+
+@Utils =
+  documentListenerForLinks: documentListenerForLinks
   reverseMerge: reverseMerge
   merge: merge
   clone: clone
@@ -71,5 +84,5 @@ triggerEvent = (name, data) =>
   browserSupportsPlumlinks: browserSupportsPlumlinks
   intersection: intersection
   triggerEvent: triggerEvent
-  
+
 
