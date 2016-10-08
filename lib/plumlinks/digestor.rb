@@ -3,7 +3,13 @@ require 'action_view/digestor'
 
 module Plumlinks
   module PartialDigestor
-    if ::Rails.version >= '4.1'
+    if ::Rails.version >= '5.0'
+      def _partial_digestor(options)
+        name = options[:name]
+        finder = options[:finder]
+        ::ActionView::Digestor.digest(name: name, finder: finder)
+      end 
+    elsif ::Rails.version >= '4.1'
       def _partial_digestor(options)
         name = options[:name]
         finder = options[:finder]

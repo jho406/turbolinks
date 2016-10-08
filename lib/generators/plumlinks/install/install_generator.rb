@@ -9,14 +9,16 @@ DESC
         @source_root ||= File.expand_path(File.join(File.dirname(__FILE__), 'templates'))
       end
 
-      def copy_view_component
-        copy_file 'view.js.jsx', 'app/assets/javascripts/components/view2.js.jsx'
-        copy_file 'boot.js', 'app/assets/javascripts/boot.js'
-      end
-
       def create_views_and_layouts
         empty_directory 'app/assets/javascripts/views'
         empty_directory 'app/assets/javascripts/layouts'
+        empty_directory 'app/assets/javascripts/components'
+      end
+
+      def copy_view_component
+        copy_file 'view.js.jsx', 'app/assets/javascripts/components/view.js.jsx'
+        copy_file 'boot.js', 'app/assets/javascripts/boot.js'
+        copy_file 'default.js.jsx', 'app/assets/javascripts/layouts/default.js.jsx'
       end
 
       def append_js_requires
@@ -24,7 +26,7 @@ DESC
 
         if File.readlines("#{Rails.root}/#{app_js}").grep(/require_tree/).any?
           inject_into_file app_js, before: '//= require_tree .' do
-            "//= require boot\n//= require_tree layouts\n//= require_tree views\n //= require_tree components \n"
+            "//=require plumlinks\n//= require boot\n//= require_tree layouts\n//= require_tree views\n//= require_tree components\n"
           end
         end
       end
