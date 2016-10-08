@@ -17,7 +17,7 @@ class RenderController < TestController
   end
 
   def simple_render_with_plumlinks
-    render :action, plumlinks: {view: 'ComponentView'}
+    render :action
   end
 
   def render_action_with_plumlinks_false
@@ -90,13 +90,13 @@ class RenderTest < ActionController::TestCase
 
   def assert_plumlinks_html(content)
     assert_response 200
-    assert_equal "<html><head><script type='text/javascript'>Plumlinks.replace((function(){return ({\"data\":#{content.to_json},\"view\":\"ComponentView\",\"csrf_token\":\"secret\",\"assets\":[\"/app.js\"]});})());</script></head><body></body></html>", @response.body
+    assert_equal "<html><head><script type='text/javascript'>Plumlinks.replace((function(){return ({\"data\":#{content.to_json},\"view\":\"RenderSimpleRenderWithPlumlinks\",\"csrf_token\":\"secret\",\"assets\":[\"/app.js\"]});})());</script></head><body></body></html>", @response.body
     assert_equal 'text/html', @response.content_type
   end
 
   def assert_plumlinks_js(content)
     assert_response 200
-    assert_equal '(function(){return ({"data":' + content.to_json + ',"view":"ComponentView","csrf_token":"secret","assets":["/app.js"]});})()', @response.body
+    assert_equal '(function(){return ({"data":' + content.to_json + ',"view":"RenderSimpleRenderWithPlumlinks","csrf_token":"secret","assets":["/app.js"]});})()', @response.body
     assert_equal 'text/javascript', @response.content_type
   end
 
