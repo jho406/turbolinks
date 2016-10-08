@@ -51,6 +51,7 @@ else
 
 @Plumlinks = {
   controller,
+  updateContentByKeypath: controller.history.updateContentByKeypath,
   visit,
   replace: controller.replace,
   cache: controller.cache,

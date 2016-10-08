@@ -79,6 +79,12 @@ class window.Controller
     return @atomCache[key] if value == null
     @atomCache[key] ||= value
 
+  updateContentByKeypath: (keypath, node)=>
+    for k, v in @history.pageCache
+      keypath = 'data.' + keypath
+      @history.pageCache[k] = Utils.updateCurrentBrowserState(keypath, node, v)
+    Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
+
   # Events
   onLoadEnd: => @http = null
 

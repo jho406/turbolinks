@@ -77,3 +77,9 @@ class window.Snapshot
     fetchedAssets = nextPage.assets
     fetchedAssets.length isnt @loadedAssets.length or Utils.intersection(fetchedAssets, @loadedAssets).length isnt @loadedAssets.length
 
+  updateContentByKeypath: (keypath, node)=>
+    for k, v in @pageCache
+      @history.pageCache[k] = Utils.cloneByKeypath(keypath, node, v)
+
+    @currentPage = Utils.cloneByKeypath(keypath, node, @currentPage)
+    Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage
