@@ -1,6 +1,11 @@
 require_relative 'test_helper'
 
 class PlumlinksController < TestController
+  before_action do 
+  
+    @_use_plumlinks_html = false
+  end
+
   def simple_action
     render plain: ' '
   end

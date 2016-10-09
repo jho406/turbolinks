@@ -10,6 +10,11 @@ class RenderController < TestController
   ))
 
   layout 'application'
+
+  before_action do
+    @_use_plumlinks_html = false
+  end
+
   before_action :use_plumlinks_html, only: [:simple_render_with_plumlinks]
 
   def render_action
@@ -59,7 +64,7 @@ class RenderTest < ActionController::TestCase
 
   test "render action via xhr and get js" do
     @request.accept = 'application/javascript'
-    xhr :get, :simple_render_with_plumlinks
+    get :simple_render_with_plumlinks, xhr: true
     assert_plumlinks_js({author: "john smith"})
   end
 
@@ -76,13 +81,13 @@ class RenderTest < ActionController::TestCase
 
   test "render with plumlinks false via xhr get" do
     @request.accept = 'text/html'
-    xhr :get, :render_action_with_plumlinks_false
+    get :render_action_with_plumlinks_false, xhr: true
     assert_normal_render("john smith")
   end
 
   test "render action via xhr and put" do
     @request.accept = 'text/html'
-    xhr :put, :render_action
+    put :render_action, xhr: true
     assert_normal_render 'john smith'
   end
 

@@ -10,11 +10,6 @@ require 'active_support/test_case'
 
 ActiveSupport::TestCase.test_order = :random if ActiveSupport::TestCase.respond_to?(:test_order=)
 
-module Rails
-  def self.cache
-    @cache ||= ActiveSupport::Cache::MemoryStore.new
-  end
-end
 
 if !defined? TestApplication
   class TestApplication < Rails::Application
@@ -31,17 +26,25 @@ if !defined? TestApplication
       get ':controller(/:action)'
     end
   end
-end
 
-class TestController < ActionController::Base
-  extend AbstractController::Railties::RoutesHelpers.with(TestApplication.routes)
-  include Plumlinks::Controller
-end
-
-module ActionController
-  class TestCase
-    setup do
-      @routes = TestApplication.routes
+  module Rails
+    def self.cache
+      @cache ||= ActiveSupport::Cache::MemoryStore.new
     end
   end
+
+  class TestController < ActionController::Base
+    extend AbstractController::Railties::RoutesHelpers.with(TestApplication.routes)
+    include Plumlinks::Controller
+  end
+
+  module ActionController
+    class TestCase
+      setup do
+        @routes = TestApplication.routes
+      end
+    end
+  end
+
 end
+
