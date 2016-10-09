@@ -26,7 +26,7 @@ DESC
 
         if File.readlines("#{Rails.root}/#{app_js}").grep(/require_tree/).any?
           inject_into_file app_js, before: '//= require_tree .' do
-            "//=require plumlinks\n//= require boot\n//= require_tree layouts\n//= require_tree views\n//= require_tree components\n"
+            "//= require plumlinks\n//= require boot\n//= require_tree ./layouts\n//= require_tree ./views\n//= require_tree ./components\n"
           end
         end
       end
@@ -53,7 +53,7 @@ DESC
         end
 
         inject_into_file app_html, after: '</head>' do
-          "<div id='app'></div>"
+          "\n<div id='app'></div>"
         end
       end
     end
