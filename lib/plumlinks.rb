@@ -4,7 +4,7 @@ require 'plumlinks/xhr_redirect'
 require 'plumlinks/xhr_url_for'
 require 'plumlinks/cookies'
 require 'plumlinks/x_domain_blocker'
-require 'plumlinks/redirection'
+require 'plumlinks/render'
 require 'plumlinks/helpers'
 require 'plumlinks/configuration'
 require 'plumlinks/plum_template'
@@ -12,7 +12,7 @@ require 'plumlinks/digestor'
 
 module Plumlinks
   module Controller
-    include XHRHeaders, Cookies, XDomainBlocker, Redirection, Helpers
+    include XHRHeaders, Cookies, XDomainBlocker, Render, Helpers
 
     def self.included(base)
       if base.respond_to?(:before_action)

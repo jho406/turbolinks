@@ -1,5 +1,5 @@
 module Plumlinks
-  module Redirection
+  module Render
     def render(*args, &block)
       render_options = args.extract_options!
       plumlinks = render_options.delete(:plumlinks)
