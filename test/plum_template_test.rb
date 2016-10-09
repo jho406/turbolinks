@@ -5,6 +5,7 @@ require "action_view"
 require "action_view/testing/resolvers"
 require "active_support/cache"
 require "plumlinks/plum_template"
+require "rails/version"
 
 BLOG_POST_PARTIAL = <<-JBUILDER
   json.extract! blog_post, :id, :body
@@ -72,6 +73,15 @@ class PlumTemplateTest < ActionView::TestCase
     lookup_context.formats = [:js]
     template = ActionView::Template.new(source, "test", Plumlinks::KbuilderHandler, virtual_path: "test")
     template.render(self, {}).strip
+  end
+
+  def cache_keys
+    major_v = Rails::VERSION::MAJOR
+    minor_v = Rails::VERSION::MINOR
+    rails_v = "rails#{major_v}#{minor_v}"
+    path = File.expand_path("../fixtures/cache_keys.yaml", __FILE__)
+    keys = YAML.load_file(path)
+    keys[method_name][rails_v]
   end
 
   def undef_context_methods(*names)
@@ -246,8 +256,8 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("fbf68bd43dba9d0054ad02b65b7bb4aa", {"email":"test@test.com"});
-        return ({"data":{"profile":Plumlinks.cache("fbf68bd43dba9d0054ad02b65b7bb4aa")}});
+        Plumlinks.cache("#{cache_keys[0]}", {"email":"test@test.com"});
+        return ({"data":{"profile":Plumlinks.cache("#{cache_keys[0]}")}});
       })()
     JS
 
@@ -289,9 +299,9 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("0d6be77bebdef3fee771f21b49d51806", {"terms":"You agree"});
-        Plumlinks.cache("c88c9332e539d4f3740f3c44575a1ebc", {"terms":"You agree"});
-        return ({"data":[Plumlinks.cache("0d6be77bebdef3fee771f21b49d51806"),Plumlinks.cache("c88c9332e539d4f3740f3c44575a1ebc")]});
+        Plumlinks.cache("#{cache_keys[0]}", {"terms":"You agree"});
+        Plumlinks.cache("#{cache_keys[1]}", {"terms":"You agree"});
+        return ({"data":[Plumlinks.cache("#{cache_keys[0]}"),Plumlinks.cache("#{cache_keys[1]}")]});
       })()
     JS
 
@@ -394,8 +404,8 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("420dd59aa351baf103b4184869dfe516", 32);
-        return ({"data":{"hello":Plumlinks.cache("420dd59aa351baf103b4184869dfe516")}});
+        Plumlinks.cache("#{cache_keys[0]}", 32);
+        return ({"data":{"hello":Plumlinks.cache("#{cache_keys[0]}")}});
       })()
     JS
 
@@ -415,9 +425,9 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("31a0b2d69da777bb2dcf027350566f1d", {"top":"hello4"});
-        Plumlinks.cache("e9b9b9b98dafc029c4e814b091e90a7a", {"top":"hello5"});
-        return ({"data":{"hello":[Plumlinks.cache("31a0b2d69da777bb2dcf027350566f1d"),Plumlinks.cache("e9b9b9b98dafc029c4e814b091e90a7a")]}});
+        Plumlinks.cache("#{cache_keys[0]}", {"top":"hello4"});
+        Plumlinks.cache("#{cache_keys[1]}", {"top":"hello5"});
+        return ({"data":{"hello":[Plumlinks.cache("#{cache_keys[0]}"),Plumlinks.cache("#{cache_keys[1]}")]}});
       })()
     JS
 
@@ -441,11 +451,11 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("31a0b2d69da777bb2dcf027350566f1d", {"top":"hello"});
-        Plumlinks.cache("e9b9b9b98dafc029c4e814b091e90a7a", {"top":"hello"});
-        Plumlinks.cache("4237e6f58bfe464b27ee270b55c12e84", {"bottom":"hello"});
-        Plumlinks.cache("34cfb415aba6256e9aaf661a8697248c", {"bottom":"hello"});
-        return ({"data":{"hello":[Plumlinks.cache("31a0b2d69da777bb2dcf027350566f1d"),Plumlinks.cache("e9b9b9b98dafc029c4e814b091e90a7a"),3,4,Plumlinks.cache("4237e6f58bfe464b27ee270b55c12e84"),Plumlinks.cache("34cfb415aba6256e9aaf661a8697248c")]}});
+        Plumlinks.cache("#{cache_keys[0]}", {"top":"hello"});
+        Plumlinks.cache("#{cache_keys[1]}", {"top":"hello"});
+        Plumlinks.cache("#{cache_keys[2]}", {"bottom":"hello"});
+        Plumlinks.cache("#{cache_keys[3]}", {"bottom":"hello"});
+        return ({"data":{"hello":[Plumlinks.cache("#{cache_keys[0]}"),Plumlinks.cache("#{cache_keys[1]}"),3,4,Plumlinks.cache("#{cache_keys[2]}"),Plumlinks.cache("#{cache_keys[3]}")]}});
       })()
     JS
 
@@ -468,10 +478,10 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("527312c467060937453434d11496f10f", {"subcontent":"inner"});
-        Plumlinks.cache("423c34f3270addc1369ee6d95d662c04", {"subcontent":"other"});
-        Plumlinks.cache("64af83f0566cd020f44ca0b25121fc58", {"content":Plumlinks.cache("527312c467060937453434d11496f10f"),"other":Plumlinks.cache("423c34f3270addc1369ee6d95d662c04")});
-        return ({"data":{"hello":Plumlinks.cache("64af83f0566cd020f44ca0b25121fc58")}});
+        Plumlinks.cache("#{cache_keys[0]}", {"subcontent":"inner"});
+        Plumlinks.cache("#{cache_keys[1]}", {"subcontent":"other"});
+        Plumlinks.cache("#{cache_keys[2]}", {"content":Plumlinks.cache("#{cache_keys[0]}"),"other":Plumlinks.cache("#{cache_keys[1]}")});
+        return ({"data":{"hello":Plumlinks.cache("#{cache_keys[2]}")}});
       })()
     JS
 
@@ -513,8 +523,8 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("423c34f3270addc1369ee6d95d662c04", {"content":"hello"});
-        return ({"data":{"comments":[Plumlinks.cache("423c34f3270addc1369ee6d95d662c04"),{"content":"world"}]}});
+        Plumlinks.cache("#{cache_keys[0]}", {"content":"hello"});
+        return ({"data":{"comments":[Plumlinks.cache("#{cache_keys[0]}"),{"content":"world"}]}});
       })()
     JS
 
@@ -538,8 +548,8 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("c6eb1da804069b92da0553e647a6770a", {"name":"Cache"});
-        return ({"data":{"post":Plumlinks.cache("c6eb1da804069b92da0553e647a6770a")}});
+        Plumlinks.cache("#{cache_keys[0]}", {"name":"Cache"});
+        return ({"data":{"post":Plumlinks.cache("#{cache_keys[0]}")}});
       })()
     JS
 
@@ -557,8 +567,8 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("c6eb1da804069b92da0553e647a6770a", ["a","b","c"]);
-        return ({"data":{"content":Plumlinks.cache("c6eb1da804069b92da0553e647a6770a")}});
+        Plumlinks.cache("#{cache_keys[0]}", ["a","b","c"]);
+        return ({"data":{"content":Plumlinks.cache("#{cache_keys[0]}")}});
       })()
     JS
 
@@ -633,8 +643,8 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("fedd00e5759ffda2b4ac1aeb6f2a7dde", {"id":1,"body":"post body 1","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        return ({"data":{"post":Plumlinks.cache("fedd00e5759ffda2b4ac1aeb6f2a7dde")}});
+        Plumlinks.cache("#{cache_keys[0]}", {"id":1,"body":"post body 1","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        return ({"data":{"post":Plumlinks.cache("#{cache_keys[0]}")}});
       })()
     JS
 
@@ -655,8 +665,8 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("fedd00e5759ffda2b4ac1aeb6f2a7dde", {"id":1,"body":"hit","author":{"first_name":"John","last_name":"Smith"}});
-        return ({"data":{"post":Plumlinks.cache("fedd00e5759ffda2b4ac1aeb6f2a7dde")}});
+        Plumlinks.cache("#{cache_keys[0]}", {"id":1,"body":"hit","author":{"first_name":"John","last_name":"Smith"}});
+        return ({"data":{"post":Plumlinks.cache("#{cache_keys[0]}")}});
       })()
     JS
 
@@ -672,17 +682,17 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("0d6be77bebdef3fee771f21b49d51806", {"id":1,"body":"post body 1","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Plumlinks.cache("c88c9332e539d4f3740f3c44575a1ebc", {"id":2,"body":"post body 2","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        Plumlinks.cache("f693f9f35d5cd7fa1df4d6cb05f0dd64", {"id":3,"body":"post body 3","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Plumlinks.cache("306d22c07d0ed0080656222b634a23fd", {"id":4,"body":"post body 4","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        Plumlinks.cache("599510241b78966805152d3f10379bdc", {"id":5,"body":"post body 5","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Plumlinks.cache("37741607162f895d17d45ec9ff75d4dc", {"id":6,"body":"post body 6","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        Plumlinks.cache("65e8f91af9ffe9989cb759345dcb7d26", {"id":7,"body":"post body 7","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Plumlinks.cache("ca627b17e0fe8b9560ec1e0911099762", {"id":8,"body":"post body 8","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        Plumlinks.cache("63543700a921958662967cc003f0dc06", {"id":9,"body":"post body 9","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Plumlinks.cache("277a88c729950f01f14013d13dedf37d", {"id":10,"body":"post body 10","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        return ({"data":[Plumlinks.cache("0d6be77bebdef3fee771f21b49d51806"),Plumlinks.cache("c88c9332e539d4f3740f3c44575a1ebc"),Plumlinks.cache("f693f9f35d5cd7fa1df4d6cb05f0dd64"),Plumlinks.cache("306d22c07d0ed0080656222b634a23fd"),Plumlinks.cache("599510241b78966805152d3f10379bdc"),Plumlinks.cache("37741607162f895d17d45ec9ff75d4dc"),Plumlinks.cache("65e8f91af9ffe9989cb759345dcb7d26"),Plumlinks.cache("ca627b17e0fe8b9560ec1e0911099762"),Plumlinks.cache("63543700a921958662967cc003f0dc06"),Plumlinks.cache("277a88c729950f01f14013d13dedf37d")]});
+        Plumlinks.cache("#{cache_keys[0]}", {"id":1,"body":"post body 1","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Plumlinks.cache("#{cache_keys[1]}", {"id":2,"body":"post body 2","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        Plumlinks.cache("#{cache_keys[2]}", {"id":3,"body":"post body 3","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Plumlinks.cache("#{cache_keys[3]}", {"id":4,"body":"post body 4","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        Plumlinks.cache("#{cache_keys[4]}", {"id":5,"body":"post body 5","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Plumlinks.cache("#{cache_keys[5]}", {"id":6,"body":"post body 6","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        Plumlinks.cache("#{cache_keys[6]}", {"id":7,"body":"post body 7","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Plumlinks.cache("#{cache_keys[7]}", {"id":8,"body":"post body 8","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        Plumlinks.cache("#{cache_keys[8]}", {"id":9,"body":"post body 9","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Plumlinks.cache("#{cache_keys[9]}", {"id":10,"body":"post body 10","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        return ({"data":[Plumlinks.cache("#{cache_keys[0]}"),Plumlinks.cache("#{cache_keys[1]}"),Plumlinks.cache("#{cache_keys[2]}"),Plumlinks.cache("#{cache_keys[3]}"),Plumlinks.cache("#{cache_keys[4]}"),Plumlinks.cache("#{cache_keys[5]}"),Plumlinks.cache("#{cache_keys[6]}"),Plumlinks.cache("#{cache_keys[7]}"),Plumlinks.cache("#{cache_keys[8]}"),Plumlinks.cache("#{cache_keys[9]}")]});
       })()
     JS
 
