@@ -16,9 +16,9 @@ DESC
       end
 
       def copy_view_component
-        copy_file 'view.js.jsx', 'app/assets/javascripts/components/view.js.jsx'
+        copy_file 'View.js.jsx', 'app/assets/javascripts/components/view.js.jsx'
         copy_file 'boot.js', 'app/assets/javascripts/boot.js'
-        copy_file 'default.js.jsx', 'app/assets/javascripts/layouts/default.js.jsx'
+        copy_file 'Default.js.jsx', 'app/assets/javascripts/layouts/default.js.jsx'
       end
 
       def append_js_requires

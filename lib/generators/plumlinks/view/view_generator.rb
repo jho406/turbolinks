@@ -25,8 +25,8 @@ DESC
           @content_path =  File.join(content_destination, "#{@action}.js.plum")
           @view_path = File.join(view_destination, "#{@js_filename}.js.jsx")
 
-          template 'view.js.jsx', @view_path
-          template 'view.plum', @content_path
+          template 'View.js.jsx', @view_path
+          template 'view.js.plum', @content_path
         end
       end
 
