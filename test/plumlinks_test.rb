@@ -2,7 +2,7 @@ require_relative 'test_helper'
 
 class PlumlinksController < TestController
   def simple_action
-    render text: ' '
+    render plain: ' '
   end
 
   def redirect_to_same_origin
