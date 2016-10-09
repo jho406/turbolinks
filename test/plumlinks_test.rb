@@ -128,19 +128,19 @@ class PlumlinksIntegrationTest < ActionDispatch::IntegrationTest
     get response.location
     assert_nil response.headers['X-XHR-Redirected-To']
 
-    get '/redirect_hash', nil, { 'HTTP_X_XHR_REFERER' => 'http://www.example.com/' }
+    get '/redirect_hash', headers: { 'HTTP_X_XHR_REFERER' => 'http://www.example.com/' }
     assert_response :redirect
     assert_nil response.headers['X-XHR-Redirected-To']
 
-    get response.location, nil, { 'HTTP_X_XHR_REFERER' => nil }
+    get response.location, headers: { 'HTTP_X_XHR_REFERER' => nil }
     assert_equal 'http://www.example.com/plumlinks/simple_action', response.headers['X-XHR-Redirected-To']
     assert_response :ok
 
-    get '/redirect_path', nil, { 'HTTP_X_XHR_REFERER' => 'http://www.example.com/' }
+    get '/redirect_path', headers: { 'HTTP_X_XHR_REFERER' => 'http://www.example.com/' }
     assert_response :redirect
     assert_nil response.headers['X-XHR-Redirected-To']
 
-    get response.location, nil, { 'HTTP_X_XHR_REFERER' => nil }
+    get response.location, headers: { 'HTTP_X_XHR_REFERER' => nil }
     assert_equal 'http://www.example.com/plumlinks/simple_action', response.headers['X-XHR-Redirected-To']
     assert_response :ok
   end
