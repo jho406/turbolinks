@@ -9,6 +9,18 @@ module Plumlinks
   # Plumlinks script will detect the header and use replaceState to reflect the redirected
   # url.
   module XHRHeaders
+    if Rails.version >= '5.0'
+      def redirect_back(fallback_location:, **args)
+        if referer = request.headers["X-XHR-Referer"]
+          rsp = redirect_to referer, **args
+          store_for_plumlinks(self.location)
+          rsp
+        else
+          super
+        end
+      end
+    end
+
     def _compute_redirect_to_location(*args)
       options, request = _normalize_redirect_params(args)
 

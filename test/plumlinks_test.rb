@@ -1,13 +1,12 @@
 require_relative 'test_helper'
 
 class PlumlinksController < TestController
-  before_action do 
-  
+  before_action do
     @_use_plumlinks_html = false
   end
 
   def simple_action
-    render plain: ' '
+    render plain: ''
   end
 
   def redirect_to_same_origin
@@ -23,7 +22,11 @@ class PlumlinksController < TestController
   end
 
   def redirect_to_back
-    redirect_to :back
+    if Rails.version >= "5.0"
+      redirect_back(fallback_location: '/')
+    else
+      redirect_to :back
+    end
   end
 
   def redirect_to_unescaped_path
