@@ -26,8 +26,9 @@ class window.Controller
 
     @history.cacheCurrentPage()
     @progressBar?.start()
+    restorePoint = @history.transitionCacheFor(url.absolute)
 
-    if @transitionCacheEnabled and restorePoint = @history.transitionCacheFor(url.absolute)
+    if @transitionCacheEnabled and restorePoint
       @history.reflectNewUrl(url)
       @restore(restorePoint)
       options.showProgressBar = false
@@ -70,7 +71,11 @@ class window.Controller
     Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
 
   crossOriginRedirect: =>
-    redirect if (redirect = @http.getResponseHeader('Location'))? and (new ComponentUrl(redirect)).crossOrigin()
+    redirect = @http.getResponseHeader('Location')
+    crossOrigin = (new ComponentUrl(redirect)).crossOrigin()
+
+    if redirect? and crossOrigin
+      redirect
 
   pageChangePrevented: (url) =>
     !Utils.triggerEvent Plumlinks.EVENTS.BEFORE_CHANGE, url: url
@@ -119,10 +124,12 @@ class window.Controller
     document.location.href = url.absolute
 
   createRequest: (url, opts)=>
+    jsAccept = 'text/javascript, application/x-javascript, application/javascript'
     requestMethod = opts.requestMethod || 'GET'
+
     xhr = new XMLHttpRequest
     xhr.open requestMethod, url.formatForXHR(cache: opts.cacheRequest), true
-    xhr.setRequestHeader 'Accept', 'text/javascript, application/x-javascript, application/javascript'
+    xhr.setRequestHeader 'Accept', jsAccept
     xhr.setRequestHeader 'X-XHR-Referer', document.location.href
     xhr.setRequestHeader 'X-Requested-With', 'XMLHttpRequest'
     xhr.setRequestHeader 'Content-Type', opts.contentType if opts.contentType
@@ -150,14 +157,16 @@ class window.Controller
     not @clientOrServerError(xhr) and @validContent(xhr) and not @downloadingFile(xhr)
 
   responseContent: (xhr) ->
-    new Function("'use strict'; return " + xhr.responseText )();
+    new Function("'use strict'; return " + xhr.responseText )()
 
   clientOrServerError: (xhr) ->
     400 <= xhr.status < 600
 
   validContent: (xhr) ->
-    (contentType = xhr.getResponseHeader('Content-Type'))? and
-      contentType.match /^(?:text\/javascript|application\/x-javascript|application\/javascript)(?:;|$)/
+    contentType = xhr.getResponseHeader('Content-Type')
+    jsContent = /^(?:text\/javascript|application\/x-javascript|application\/javascript)(?:;|$)/
+
+    contentType? and contentType.match jsContent
 
   downloadingFile: (xhr) ->
     (disposition = xhr.getResponseHeader('Content-Disposition'))? and

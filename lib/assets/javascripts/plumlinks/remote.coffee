@@ -19,7 +19,7 @@ class window.Remote
       @httpRequestType = @httpRequestType.toUpperCase()
 
       if @httpRequestType not in SUPPORTED_METHODS
-         @httpRequestType = FALLBACK_LINK_METHOD
+        @httpRequestType = FALLBACK_LINK_METHOD
 
     if target.tagName == 'FORM'
       formActionMethod = target.getAttribute('method')
@@ -28,7 +28,7 @@ class window.Remote
       @httpRequestType = @httpRequestType.toUpperCase()
 
       if @httpRequestType not in SUPPORTED_METHODS
-         @httpRequestType = FALLBACK_FORM_METHOD
+        @httpRequestType = FALLBACK_FORM_METHOD
 
     @actualRequestType = if @httpRequestType == 'GET' then 'GET' else 'POST'
 
@@ -45,7 +45,7 @@ class window.Remote
         @payload.append("_method", @httpRequestType)
 
   isValid: =>
-   @isValidLink() || @isValidForm()
+    @isValidLink() || @isValidForm()
 
   isValidLink: =>
     if @target.tagName != 'A'
