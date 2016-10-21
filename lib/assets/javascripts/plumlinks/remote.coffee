@@ -10,6 +10,7 @@ class window.Remote
     @setRequestType(target)
     @isAsync =  @getTGAttribute(target, 'plumlinks-remote-async') || false
     @httpUrl = target.getAttribute('href') || target.getAttribute('action')
+    @silent = @getTGAttribute(target, 'plumlinks-silent') || false
     @setPayload(target)
 
   setRequestType: (target)=>

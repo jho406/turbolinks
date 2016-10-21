@@ -131,18 +131,20 @@ class window.Controller
     xhr.open requestMethod, url.formatForXHR(cache: opts.cacheRequest), true
     xhr.setRequestHeader 'Accept', jsAccept
     xhr.setRequestHeader 'X-XHR-Referer', document.location.href
+    xhr.setRequestHeader 'X-Silent', opts.silent if opts.silent
     xhr.setRequestHeader 'X-Requested-With', 'XMLHttpRequest'
     xhr.setRequestHeader 'Content-Type', opts.contentType if opts.contentType
 
     csrfToken = CSRFToken.get().token
     xhr.setRequestHeader('X-CSRF-Token', csrfToken) if csrfToken
 
-    xhr.onload = =>
-      self = ` this `
-      redirectedUrl = self.getResponseHeader 'X-XHR-Redirected-To'
-      actualUrl = redirectedUrl || url
+    if !opts.silent
+      xhr.onload = =>
+        self = ` this `
+        redirectedUrl = self.getResponseHeader 'X-XHR-Redirected-To'
+        actualUrl = redirectedUrl || url
+        @onLoad(self, actualUrl, opts)
 
-      @onLoad(self, actualUrl, opts)
     xhr.onprogress = @onProgress if @progressBar and opts.showProgressBar
     xhr.onloadend = @onLoadEnd
     xhr.onerror = =>

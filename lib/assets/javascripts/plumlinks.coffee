@@ -32,6 +32,7 @@ remoteHandler = (ev) ->
     requestMethod: remote.actualRequestType
     payload: remote.payload
     contentType: remote.contentType
+    silent: remote.silent
 
 browserSupportsCustomEvents =
   document.addEventListener and document.createEvent
