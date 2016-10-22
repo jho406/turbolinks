@@ -78,10 +78,10 @@ isObject = (val) ->
 isArray = (val) ->
   Object.prototype.toString.call(val) is '[object Array]'
 
-cloneByKeypath = (path, leaf, obj) ->
+cloneByKeypath = (path, leaf, obj, opts={}) ->
   if typeof path is "string"
     path = path.split('.')
-    return cloneByKeypath(path, leaf, obj)
+    return cloneByKeypath(path, leaf, obj, opts)
   return obj unless obj?
 
   head = path[0]
@@ -89,14 +89,22 @@ cloneByKeypath = (path, leaf, obj) ->
   remaining = path.slice(1)
 
   if path.length is 0
-    return leaf
+    if opts.append? and isArray(obj)
+      copy = []
+      for child in obj
+        copy.push child
+
+      copy.push leaf
+      return copy
+    else
+      return leaf
 
   if isObject(obj)
     copy = {}
     found = false
     for key, value of obj
       if key is head
-        node = cloneByKeypath(remaining, leaf, child)
+        node = cloneByKeypath(remaining, leaf, child, opts)
         found = true unless child is node
         copy[key] = node
       else
@@ -111,7 +119,7 @@ cloneByKeypath = (path, leaf, obj) ->
     found = false
     for child in obj
       if child[attr] == id
-        node = cloneByKeypath(remaining, leaf, child)
+        node = cloneByKeypath(remaining, leaf, child, opts)
         found = true unless child is node
         copy.push node
       else

@@ -58,3 +58,22 @@ testWithSession "objects in arrays can be referenced using an id attribute", (as
     {id: 3}
   ]
 
+testWithSession "objects in arrays can be referenced using an id attribute", (assert) ->
+  page = a: b: [
+    {id: 1},
+    {id: 2},
+    {id: 3}
+  ]
+
+  clone = @window.Utils.cloneByKeypath('a.b', {id:4}, page, append: true)
+  assert.notStrictEqual page, clone
+  assert.notStrictEqual page.a.b, clone.a.b
+  assert.strictEqual page.a.b[0], clone.a.b[0]
+  assert.strictEqual page.a.b[2], clone.a.b[2]
+  assert.propEqual clone,  a: b: [
+    {id: 1},
+    {id: 2},
+    {id: 3},
+    {id: 4}
+  ]
+
