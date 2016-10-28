@@ -1,4 +1,4 @@
-module Plumlinks
+module Bensonhurst
   class Configuration
     attr_accessor :track_assets
 

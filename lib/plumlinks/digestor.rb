@@ -1,7 +1,7 @@
 require 'action_view'
 require 'action_view/digestor'
 
-module Plumlinks
+module Bensonhurst
   module PartialDigestor
     if ::Rails.version >= '5.0'
       def _partial_digestor(options)

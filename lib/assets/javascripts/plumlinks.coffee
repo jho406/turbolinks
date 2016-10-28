@@ -1,4 +1,4 @@
-#= export Plumlinks
+#= export Bensonhurst
 #= require_tree ./plumlinks
 #= require_self
 #
@@ -37,20 +37,20 @@ remoteHandler = (ev) ->
 browserSupportsCustomEvents =
   document.addEventListener and document.createEvent
 
-initializePlumlinks = ->
+initializeBensonhurst = ->
   ProgressBarAPI.enable()
   window.addEventListener 'hashchange', controller.history.rememberCurrentUrlAndState, false
   window.addEventListener 'popstate', controller.history.onHistoryChange, false
   Utils.documentListenerForLinks 'click', remoteHandler
   document.addEventListener "submit", remoteHandler
 
-if Utils.browserSupportsPlumlinks()
+if Utils.browserSupportsBensonhurst()
   visit = controller.request
-  initializePlumlinks()
+  initializeBensonhurst()
 else
   visit = (url = document.location.href) -> document.location.href = url
 
-@Plumlinks = {
+@Bensonhurst = {
   controller,
   updateContentByKeypath: controller.history.updateContentByKeypath,
   visit,
@@ -60,6 +60,6 @@ else
   enableTransitionCache: controller.enableTransitionCache,
   disableRequestCaching: controller.disableRequestCaching,
   ProgressBar: ProgressBarAPI,
-  supported: Utils.browserSupportsPlumlinks(),
+  supported: Utils.browserSupportsBensonhurst(),
   EVENTS: Utils.clone(EVENTS)
 }

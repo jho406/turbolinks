@@ -1,4 +1,4 @@
-module Plumlinks
+module Bensonhurst
   module Render
     def render(*args, &block)
       render_options = args.extract_options!

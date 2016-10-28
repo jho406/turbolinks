@@ -1,4 +1,4 @@
-module Plumlinks
+module Bensonhurst
   module Generators
     class InstallGenerator < ::Rails::Generators::Base
        desc <<-DESC

@@ -36,7 +36,7 @@ class window.Controller
     options.cacheRequest ?= @requestCachingEnabled
     options.showProgressBar ?= true
 
-    Utils.triggerEvent Plumlinks.EVENTS.FETCH, url: url.absolute
+    Utils.triggerEvent Bensonhurst.EVENTS.FETCH, url: url.absolute
 
     if options.isAsync
       options.showProgressBar = false
@@ -62,13 +62,13 @@ class window.Controller
     @history.changePage(cachedPage, options)
 
     @progressBar?.done()
-    Utils.triggerEvent Plumlinks.EVENTS.RESTORE
-    Utils.triggerEvent Plumlinks.EVENTS.LOAD, cachedPage
+    Utils.triggerEvent Bensonhurst.EVENTS.RESTORE
+    Utils.triggerEvent Bensonhurst.EVENTS.LOAD, cachedPage
 
   replace: (nextPage, options = {}) =>
     Utils.withDefaults(nextPage, @history.currentBrowserState)
     @history.changePage(nextPage, options)
-    Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
+    Utils.triggerEvent Bensonhurst.EVENTS.LOAD, @currentPage()
 
   crossOriginRedirect: =>
     redirect = @http.getResponseHeader('Location')
@@ -78,7 +78,7 @@ class window.Controller
       redirect
 
   pageChangePrevented: (url) =>
-    !Utils.triggerEvent Plumlinks.EVENTS.BEFORE_CHANGE, url: url
+    !Utils.triggerEvent Bensonhurst.EVENTS.BEFORE_CHANGE, url: url
 
   cache: (key, value) =>
     return @atomCache[key] if value == null
@@ -88,13 +88,13 @@ class window.Controller
     for k, v in @history.pageCache
       keypath = 'data.' + keypath
       @history.pageCache[k] = Utils.updateCurrentBrowserState(keypath, node, v)
-    Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
+    Utils.triggerEvent Bensonhurst.EVENTS.LOAD, @currentPage()
 
   # Events
   onLoadEnd: => @http = null
 
   onLoad: (xhr, url, options) =>
-    Utils.triggerEvent Plumlinks.EVENTS.RECEIVE, url: url.absolute
+    Utils.triggerEvent Bensonhurst.EVENTS.RECEIVE, url: url.absolute
     nextPage =  @processResponse(xhr)
 
     if xhr.status == 0
@@ -108,7 +108,7 @@ class window.Controller
       @history.reflectNewUrl url
       Utils.withDefaults(nextPage, @history.currentBrowserState)
       @history.changePage(nextPage, options)
-      Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage()
+      Utils.triggerEvent Bensonhurst.EVENTS.LOAD, @currentPage()
 
       if options.showProgressBar
         @progressBar?.done()

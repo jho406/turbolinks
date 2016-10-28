@@ -1,4 +1,4 @@
-module Plumlinks
+module Bensonhurst
   # Intercepts calls to _compute_redirect_to_location (used by redirect_to) for two purposes.
   #
   # 1. Corrects the behavior of redirect_to with the :back option by using the X-XHR-Referer
@@ -6,7 +6,7 @@ module Plumlinks
   #
   # 2. Stores the return value (the redirect target url) to persist through to the redirect
   # request, where it will be used to set the X-XHR-Redirected-To response header.  The
-  # Plumlinks script will detect the header and use replaceState to reflect the redirected
+  # Bensonhurst script will detect the header and use replaceState to reflect the redirected
   # url.
   module XHRHeaders
     if Rails.version >= '5.0'

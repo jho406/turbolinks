@@ -1,3 +1,3 @@
-module Plumlinks
+module Bensonhurst
   VERSION = '3.0.0'
 end

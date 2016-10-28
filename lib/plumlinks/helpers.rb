@@ -1,14 +1,14 @@
-module Plumlinks
+module Bensonhurst
   module Helpers
     def plumlinks_tag
       if defined?(@plumlinks) && @plumlinks
-        "<script type='text/javascript'>Plumlinks.replace(#{@plumlinks});</script>".html_safe
+        "<script type='text/javascript'>Bensonhurst.replace(#{@plumlinks});</script>".html_safe
       end
     end
 
     def plumlinks_snippet
       if defined?(@plumlinks) && @plumlinks
-        "Plumlinks.replace(#{@plumlinks});".html_safe
+        "Bensonhurst.replace(#{@plumlinks});".html_safe
       end
     end
 

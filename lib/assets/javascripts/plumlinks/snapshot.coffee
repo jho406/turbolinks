@@ -82,11 +82,11 @@ class window.Snapshot
       @history.pageCache[k] = Utils.cloneByKeypath(keypath, node, v)
 
     @currentPage = Utils.cloneByKeypath(keypath, node, @currentPage)
-    Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage
+    Utils.triggerEvent Bensonhurst.EVENTS.LOAD, @currentPage
 
   addContentByKeypath: (keypath, node)=>
     for k, v in @pageCache
       @history.pageCache[k] = Utils.cloneByKeypath(keypath, node, v, append: true)
 
     @currentPage = Utils.cloneByKeypath(keypath, node, @currentPage)
-    Utils.triggerEvent Plumlinks.EVENTS.LOAD, @currentPage
+    Utils.triggerEvent Bensonhurst.EVENTS.LOAD, @currentPage

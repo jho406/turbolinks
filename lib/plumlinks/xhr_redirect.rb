@@ -1,4 +1,4 @@
-module Plumlinks
+module Bensonhurst
   module XHRRedirect
     def call(env)
       status, headers, body = super(env)

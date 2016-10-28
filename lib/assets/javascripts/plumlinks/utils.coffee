@@ -45,7 +45,7 @@ popCookie = (name) ->
 
 requestMethodIsSafe = -> popCookie('request_method') in ['GET','']
 
-browserSupportsPlumlinks = ->
+browserSupportsBensonhurst = ->
   browserSupportsPushState() and !browserIsBuggy() and requestMethodIsSafe()
 
 intersection = (a, b) ->
@@ -138,7 +138,7 @@ cloneByKeypath = (path, leaf, obj, opts={}) ->
   merge: merge
   clone: clone
   withDefaults: withDefaults
-  browserSupportsPlumlinks: browserSupportsPlumlinks
+  browserSupportsBensonhurst: browserSupportsBensonhurst
   intersection: intersection
   triggerEvent: triggerEvent
 

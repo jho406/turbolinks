@@ -1,6 +1,6 @@
-module Plumlinks
+module Bensonhurst
   # Changes the response status to 403 Forbidden if all of these conditions are true:
-  # - The current request originated from Plumlinks
+  # - The current request originated from Bensonhurst
   # - The request is being redirected to a different domain
   module XDomainBlocker
     private

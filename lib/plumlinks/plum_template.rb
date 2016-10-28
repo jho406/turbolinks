@@ -3,9 +3,9 @@ require 'digest/md5'
 require 'action_view'
 require 'plumlinks/digestor'
 
-module Plumlinks
+module Bensonhurst
   class PlumTemplate < ::Jbuilder
-    include ::Plumlinks::PartialDigestor
+    include ::Bensonhurst::PartialDigestor
 
     class << self
       attr_accessor :template_lookup_options
@@ -15,7 +15,7 @@ module Plumlinks
 
     class Digest
       def initialize(digest)
-        @digest = "Plumlinks.cache(\"#{digest}\")"
+        @digest = "Bensonhurst.cache(\"#{digest}\")"
       end
 
       def to_json(*)
@@ -176,7 +176,7 @@ module Plumlinks
       end
 
       def _plumlinks_set_cache(key, value)
-        "Plumlinks.cache(\"#{key}\", #{_dump(value)});"
+        "Bensonhurst.cache(\"#{key}\", #{_dump(value)});"
       end
 
       def _plumlinks_return(results)
@@ -216,7 +216,7 @@ module Plumlinks
 
       def _render_partial_with_options(options)
         options.reverse_merge! locals: {}
-        options.reverse_merge! ::Plumlinks::PlumTemplate.template_lookup_options
+        options.reverse_merge! ::Bensonhurst::PlumTemplate.template_lookup_options
         as = options[:as]
 
         if options.key?(:collection)
@@ -309,7 +309,7 @@ module Plumlinks
 
     def self.call(template)
       # this juggling is required to keep line numbers right in the error
-      %{__already_defined = defined?(json); json||=::Plumlinks::PlumTemplate.new(self);#{template.source}
+      %{__already_defined = defined?(json); json||=::Bensonhurst::PlumTemplate.new(self);#{template.source}
         if !(__already_defined && __already_defined != "method")
         json.merge!({data: json.empty!})
           if defined?(plumlinks) && plumlinks
@@ -322,9 +322,9 @@ module Plumlinks
             json.csrf_token form_authenticity_token
           end
 
-          if ::Plumlinks.configuration.track_assets.any?
+          if ::Bensonhurst.configuration.track_assets.any?
             json.assets do
-              json.array! (::Plumlinks.configuration.track_assets || []).map{|assets|
+              json.array! (::Bensonhurst.configuration.track_assets || []).map{|assets|
                 asset_path(assets)
               }
             end

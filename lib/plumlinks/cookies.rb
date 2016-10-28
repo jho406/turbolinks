@@ -1,6 +1,6 @@
-module Plumlinks
+module Bensonhurst
   # For non-GET requests, sets a request_method cookie containing
-  # the request method of the current request. The Plumlinks script
+  # the request method of the current request. The Bensonhurst script
   # will not initialize if this cookie is set.
   module Cookies
     private

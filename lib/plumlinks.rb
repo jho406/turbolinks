@@ -10,7 +10,7 @@ require 'plumlinks/configuration'
 require 'plumlinks/plum_template'
 require 'plumlinks/digestor'
 
-module Plumlinks
+module Bensonhurst
   module Controller
     include XHRHeaders, Cookies, XDomainBlocker, Render, Helpers
 
@@ -58,7 +58,7 @@ module Plumlinks
       end
 
       ActiveSupport.on_load(:action_view) do
-        ActionView::Template.register_template_handler :plum, Plumlinks::KbuilderHandler
+        ActionView::Template.register_template_handler :plum, Bensonhurst::KbuilderHandler
         require 'plumlinks/dependency_tracker'
         require 'plumlinks/active_support'
 

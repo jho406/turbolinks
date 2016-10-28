@@ -1,4 +1,4 @@
-module Plumlinks
+module Bensonhurst
   module Generators
     class ViewGenerator < ::Rails::Generators::NamedBase
        desc <<-DESC
