@@ -8,14 +8,14 @@ class window.Remote
     @payload = ''
     @contentType = null
     @setRequestType(target)
-    @isAsync =  @getTGAttribute(target, 'bensonhurst-remote-async') || false
+    @isAsync =  @getBHAttribute(target, 'bensonhurst-remote-async') || false
     @httpUrl = target.getAttribute('href') || target.getAttribute('action')
-    @silent = @getTGAttribute(target, 'bensonhurst-silent') || false
+    @silent = @getBHAttribute(target, 'bensonhurst-silent') || false
     @setPayload(target)
 
   setRequestType: (target)=>
     if target.tagName == 'A'
-      @httpRequestType = @getTGAttribute(target, 'bensonhurst-remote')
+      @httpRequestType = @getBHAttribute(target, 'bensonhurst-remote')
       @httpRequestType ?= ''
       @httpRequestType = @httpRequestType.toUpperCase()
 
@@ -24,7 +24,7 @@ class window.Remote
 
     if target.tagName == 'FORM'
       formActionMethod = target.getAttribute('method')
-      @httpRequestType = formActionMethod || @getTGAttribute(target, 'bensonhurst-remote')
+      @httpRequestType = formActionMethod || @getBHAttribute(target, 'bensonhurst-remote')
       @httpRequestType ?= ''
       @httpRequestType = @httpRequestType.toUpperCase()
 
@@ -52,12 +52,12 @@ class window.Remote
     if @target.tagName != 'A'
       return false
 
-    @hasTGAttribute(@target, 'bensonhurst-remote')
+    @hasBHAttribute(@target, 'bensonhurst-remote')
 
   isValidForm: =>
     if @target.tagName != 'FORM'
       return false
-    @hasTGAttribute(@target, 'bensonhurst-remote') &&
+    @hasBHAttribute(@target, 'bensonhurst-remote') &&
     @target.getAttribute('action')?
 
   formAppend: (uriEncoded, key, value) ->
@@ -91,7 +91,7 @@ class window.Remote
   _enabledInputs: (form) ->
     selector = "input:not([type='reset']):not([type='button']):not([type='submit']):not([type='image']), select, textarea"
     inputs = Array::slice.call(form.querySelectorAll(selector))
-    disabledNodes = Array::slice.call(@querySelectorAllTGAttribute(form, 'bensonhurst-remote-noserialize'))
+    disabledNodes = Array::slice.call(@querySelectorAllBHAttribute(form, 'bensonhurst-remote-noserialize'))
 
     return inputs unless disabledNodes.length
 
@@ -110,17 +110,17 @@ class window.Remote
     else
       "data-bensonhurst-#{attr}"
 
-  getTGAttribute: (node, attr) ->
+  getBHAttribute: (node, attr) ->
     tgAttr = @tgAttribute(attr)
     (node.getAttribute(tgAttr) || node.getAttribute(attr))
 
-  querySelectorAllTGAttribute: (node, attr, value = null) ->
+  querySelectorAllBHAttribute: (node, attr, value = null) ->
     tgAttr = @tgAttribute(attr)
     if value
       node.querySelectorAll("[#{tgAttr}=#{value}], [#{attr}=#{value}]")
     else
       node.querySelectorAll("[#{tgAttr}], [#{attr}]")
 
-  hasTGAttribute: (node, attr) ->
+  hasBHAttribute: (node, attr) ->
     tgAttr = @tgAttribute(attr)
     node.getAttribute(tgAttr)? || node.getAttribute(attr)?
