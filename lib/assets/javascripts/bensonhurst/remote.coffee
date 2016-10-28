@@ -8,14 +8,14 @@ class window.Remote
     @payload = ''
     @contentType = null
     @setRequestType(target)
-    @isAsync =  @getBHAttribute(target, 'bensonhurst-remote-async') || false
+    @isAsync =  @getBHAttribute(target, 'bh-remote-async') || false
     @httpUrl = target.getAttribute('href') || target.getAttribute('action')
-    @silent = @getBHAttribute(target, 'bensonhurst-silent') || false
+    @silent = @getBHAttribute(target, 'bh-silent') || false
     @setPayload(target)
 
   setRequestType: (target)=>
     if target.tagName == 'A'
-      @httpRequestType = @getBHAttribute(target, 'bensonhurst-remote')
+      @httpRequestType = @getBHAttribute(target, 'bh-remote')
       @httpRequestType ?= ''
       @httpRequestType = @httpRequestType.toUpperCase()
 
@@ -24,7 +24,7 @@ class window.Remote
 
     if target.tagName == 'FORM'
       formActionMethod = target.getAttribute('method')
-      @httpRequestType = formActionMethod || @getBHAttribute(target, 'bensonhurst-remote')
+      @httpRequestType = formActionMethod || @getBHAttribute(target, 'bh-remote')
       @httpRequestType ?= ''
       @httpRequestType = @httpRequestType.toUpperCase()
 
@@ -52,12 +52,12 @@ class window.Remote
     if @target.tagName != 'A'
       return false
 
-    @hasBHAttribute(@target, 'bensonhurst-remote')
+    @hasBHAttribute(@target, 'bh-remote')
 
   isValidForm: =>
     if @target.tagName != 'FORM'
       return false
-    @hasBHAttribute(@target, 'bensonhurst-remote') &&
+    @hasBHAttribute(@target, 'bh-remote') &&
     @target.getAttribute('action')?
 
   formAppend: (uriEncoded, key, value) ->
@@ -91,7 +91,7 @@ class window.Remote
   _enabledInputs: (form) ->
     selector = "input:not([type='reset']):not([type='button']):not([type='submit']):not([type='image']), select, textarea"
     inputs = Array::slice.call(form.querySelectorAll(selector))
-    disabledNodes = Array::slice.call(@querySelectorAllBHAttribute(form, 'bensonhurst-remote-noserialize'))
+    disabledNodes = Array::slice.call(@querySelectorAllBHAttribute(form, 'bh-remote-noserialize'))
 
     return inputs unless disabledNodes.length
 
@@ -104,23 +104,23 @@ class window.Remote
       enabledInputs.push(input)
     enabledInputs
 
-  tgAttribute: (attr) ->
-    tgAttr = if attr[0...10] == 'bensonhurst-'
+  bhAttribute: (attr) ->
+    bhAttr = if attr[0...3] == 'bh-'
       "data-#{attr}"
     else
-      "data-bensonhurst-#{attr}"
+      "data-bh-#{attr}"
 
   getBHAttribute: (node, attr) ->
-    tgAttr = @tgAttribute(attr)
-    (node.getAttribute(tgAttr) || node.getAttribute(attr))
+    bhAttr = @bhAttribute(attr)
+    (node.getAttribute(bhAttr) || node.getAttribute(attr))
 
   querySelectorAllBHAttribute: (node, attr, value = null) ->
-    tgAttr = @tgAttribute(attr)
+    bhAttr = @bhAttribute(attr)
     if value
-      node.querySelectorAll("[#{tgAttr}=#{value}], [#{attr}=#{value}]")
+      node.querySelectorAll("[#{bhAttr}=#{value}], [#{attr}=#{value}]")
     else
-      node.querySelectorAll("[#{tgAttr}], [#{attr}]")
+      node.querySelectorAll("[#{bhAttr}], [#{attr}]")
 
   hasBHAttribute: (node, attr) ->
-    tgAttr = @tgAttribute(attr)
-    node.getAttribute(tgAttr)? || node.getAttribute(attr)?
+    bhAttr = @bhAttribute(attr)
+    node.getAttribute(bhAttr)? || node.getAttribute(attr)?
