@@ -25,6 +25,7 @@ module Plumlinks
 
       if base.respond_to?(:helper_method)
         base.helper_method :plumlinks_tag
+        base.helper_method :plumlinks_silient?
         base.helper_method :plumlinks_snippet
         base.helper_method :use_plumlinks_html
       end

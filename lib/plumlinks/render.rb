@@ -1,13 +1,5 @@
 module Plumlinks
   module Render
-    def redirect_to(args)
-      if request.headers["X-SILENT"]
-        head :ok
-      else
-        super
-      end
-    end
-
     def render(*args, &block)
       render_options = args.extract_options!
       plumlinks = render_options.delete(:plumlinks)

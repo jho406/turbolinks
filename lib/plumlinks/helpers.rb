@@ -15,5 +15,9 @@ module Plumlinks
     def use_plumlinks_html
       @_use_plumlinks_html = true
     end
+
+    def plumlinks_silient?
+      !!controller.request.headers["X-SILENT"]
+    end
   end
 end
