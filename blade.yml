@@ -6,12 +6,12 @@ load_paths:
 logical_paths:
   - sinon-1.17.5.js
   - sinon-qunit-1.0.0.js
-  - plumlinks.js
+  - bensonhurst.js
   - test.js
 
 build:
   logical_paths:
-    - plumlinks.js
+    - bensonhurst.js
   path: dist
   js_compressor: uglifier
 

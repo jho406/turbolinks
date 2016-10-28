@@ -43,5 +43,5 @@ if dependency_tracker
 
   ::Bensonhurst::DependencyTracker = Class.new(dependency_tracker::ERBTracker)
   ::Bensonhurst::DependencyTracker.send :include, ::Bensonhurst::BathTemplate::DependencyTrackerMethods
-  dependency_tracker.register_tracker :plum, ::Bensonhurst::DependencyTracker
+  dependency_tracker.register_tracker :bath, ::Bensonhurst::DependencyTracker
 end

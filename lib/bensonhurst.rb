@@ -7,7 +7,7 @@ require 'bensonhurst/x_domain_blocker'
 require 'bensonhurst/render'
 require 'bensonhurst/helpers'
 require 'bensonhurst/configuration'
-require 'bensonhurst/plum_template'
+require 'bensonhurst/bath_template'
 require 'bensonhurst/digestor'
 
 module Bensonhurst
@@ -58,7 +58,7 @@ module Bensonhurst
       end
 
       ActiveSupport.on_load(:action_view) do
-        ActionView::Template.register_template_handler :plum, Bensonhurst::KbuilderHandler
+        ActionView::Template.register_template_handler :bath, Bensonhurst::BathHandler
         require 'bensonhurst/dependency_tracker'
         require 'bensonhurst/active_support'
 

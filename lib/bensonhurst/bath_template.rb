@@ -11,7 +11,7 @@ module Bensonhurst
       attr_accessor :template_lookup_options
     end
 
-    self.template_lookup_options = { handlers: [:plum] }
+    self.template_lookup_options = { handlers: [:bath] }
 
     class Digest
       def initialize(digest)
@@ -303,7 +303,7 @@ module Bensonhurst
   end
 
 
-  class KbuilderHandler
+  class BathHandler
     cattr_accessor :default_format
     self.default_format = Mime[:js]
 

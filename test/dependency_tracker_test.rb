@@ -12,14 +12,14 @@ class FakeTemplate
 end
 
 
-class KbuilderDependencyTrackerTest < ActiveSupport::TestCase
+class BathDependencyTrackerTest < ActiveSupport::TestCase
   def make_tracker(name, source)
     template = FakeTemplate.new(source)
     Bensonhurst::DependencyTracker.new(name, template)
   end
 
   def track_dependencies(source)
-    make_tracker('plum_template', source).dependencies
+    make_tracker('bath_template', source).dependencies
   end
 
   test 'jbuilder direct partial! feature are not allowed' do

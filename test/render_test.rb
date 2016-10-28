@@ -4,7 +4,7 @@ class RenderController < TestController
   require 'action_view/testing/resolvers'
 
   append_view_path(ActionView::FixtureResolver.new(
-    'render/action.js.plum' => 'json.author "john smith"',
+    'render/action.js.bath' => 'json.author "john smith"',
     'render/action.html.erb' => 'john smith',
     'layouts/application.html.erb' => "<html><head><%=bensonhurst_tag%></head><body><%=yield%></body></html>"
   ))

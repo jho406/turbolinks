@@ -4,7 +4,7 @@ require "active_model"
 require "action_view"
 require "action_view/testing/resolvers"
 require "active_support/cache"
-require "bensonhurst/plum_template"
+require "bensonhurst/bath_template"
 require "rails/version"
 
 BLOG_POST_PARTIAL = <<-JBUILDER
@@ -34,21 +34,21 @@ blog_authors = [ "David Heinemeier Hansson", "Pavel Pravosud" ].cycle
 BLOG_POST_COLLECTION = Array.new(10){ |i| BlogPost.new(i+1, "post body #{i+1}", blog_authors.next) }
 COLLECTION_COLLECTION = Array.new(5){ |i| Collection.new(i+1, "collection #{i+1}") }
 
-ActionView::Template.register_template_handler :plum, Bensonhurst::KbuilderHandler
+ActionView::Template.register_template_handler :bath, Bensonhurst::BathHandler
 
 PARTIALS = {
-  "_partial.js.plum"  => "foo ||= 'hello'; json.content foo",
-  "_blog_post.js.plum" => BLOG_POST_PARTIAL,
-  "_profile.js.plum" => PROFILE_PARTIAL,
-  "_footer.js.plum" => FOOTER_PARTIAL,
-  "_collection.js.plum" => COLLECTION_PARTIAL
+  "_partial.js.bath"  => "foo ||= 'hello'; json.content foo",
+  "_blog_post.js.bath" => BLOG_POST_PARTIAL,
+  "_profile.js.bath" => PROFILE_PARTIAL,
+  "_footer.js.bath" => FOOTER_PARTIAL,
+  "_collection.js.bath" => COLLECTION_PARTIAL
 }
 
 def strip_format(str)
   str.strip_heredoc.gsub(/\n\s*/, "")
 end
 
-class PlumTemplateTest < ActionView::TestCase
+class BathTemplateTest < ActionView::TestCase
   setup do
     self.request_forgery = false
     Bensonhurst.configuration.track_assets = []
@@ -67,11 +67,11 @@ class PlumTemplateTest < ActionView::TestCase
   def jbuild(source)
     @rendered = []
     partials = PARTIALS.clone
-    partials["test.js.plum"] = source
+    partials["test.js.bath"] = source
     resolver = ActionView::FixtureResolver.new(partials)
     lookup_context.view_paths = [resolver]
     lookup_context.formats = [:js]
-    template = ActionView::Template.new(source, "test", Bensonhurst::KbuilderHandler, virtual_path: "test")
+    template = ActionView::Template.new(source, "test", Bensonhurst::BathHandler, virtual_path: "test")
     template.render(self, {}).strip
   end
 

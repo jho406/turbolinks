@@ -22,11 +22,11 @@ DESC
         actions.each do |action|
           @action = action
           @js_filename = (base_parts + [action]).map(&:camelcase).join
-          @content_path =  File.join(content_destination, "#{@action}.js.plum")
+          @content_path =  File.join(content_destination, "#{@action}.js.bath")
           @view_path = File.join(view_destination, "#{@js_filename}.js.jsx")
 
           template 'View.js.jsx', @view_path
-          template 'view.js.plum', @content_path
+          template 'view.js.bath', @content_path
         end
       end
 
