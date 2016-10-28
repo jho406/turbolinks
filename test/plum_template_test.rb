@@ -4,7 +4,7 @@ require "active_model"
 require "action_view"
 require "action_view/testing/resolvers"
 require "active_support/cache"
-require "plumlinks/plum_template"
+require "bensonhurst/plum_template"
 require "rails/version"
 
 BLOG_POST_PARTIAL = <<-JBUILDER
@@ -34,7 +34,7 @@ blog_authors = [ "David Heinemeier Hansson", "Pavel Pravosud" ].cycle
 BLOG_POST_COLLECTION = Array.new(10){ |i| BlogPost.new(i+1, "post body #{i+1}", blog_authors.next) }
 COLLECTION_COLLECTION = Array.new(5){ |i| Collection.new(i+1, "collection #{i+1}") }
 
-ActionView::Template.register_template_handler :plum, Plumlinks::KbuilderHandler
+ActionView::Template.register_template_handler :plum, Bensonhurst::KbuilderHandler
 
 PARTIALS = {
   "_partial.js.plum"  => "foo ||= 'hello'; json.content foo",
@@ -51,17 +51,17 @@ end
 class PlumTemplateTest < ActionView::TestCase
   setup do
     self.request_forgery = false
-    Plumlinks.configuration.track_assets = []
+    Bensonhurst.configuration.track_assets = []
 
     # this is a stub. Normally this would be set by the
     # controller locals
-    self.plumlinks = {}
+    self.bensonhurst = {}
 
     @context = self
     Rails.cache.clear
   end
 
-  cattr_accessor :request_forgery, :plumlinks
+  cattr_accessor :request_forgery, :bensonhurst
   self.request_forgery = false
 
   def jbuild(source)
@@ -71,7 +71,7 @@ class PlumTemplateTest < ActionView::TestCase
     resolver = ActionView::FixtureResolver.new(partials)
     lookup_context.view_paths = [resolver]
     lookup_context.formats = [:js]
-    template = ActionView::Template.new(source, "test", Plumlinks::KbuilderHandler, virtual_path: "test")
+    template = ActionView::Template.new(source, "test", Bensonhurst::KbuilderHandler, virtual_path: "test")
     template.render(self, {}).strip
   end
 
@@ -115,7 +115,7 @@ class PlumTemplateTest < ActionView::TestCase
   end
 
   test "render with asset tracking" do
-    Plumlinks.configuration.track_assets = ['test.js', 'test.css']
+    Bensonhurst.configuration.track_assets = ['test.js', 'test.css']
 
     result = jbuild(<<-TEMPLATE)
       json.content "hello"
@@ -149,9 +149,9 @@ class PlumTemplateTest < ActionView::TestCase
     assert_equal expected, result
   end
 
-  test "wrapping jbuilder contents inside Plumlinks with additional options" do
-    Plumlinks.configuration.track_assets = ['test.js', 'test.css']
-    self.plumlinks = { title: 'this is fun' }
+  test "wrapping jbuilder contents inside Bensonhurst with additional options" do
+    Bensonhurst.configuration.track_assets = ['test.js', 'test.css']
+    self.bensonhurst = { title: 'this is fun' }
 
     result = jbuild(<<-TEMPLATE)
       json.content "hello"
@@ -256,8 +256,8 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("#{cache_keys[0]}", {"email":"test@test.com"});
-        return ({"data":{"profile":Plumlinks.cache("#{cache_keys[0]}")}});
+        Bensonhurst.cache("#{cache_keys[0]}", {"email":"test@test.com"});
+        return ({"data":{"profile":Bensonhurst.cache("#{cache_keys[0]}")}});
       })()
     JS
 
@@ -299,9 +299,9 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("#{cache_keys[0]}", {"terms":"You agree"});
-        Plumlinks.cache("#{cache_keys[1]}", {"terms":"You agree"});
-        return ({"data":[Plumlinks.cache("#{cache_keys[0]}"),Plumlinks.cache("#{cache_keys[1]}")]});
+        Bensonhurst.cache("#{cache_keys[0]}", {"terms":"You agree"});
+        Bensonhurst.cache("#{cache_keys[1]}", {"terms":"You agree"});
+        return ({"data":[Bensonhurst.cache("#{cache_keys[0]}"),Bensonhurst.cache("#{cache_keys[1]}")]});
       })()
     JS
 
@@ -313,7 +313,7 @@ class PlumTemplateTest < ActionView::TestCase
   #   result = jbuild(<<-JBUILDER)
   #     json.collection collection: BLOG_POST_COLLECTION, partial: "collection", as: :collection
   #   JBUILDER
-  #   expected = "Plumlinks.replace([{\"id\":1,\"body\":\"post body 1\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":2,\"body\":\"post body 2\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}},{\"id\":3,\"body\":\"post body 3\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":4,\"body\":\"post body 4\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}},{\"id\":5,\"body\":\"post body 5\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":6,\"body\":\"post body 6\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}},{\"id\":7,\"body\":\"post body 7\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":8,\"body\":\"post body 8\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}},{\"id\":9,\"body\":\"post body 9\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":10,\"body\":\"post body 10\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}}]);"
+  #   expected = "Bensonhurst.replace([{\"id\":1,\"body\":\"post body 1\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":2,\"body\":\"post body 2\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}},{\"id\":3,\"body\":\"post body 3\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":4,\"body\":\"post body 4\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}},{\"id\":5,\"body\":\"post body 5\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":6,\"body\":\"post body 6\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}},{\"id\":7,\"body\":\"post body 7\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":8,\"body\":\"post body 8\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}},{\"id\":9,\"body\":\"post body 9\",\"author\":{\"first_name\":\"David\",\"last_name\":\"Heinemeier Hansson\"}},{\"id\":10,\"body\":\"post body 10\",\"author\":{\"first_name\":\"Pavel\",\"last_name\":\"Pravosud\"}}]);"
   #   assert_equal expected, result
   # end
   #
@@ -404,8 +404,8 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("#{cache_keys[0]}", 32);
-        return ({"data":{"hello":Plumlinks.cache("#{cache_keys[0]}")}});
+        Bensonhurst.cache("#{cache_keys[0]}", 32);
+        return ({"data":{"hello":Bensonhurst.cache("#{cache_keys[0]}")}});
       })()
     JS
 
@@ -425,9 +425,9 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("#{cache_keys[0]}", {"top":"hello4"});
-        Plumlinks.cache("#{cache_keys[1]}", {"top":"hello5"});
-        return ({"data":{"hello":[Plumlinks.cache("#{cache_keys[0]}"),Plumlinks.cache("#{cache_keys[1]}")]}});
+        Bensonhurst.cache("#{cache_keys[0]}", {"top":"hello4"});
+        Bensonhurst.cache("#{cache_keys[1]}", {"top":"hello5"});
+        return ({"data":{"hello":[Bensonhurst.cache("#{cache_keys[0]}"),Bensonhurst.cache("#{cache_keys[1]}")]}});
       })()
     JS
 
@@ -451,11 +451,11 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("#{cache_keys[0]}", {"top":"hello"});
-        Plumlinks.cache("#{cache_keys[1]}", {"top":"hello"});
-        Plumlinks.cache("#{cache_keys[2]}", {"bottom":"hello"});
-        Plumlinks.cache("#{cache_keys[3]}", {"bottom":"hello"});
-        return ({"data":{"hello":[Plumlinks.cache("#{cache_keys[0]}"),Plumlinks.cache("#{cache_keys[1]}"),3,4,Plumlinks.cache("#{cache_keys[2]}"),Plumlinks.cache("#{cache_keys[3]}")]}});
+        Bensonhurst.cache("#{cache_keys[0]}", {"top":"hello"});
+        Bensonhurst.cache("#{cache_keys[1]}", {"top":"hello"});
+        Bensonhurst.cache("#{cache_keys[2]}", {"bottom":"hello"});
+        Bensonhurst.cache("#{cache_keys[3]}", {"bottom":"hello"});
+        return ({"data":{"hello":[Bensonhurst.cache("#{cache_keys[0]}"),Bensonhurst.cache("#{cache_keys[1]}"),3,4,Bensonhurst.cache("#{cache_keys[2]}"),Bensonhurst.cache("#{cache_keys[3]}")]}});
       })()
     JS
 
@@ -478,10 +478,10 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("#{cache_keys[0]}", {"subcontent":"inner"});
-        Plumlinks.cache("#{cache_keys[1]}", {"subcontent":"other"});
-        Plumlinks.cache("#{cache_keys[2]}", {"content":Plumlinks.cache("#{cache_keys[0]}"),"other":Plumlinks.cache("#{cache_keys[1]}")});
-        return ({"data":{"hello":Plumlinks.cache("#{cache_keys[2]}")}});
+        Bensonhurst.cache("#{cache_keys[0]}", {"subcontent":"inner"});
+        Bensonhurst.cache("#{cache_keys[1]}", {"subcontent":"other"});
+        Bensonhurst.cache("#{cache_keys[2]}", {"content":Bensonhurst.cache("#{cache_keys[0]}"),"other":Bensonhurst.cache("#{cache_keys[1]}")});
+        return ({"data":{"hello":Bensonhurst.cache("#{cache_keys[2]}")}});
       })()
     JS
 
@@ -523,8 +523,8 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("#{cache_keys[0]}", {"content":"hello"});
-        return ({"data":{"comments":[Plumlinks.cache("#{cache_keys[0]}"),{"content":"world"}]}});
+        Bensonhurst.cache("#{cache_keys[0]}", {"content":"hello"});
+        return ({"data":{"comments":[Bensonhurst.cache("#{cache_keys[0]}"),{"content":"world"}]}});
       })()
     JS
 
@@ -548,8 +548,8 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("#{cache_keys[0]}", {"name":"Cache"});
-        return ({"data":{"post":Plumlinks.cache("#{cache_keys[0]}")}});
+        Bensonhurst.cache("#{cache_keys[0]}", {"name":"Cache"});
+        return ({"data":{"post":Bensonhurst.cache("#{cache_keys[0]}")}});
       })()
     JS
 
@@ -567,8 +567,8 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("#{cache_keys[0]}", ["a","b","c"]);
-        return ({"data":{"content":Plumlinks.cache("#{cache_keys[0]}")}});
+        Bensonhurst.cache("#{cache_keys[0]}", ["a","b","c"]);
+        return ({"data":{"content":Bensonhurst.cache("#{cache_keys[0]}")}});
       })()
     JS
 
@@ -643,8 +643,8 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("#{cache_keys[0]}", {"id":1,"body":"post body 1","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        return ({"data":{"post":Plumlinks.cache("#{cache_keys[0]}")}});
+        Bensonhurst.cache("#{cache_keys[0]}", {"id":1,"body":"post body 1","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        return ({"data":{"post":Bensonhurst.cache("#{cache_keys[0]}")}});
       })()
     JS
 
@@ -665,8 +665,8 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("#{cache_keys[0]}", {"id":1,"body":"hit","author":{"first_name":"John","last_name":"Smith"}});
-        return ({"data":{"post":Plumlinks.cache("#{cache_keys[0]}")}});
+        Bensonhurst.cache("#{cache_keys[0]}", {"id":1,"body":"hit","author":{"first_name":"John","last_name":"Smith"}});
+        return ({"data":{"post":Bensonhurst.cache("#{cache_keys[0]}")}});
       })()
     JS
 
@@ -682,17 +682,17 @@ class PlumTemplateTest < ActionView::TestCase
 
     expected = strip_format(<<-JS)
       (function(){
-        Plumlinks.cache("#{cache_keys[0]}", {"id":1,"body":"post body 1","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Plumlinks.cache("#{cache_keys[1]}", {"id":2,"body":"post body 2","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        Plumlinks.cache("#{cache_keys[2]}", {"id":3,"body":"post body 3","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Plumlinks.cache("#{cache_keys[3]}", {"id":4,"body":"post body 4","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        Plumlinks.cache("#{cache_keys[4]}", {"id":5,"body":"post body 5","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Plumlinks.cache("#{cache_keys[5]}", {"id":6,"body":"post body 6","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        Plumlinks.cache("#{cache_keys[6]}", {"id":7,"body":"post body 7","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Plumlinks.cache("#{cache_keys[7]}", {"id":8,"body":"post body 8","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        Plumlinks.cache("#{cache_keys[8]}", {"id":9,"body":"post body 9","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
-        Plumlinks.cache("#{cache_keys[9]}", {"id":10,"body":"post body 10","author":{"first_name":"Pavel","last_name":"Pravosud"}});
-        return ({"data":[Plumlinks.cache("#{cache_keys[0]}"),Plumlinks.cache("#{cache_keys[1]}"),Plumlinks.cache("#{cache_keys[2]}"),Plumlinks.cache("#{cache_keys[3]}"),Plumlinks.cache("#{cache_keys[4]}"),Plumlinks.cache("#{cache_keys[5]}"),Plumlinks.cache("#{cache_keys[6]}"),Plumlinks.cache("#{cache_keys[7]}"),Plumlinks.cache("#{cache_keys[8]}"),Plumlinks.cache("#{cache_keys[9]}")]});
+        Bensonhurst.cache("#{cache_keys[0]}", {"id":1,"body":"post body 1","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Bensonhurst.cache("#{cache_keys[1]}", {"id":2,"body":"post body 2","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        Bensonhurst.cache("#{cache_keys[2]}", {"id":3,"body":"post body 3","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Bensonhurst.cache("#{cache_keys[3]}", {"id":4,"body":"post body 4","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        Bensonhurst.cache("#{cache_keys[4]}", {"id":5,"body":"post body 5","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Bensonhurst.cache("#{cache_keys[5]}", {"id":6,"body":"post body 6","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        Bensonhurst.cache("#{cache_keys[6]}", {"id":7,"body":"post body 7","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Bensonhurst.cache("#{cache_keys[7]}", {"id":8,"body":"post body 8","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        Bensonhurst.cache("#{cache_keys[8]}", {"id":9,"body":"post body 9","author":{"first_name":"David","last_name":"Heinemeier Hansson"}});
+        Bensonhurst.cache("#{cache_keys[9]}", {"id":10,"body":"post body 10","author":{"first_name":"Pavel","last_name":"Pravosud"}});
+        return ({"data":[Bensonhurst.cache("#{cache_keys[0]}"),Bensonhurst.cache("#{cache_keys[1]}"),Bensonhurst.cache("#{cache_keys[2]}"),Bensonhurst.cache("#{cache_keys[3]}"),Bensonhurst.cache("#{cache_keys[4]}"),Bensonhurst.cache("#{cache_keys[5]}"),Bensonhurst.cache("#{cache_keys[6]}"),Bensonhurst.cache("#{cache_keys[7]}"),Bensonhurst.cache("#{cache_keys[8]}"),Bensonhurst.cache("#{cache_keys[9]}")]});
       })()
     JS
 

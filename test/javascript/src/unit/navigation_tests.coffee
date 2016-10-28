@@ -3,38 +3,38 @@ QUnit.module "Navigation"
 testWithSession "a successful visit", (assert) ->
   done = assert.async()
 
-  plumlinksClickFired = requestFinished = requestStared = false
-  @document.addEventListener 'plumlinks:click', =>
+  bensonhurstClickFired = requestFinished = requestStared = false
+  @document.addEventListener 'bensonhurst:click', =>
     assert.equal @$('meta[name="csrf-token"]').getAttribute('content'), 'token'
-    plumlinksClickFired = true
+    bensonhurstClickFired = true
 
-  @document.addEventListener 'plumlinks:request-start', =>
+  @document.addEventListener 'bensonhurst:request-start', =>
     requestStared = true
 
-  @document.addEventListener 'plumlinks:request-end', =>
-    state = plumlinks: true, url: "#{location.protocol}//#{location.host}/fixtures/session"
+  @document.addEventListener 'bensonhurst:request-end', =>
+    state = bensonhurst: true, url: "#{location.protocol}//#{location.host}/fixtures/session"
     assert.propEqual @history.state, state
-    assert.ok plumlinksClickFired
+    assert.ok bensonhurstClickFired
     assert.ok requestStared
     requestFinished = true
 
-  @document.addEventListener 'plumlinks:load', (event) =>
+  @document.addEventListener 'bensonhurst:load', (event) =>
     assert.ok requestFinished
     assert.propEqual event.data.data, { heading: "Some heading 2" }
-    state = plumlinks: true, url: "#{location.protocol}//#{location.host}/fixtures/success"
+    state = bensonhurst: true, url: "#{location.protocol}//#{location.host}/fixtures/success"
     assert.propEqual @history.state, state
     assert.equal @location.href, state.url
     assert.equal @$('meta[name="csrf-token"]').getAttribute('content'), 'token'
     done()
 
-  @Plumlinks.visit('success')
+  @Bensonhurst.visit('success')
 
 testWithSession "asset refresh", (assert) ->
   done = assert.async()
   @window.addEventListener 'unload', =>
     assert.ok true
     done()
-  @Plumlinks.visit('success_with_new_assets')
+  @Bensonhurst.visit('success_with_new_assets')
 
 testWithSession "error fallback", (assert) ->
   done = assert.async()
@@ -49,7 +49,7 @@ testWithSession "error fallback", (assert) ->
         throw e unless /denied/.test(e.message) # IE
       done()
     , 0
-  @Plumlinks.visit('/does_not_exist')
+  @Bensonhurst.visit('/does_not_exist')
 
 
 testWithSession "with different-origin URL, forces a normal redirection", (assert) ->
@@ -57,18 +57,18 @@ testWithSession "with different-origin URL, forces a normal redirection", (asser
   @window.addEventListener 'unload', =>
     assert.ok true
     done()
-  @Plumlinks.visit("http://example.com")
+  @Bensonhurst.visit("http://example.com")
 
 testWithSession "calling preventDefault on the before-change event cancels the visit", (assert) ->
   done = assert.async()
-  @document.addEventListener 'plumlinks:click', (event) ->
+  @document.addEventListener 'bensonhurst:click', (event) ->
     event.preventDefault()
     assert.ok true
     setTimeout (-> done?()), 0
-  @document.addEventListener 'plumlinks:request-start', =>
+  @document.addEventListener 'bensonhurst:request-start', =>
     done new Error("visit wasn't cancelled")
     done = null
-  @Plumlinks.visit('success')
+  @Bensonhurst.visit('success')
 
 testWithSession "doesn't pushState when URL is the same", (assert) ->
   done = assert.async()
@@ -76,18 +76,18 @@ testWithSession "doesn't pushState when URL is the same", (assert) ->
   @history.pushState({}, "", "session");
 
   load = 0
-  @document.addEventListener 'plumlinks:load', =>
+  @document.addEventListener 'bensonhurst:load', =>
     load += 1
     if load is 1
       assert.equal @history.length, @originalHistoryLength
-      setTimeout (=> @Plumlinks.visit('session#test')), 0
+      setTimeout (=> @Bensonhurst.visit('session#test')), 0
     else if load is 2
       setTimeout (=>
         assert.equal @history.length, @originalHistoryLength + 1
         done()
       ), 0
   @originalHistoryLength = @history.length
-  @Plumlinks.visit('session')
+  @Bensonhurst.visit('session')
 
 testWithSession "with #anchor and history.back()", (assert) ->
   done = assert.async()
@@ -96,33 +96,33 @@ testWithSession "with #anchor and history.back()", (assert) ->
 
   @window.addEventListener 'hashchange', =>
     hashchange += 1
-  @document.addEventListener 'plumlinks:load', =>
+  @document.addEventListener 'bensonhurst:load', =>
     load += 1
     if load is 1
       assert.equal hashchange, 1
       setTimeout (=> @history.back()), 0
-  @document.addEventListener 'plumlinks:restore', =>
+  @document.addEventListener 'bensonhurst:restore', =>
     assert.equal hashchange, 1
     done()
   @location.href = "#{@location.href}#change"
-  setTimeout (=> @Plumlinks.visit('success#permanent')), 0
+  setTimeout (=> @Bensonhurst.visit('success#permanent')), 0
 
-testWithSession "js responses with Plumlinks.cache caches correctly", (assert) ->
+testWithSession "js responses with Bensonhurst.cache caches correctly", (assert) ->
   done = assert.async()
-  @window.addEventListener 'plumlinks:load', (event) =>
+  @window.addEventListener 'bensonhurst:load', (event) =>
     assert.equal(event.data.data.footer, 'some cached content')
-    assert.equal(@Plumlinks.cache('cachekey'), 'some cached content')
+    assert.equal(@Bensonhurst.cache('cachekey'), 'some cached content')
     done()
-  @Plumlinks.visit('success_with_russian_doll')
+  @Bensonhurst.visit('success_with_russian_doll')
 
 testWithSession "the async option allows request to run seperate from the main XHR", (assert) ->
   done = assert.async()
-  @document.addEventListener 'plumlinks:load', =>
+  @document.addEventListener 'bensonhurst:load', =>
     console.log('hi')
-    assert.equal @Plumlinks.controller.http, null
+    assert.equal @Bensonhurst.controller.http, null
     done()
 
-  @Plumlinks.visit('session', isAsync: true)
+  @Bensonhurst.visit('session', isAsync: true)
 
 testWithSession "the async options will use a parallel queue that onloads in order", (assert) ->
   done = assert.async()
@@ -143,15 +143,15 @@ testWithSession "the async options will use a parallel queue that onloads in ord
   xhr.onCreate = (xhr) ->
     requests.push(xhr)
 
-  @Plumlinks.visit('/', isAsync: true)
-  @Plumlinks.visit('/', isAsync: true)
-  assert.equal @Plumlinks.controller.pq.dll.length, 2
+  @Bensonhurst.visit('/', isAsync: true)
+  @Bensonhurst.visit('/', isAsync: true)
+  assert.equal @Bensonhurst.controller.pq.dll.length, 2
   requests[1].respond(200, { "Content-Type": "application/javascript" }, response)
 
-  assert.equal @Plumlinks.controller.pq.dll.length, 2
+  assert.equal @Bensonhurst.controller.pq.dll.length, 2
   requests[0].respond(200, { "Content-Type": "application/javascript" }, response)
 
-  assert.equal @Plumlinks.controller.pq.dll.length, 0
+  assert.equal @Bensonhurst.controller.pq.dll.length, 0
   done()
 
 testWithSession "the async options will use a parallel queue that onloads in order 2", (assert) ->
@@ -172,15 +172,15 @@ testWithSession "the async options will use a parallel queue that onloads in ord
   xhr.onCreate = (xhr) ->
     requests.push(xhr)
 
-  @Plumlinks.visit('/', isAsync: true)
-  @Plumlinks.visit('/', isAsync: true)
-  assert.equal @Plumlinks.controller.pq.dll.length, 2
+  @Bensonhurst.visit('/', isAsync: true)
+  @Bensonhurst.visit('/', isAsync: true)
+  assert.equal @Bensonhurst.controller.pq.dll.length, 2
   requests[0].respond(200, { "Content-Type": "application/javascript" }, response)
 
-  assert.equal @Plumlinks.controller.pq.dll.length, 1
+  assert.equal @Bensonhurst.controller.pq.dll.length, 1
   requests[1].respond(200, { "Content-Type": "application/javascript" }, response)
 
-  assert.equal @Plumlinks.controller.pq.dll.length, 0
+  assert.equal @Bensonhurst.controller.pq.dll.length, 0
   done()
 
 

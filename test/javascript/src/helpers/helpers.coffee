@@ -13,10 +13,10 @@
 
       @window = iframe.contentWindow
       @document = @window.document
-      @Plumlinks = @window.Plumlinks
+      @Bensonhurst = @window.Bensonhurst
       @location = @window.location
       @history = @window.history
-      @Plumlinks.disableRequestCaching()
+      @Bensonhurst.disableRequestCaching()
       @$ = (selector) => @document.querySelector(selector)
 
       start()

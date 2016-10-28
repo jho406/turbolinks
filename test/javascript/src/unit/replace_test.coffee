@@ -11,12 +11,12 @@ testWithSession "replacing current state", (assert) ->
 
   assert.equal @$('meta[name="csrf-token"]').getAttribute('content'), 'token'
   assert.equal @document.title, 'title'
-  @document.addEventListener 'plumlinks:load', (event) =>
+  @document.addEventListener 'bensonhurst:load', (event) =>
     assert.equal @document.title, 'new title'
     assert.equal @$('meta[name="csrf-token"]').getAttribute('content'), 'new-token'
     assert.propEqual event.data.data, { heading: "some data" } # body is replaced
     done()
-  @Plumlinks.replace(doc)
+  @Bensonhurst.replace(doc)
 
 testWithSession "with :title set to a value replaces the title with the value", (assert) ->
   done = assert.async()
@@ -27,10 +27,10 @@ testWithSession "with :title set to a value replaces the title with the value", 
     assets: ['application-123.js', 'application-123.js']
 
   body = @$('body')
-  @document.addEventListener 'plumlinks:load', (event) =>
+  @document.addEventListener 'bensonhurst:load', (event) =>
     assert.equal @document.title, 'specified title'
     done()
-  @Plumlinks.replace(doc, title: 'specified title')
+  @Bensonhurst.replace(doc, title: 'specified title')
 
 testWithSession "with :title set to false doesn't replace the title", (assert) ->
   done = assert.async()
@@ -40,10 +40,10 @@ testWithSession "with :title set to false doesn't replace the title", (assert) -
     csrf_token: 'new-token'
     assets: ['application-123.js', 'application-123.js']
 
-  @document.addEventListener 'plumlinks:load', (event) =>
+  @document.addEventListener 'bensonhurst:load', (event) =>
     assert.equal @document.title, 'title'
     done()
-  @Plumlinks.replace(doc, title: false)
+  @Bensonhurst.replace(doc, title: false)
 
 testWithSession "with different assets refreshes the page", (assert) ->
   done = assert.async()
@@ -56,4 +56,4 @@ testWithSession "with different assets refreshes the page", (assert) ->
   @window.addEventListener 'unload', =>
     assert.ok true
     done()
-  @Plumlinks.replace(doc, title: 'specified title')
+  @Bensonhurst.replace(doc, title: 'specified title')

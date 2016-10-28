@@ -2,7 +2,7 @@ require 'rails'
 require 'abstract_controller'
 require 'abstract_controller/railties/routes_helpers'
 require 'action_controller'
-require 'plumlinks'
+require 'bensonhurst'
 require "active_support"
 
 require 'active_support/testing/autorun' if Rails.version >= '4'
@@ -16,13 +16,13 @@ if !defined? TestApplication
     config.secret_token = Digest::SHA1.hexdigest(Time.now.to_s)
     config.secret_key_base = SecureRandom.hex
     config.eager_load = false
-    config.plumlinks.auto_include = false
+    config.bensonhurst.auto_include = false
 
     initialize!
 
     routes.draw do
-      get 'redirect_path', to: redirect('/plumlinks/simple_action')
-      get 'redirect_hash', to: redirect(path: '/plumlinks/simple_action')
+      get 'redirect_path', to: redirect('/bensonhurst/simple_action')
+      get 'redirect_hash', to: redirect(path: '/bensonhurst/simple_action')
       get ':controller(/:action)'
     end
   end
@@ -35,7 +35,7 @@ if !defined? TestApplication
 
   class TestController < ActionController::Base
     extend AbstractController::Railties::RoutesHelpers.with(TestApplication.routes)
-    include Plumlinks::Controller
+    include Bensonhurst::Controller
   end
 
   module ActionController

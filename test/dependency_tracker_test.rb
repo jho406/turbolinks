@@ -1,7 +1,7 @@
 # taken from jbuilder's jbuilder_dependency_tracker_test.rb
 
 require_relative 'test_helper'
-require 'plumlinks/dependency_tracker'
+require 'bensonhurst/dependency_tracker'
 
 
 class FakeTemplate
@@ -15,7 +15,7 @@ end
 class KbuilderDependencyTrackerTest < ActiveSupport::TestCase
   def make_tracker(name, source)
     template = FakeTemplate.new(source)
-    Plumlinks::DependencyTracker.new(name, template)
+    Bensonhurst::DependencyTracker.new(name, template)
   end
 
   def track_dependencies(source)

@@ -1,8 +1,8 @@
 require_relative 'test_helper'
 
-class PlumlinksController < TestController
+class BensonhurstController < TestController
   before_action do
-    @_use_plumlinks_html = false
+    @_use_bensonhurst_html = false
   end
 
   def simple_action
@@ -34,8 +34,8 @@ class PlumlinksController < TestController
   end
 end
 
-class PlumlinksTest < ActionController::TestCase
-  tests PlumlinksController
+class BensonhurstTest < ActionController::TestCase
+  tests BensonhurstController
 
   test "request referer returns xhr referer or standard referer" do
     @request.env['HTTP_REFERER'] = 'referer'
@@ -76,7 +76,7 @@ class PlumlinksTest < ActionController::TestCase
     assert_nil cookies[:request_method]
   end
 
-  test "sets xhr redirected to header on redirect requests coming from plumlinks" do
+  test "sets xhr redirected to header on redirect requests coming from bensonhurst" do
     get :redirect_to_same_origin
     get :simple_action
     assert_nil @response.headers['X-XHR-Redirected-To']
@@ -88,7 +88,7 @@ class PlumlinksTest < ActionController::TestCase
     assert_equal 'http://test.host/path', @response.headers['X-XHR-Redirected-To']
   end
 
-  test "changes status to 403 on plumlinks requests redirecting to different origin" do
+  test "changes status to 403 on bensonhurst requests redirecting to different origin" do
     get :redirect_to_different_host
     assert_response :redirect
 
@@ -126,12 +126,12 @@ class PlumlinksTest < ActionController::TestCase
   end
 end
 
-class PlumlinksIntegrationTest < ActionDispatch::IntegrationTest
+class BensonhurstIntegrationTest < ActionDispatch::IntegrationTest
   setup do
     @session = open_session
   end
 
-  test "sets xhr redirected to header on redirect requests coming from plumlinks" do
+  test "sets xhr redirected to header on redirect requests coming from bensonhurst" do
     get '/redirect_hash'
     get response.location
     assert_nil response.headers['X-XHR-Redirected-To']
@@ -141,7 +141,7 @@ class PlumlinksIntegrationTest < ActionDispatch::IntegrationTest
     assert_nil response.headers['X-XHR-Redirected-To']
 
     get response.location, headers: { 'HTTP_X_XHR_REFERER' => nil }
-    assert_equal 'http://www.example.com/plumlinks/simple_action', response.headers['X-XHR-Redirected-To']
+    assert_equal 'http://www.example.com/bensonhurst/simple_action', response.headers['X-XHR-Redirected-To']
     assert_response :ok
 
     get '/redirect_path', headers: { 'HTTP_X_XHR_REFERER' => 'http://www.example.com/' }
@@ -149,7 +149,7 @@ class PlumlinksIntegrationTest < ActionDispatch::IntegrationTest
     assert_nil response.headers['X-XHR-Redirected-To']
 
     get response.location, headers: { 'HTTP_X_XHR_REFERER' => nil }
-    assert_equal 'http://www.example.com/plumlinks/simple_action', response.headers['X-XHR-Redirected-To']
+    assert_equal 'http://www.example.com/bensonhurst/simple_action', response.headers['X-XHR-Redirected-To']
     assert_response :ok
   end
 end

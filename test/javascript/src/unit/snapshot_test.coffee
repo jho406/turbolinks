@@ -4,44 +4,44 @@ testWithSession "without transition cache", (assert) ->
   done = assert.async()
   load = 0
   restoreCalled = false
-  @document.addEventListener 'plumlinks:load', =>
+  @document.addEventListener 'bensonhurst:load', =>
     load += 1
     console.log(load)
     if load is 1
       assert.equal @document.title, 'title 2'
       setTimeout (=>
         console.log('here')
-        @Plumlinks.visit('session')), 0
+        @Bensonhurst.visit('session')), 0
     else if load is 2
       assert.notOk restoreCalled
       assert.equal @document.title, 'title'
       location = @window.location
-      state = plumlinks: true, url: "#{location.protocol}//#{location.host}/fixtures/session"
+      state = bensonhurst: true, url: "#{location.protocol}//#{location.host}/fixtures/session"
       assert.propEqual @history.state, state
       done()
-  @document.addEventListener 'plumlinks:restore', =>
+  @document.addEventListener 'bensonhurst:restore', =>
     restoreCalled = true
-  @Plumlinks.visit('success')
+  @Bensonhurst.visit('success')
 
 testWithSession "with same URL, skips transition cache", (assert) ->
   done = assert.async()
   restoreCalled = false
-  @document.addEventListener 'plumlinks:restore', =>
+  @document.addEventListener 'bensonhurst:restore', =>
     restoreCalled = true
-  @document.addEventListener 'plumlinks:load', =>
+  @document.addEventListener 'bensonhurst:load', =>
     assert.notOk restoreCalled
     done()
-  @Plumlinks.enableTransitionCache()
-  @Plumlinks.visit('session')
+  @Bensonhurst.enableTransitionCache()
+  @Bensonhurst.visit('session')
 
 testWithSession "history.back() cache hit", (assert) ->
   done = assert.async()
   change = 0
   fetchCalled = false
-  @document.addEventListener 'plumlinks:load', =>
+  @document.addEventListener 'bensonhurst:load', =>
     change += 1
     if change is 1
-      @document.addEventListener 'plumlinks:request-start', -> fetchCalled = true
+      @document.addEventListener 'bensonhurst:request-start', -> fetchCalled = true
       assert.equal @document.title, 'title 2'
       setTimeout =>
         @history.back()
@@ -50,17 +50,17 @@ testWithSession "history.back() cache hit", (assert) ->
       assert.notOk fetchCalled
       assert.equal @document.title, 'title'
       done()
-  @Plumlinks.visit('success')
+  @Bensonhurst.visit('success')
 
 testWithSession "history.back() cache miss", (assert) ->
   done = assert.async()
   change = 0
   restoreCalled = false
 
-  @document.addEventListener 'plumlinks:restore', =>
+  @document.addEventListener 'bensonhurst:restore', =>
     restoreCalled = true
 
-  @document.addEventListener 'plumlinks:load', =>
+  @document.addEventListener 'bensonhurst:load', =>
     change += 1
     if change is 1
       assert.equal @document.title, 'title 2'
@@ -71,5 +71,5 @@ testWithSession "history.back() cache miss", (assert) ->
       assert.equal @document.title, 'title'
       assert.equal restoreCalled, false
       done()
-  @Plumlinks.pagesCached(0)
-  @Plumlinks.visit('success')
+  @Bensonhurst.pagesCached(0)
+  @Bensonhurst.visit('success')

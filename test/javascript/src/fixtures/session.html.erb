@@ -5,13 +5,13 @@
   <title>title</title>
   <meta content="authenticity_token" name="csrf-param">
   <meta content="token" name="csrf-token">
-  <script src="/plumlinks.js"></script>
+  <script src="/bensonhurst.js"></script>
   <style>
     html { overflow: scroll; }
     body:before { content: ''; display: block; width: 1000px; height: 1000px; }
   </style>
   <script>
-    Plumlinks.replace(
+    Bensonhurst.replace(
       <%= File.read(File.join(File.expand_path(File.dirname(__FILE__)),'session.js')) %>
       );
   </script>
