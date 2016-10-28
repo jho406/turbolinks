@@ -4,7 +4,7 @@ require 'action_view'
 require 'bensonhurst/digestor'
 
 module Bensonhurst
-  class PlumTemplate < ::Jbuilder
+  class BathTemplate < ::Jbuilder
     include ::Bensonhurst::PartialDigestor
 
     class << self
@@ -216,7 +216,7 @@ module Bensonhurst
 
       def _render_partial_with_options(options)
         options.reverse_merge! locals: {}
-        options.reverse_merge! ::Bensonhurst::PlumTemplate.template_lookup_options
+        options.reverse_merge! ::Bensonhurst::BathTemplate.template_lookup_options
         as = options[:as]
 
         if options.key?(:collection)
@@ -309,7 +309,7 @@ module Bensonhurst
 
     def self.call(template)
       # this juggling is required to keep line numbers right in the error
-      %{__already_defined = defined?(json); json||=::Bensonhurst::PlumTemplate.new(self);#{template.source}
+      %{__already_defined = defined?(json); json||=::Bensonhurst::BathTemplate.new(self);#{template.source}
         if !(__already_defined && __already_defined != "method")
         json.merge!({data: json.empty!})
           if defined?(bensonhurst) && bensonhurst

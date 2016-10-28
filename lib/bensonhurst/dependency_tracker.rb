@@ -15,7 +15,7 @@ rescue LoadError
 end
 
 if dependency_tracker
-  class Bensonhurst::PlumTemplate
+  class Bensonhurst::BathTemplate
     module DependencyTrackerMethods
       # Matches:
       #   json.partial! partial: "comments/comment"
@@ -42,6 +42,6 @@ if dependency_tracker
   end
 
   ::Bensonhurst::DependencyTracker = Class.new(dependency_tracker::ERBTracker)
-  ::Bensonhurst::DependencyTracker.send :include, ::Bensonhurst::PlumTemplate::DependencyTrackerMethods
+  ::Bensonhurst::DependencyTracker.send :include, ::Bensonhurst::BathTemplate::DependencyTrackerMethods
   dependency_tracker.register_tracker :plum, ::Bensonhurst::DependencyTracker
 end
