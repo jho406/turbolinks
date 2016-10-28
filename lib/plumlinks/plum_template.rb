@@ -1,7 +1,7 @@
 require 'jbuilder'
 require 'digest/md5'
 require 'action_view'
-require 'plumlinks/digestor'
+require 'bensonhurst/digestor'
 
 module Bensonhurst
   class PlumTemplate < ::Jbuilder
@@ -114,7 +114,7 @@ module Bensonhurst
     end
 
     def target!
-      js = _plumlinks_return(@attributes)
+      js = _bensonhurst_return(@attributes)
       @js.push(js)
       "(function(){#{@js.join}})()"
     end
@@ -156,7 +156,7 @@ module Bensonhurst
           ::Rails.cache.fetch(key, options) do
             result = yield self
             if result !=BLANK
-              @js << _plumlinks_set_cache(key, result)
+              @js << _bensonhurst_set_cache(key, result)
               @js.join
             else
               BLANK
@@ -175,11 +175,11 @@ module Bensonhurst
         end
       end
 
-      def _plumlinks_set_cache(key, value)
+      def _bensonhurst_set_cache(key, value)
         "Bensonhurst.cache(\"#{key}\", #{_dump(value)});"
       end
 
-      def _plumlinks_return(results)
+      def _bensonhurst_return(results)
         "return (#{_dump(results)});"
       end
 
@@ -312,8 +312,8 @@ module Bensonhurst
       %{__already_defined = defined?(json); json||=::Bensonhurst::PlumTemplate.new(self);#{template.source}
         if !(__already_defined && __already_defined != "method")
         json.merge!({data: json.empty!})
-          if defined?(plumlinks) && plumlinks
-            plumlinks.each do |k, v|
+          if defined?(bensonhurst) && bensonhurst
+            bensonhurst.each do |k, v|
               json.set! k, v
             end
           end

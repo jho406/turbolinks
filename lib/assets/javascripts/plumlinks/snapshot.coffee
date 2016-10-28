@@ -7,7 +7,7 @@ class window.Snapshot
     @loadedAssets= null
 
   onHistoryChange: (event) =>
-    if event.state?.plumlinks && event.state.url != @currentBrowserState.url
+    if event.state?.bensonhurst && event.state.url != @currentBrowserState.url
       previousUrl = new ComponentUrl(@currentBrowserState.url)
       newUrl = new ComponentUrl(event.state.url)
 
@@ -49,13 +49,13 @@ class window.Snapshot
     @pageCache[currentUrl.absolute] = @currentPage
 
   rememberCurrentUrlAndState: =>
-    window.history.replaceState { plumlinks: true, url: document.location.href }, '', document.location.href
+    window.history.replaceState { bensonhurst: true, url: document.location.href }, '', document.location.href
     @currentBrowserState = window.history.state
 
   reflectNewUrl: (url) =>
     if (url = new ComponentUrl url).absolute != document.location.href
       preservedHash = if url.hasNoHash() then document.location.hash else ''
-      window.history.pushState { plumlinks: true, url: url.absolute + preservedHash }, '', url.absolute
+      window.history.pushState { bensonhurst: true, url: url.absolute + preservedHash }, '', url.absolute
 
   updateCurrentBrowserState: =>
     @currentBrowserState = window.history.state

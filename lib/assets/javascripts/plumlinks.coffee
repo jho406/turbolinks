@@ -1,13 +1,13 @@
 #= export Bensonhurst
-#= require_tree ./plumlinks
+#= require_tree ./bensonhurst
 #= require_self
 #
 EVENTS =
-  BEFORE_CHANGE:  'plumlinks:click'
-  FETCH:          'plumlinks:request-start'
-  RECEIVE:        'plumlinks:request-end'
-  LOAD:           'plumlinks:load'
-  RESTORE:        'plumlinks:restore'
+  BEFORE_CHANGE:  'bensonhurst:click'
+  FETCH:          'bensonhurst:request-start'
+  RECEIVE:        'bensonhurst:request-end'
+  LOAD:           'bensonhurst:load'
+  RESTORE:        'bensonhurst:restore'
 
 controller = new Controller
 progressBar = controller.progressBar

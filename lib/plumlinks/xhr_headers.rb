@@ -13,7 +13,7 @@ module Bensonhurst
       def redirect_back(fallback_location:, **args)
         if referer = request.headers["X-XHR-Referer"]
           rsp = redirect_to referer, **args
-          store_for_plumlinks(self.location)
+          store_for_bensonhurst(self.location)
           rsp
         else
           super
@@ -24,7 +24,7 @@ module Bensonhurst
     def _compute_redirect_to_location(*args)
       options, request = _normalize_redirect_params(args)
 
-      store_for_plumlinks begin
+      store_for_bensonhurst begin
         if options == :back && request.headers["X-XHR-Referer"]
           super(*[(request if args.length == 2), request.headers["X-XHR-Referer"]].compact)
         else
@@ -34,14 +34,14 @@ module Bensonhurst
     end
 
     private
-      def store_for_plumlinks(url)
-        session[:_plumlinks_redirect_to] = url if session && request.headers["X-XHR-Referer"]
+      def store_for_bensonhurst(url)
+        session[:_bensonhurst_redirect_to] = url if session && request.headers["X-XHR-Referer"]
         url
       end
 
       def set_xhr_redirected_to
-        if session && session[:_plumlinks_redirect_to]
-          response.headers['X-XHR-Redirected-To'] = session.delete :_plumlinks_redirect_to
+        if session && session[:_bensonhurst_redirect_to]
+          response.headers['X-XHR-Redirected-To'] = session.delete :_bensonhurst_redirect_to
         end
       end
 

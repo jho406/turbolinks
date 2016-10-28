@@ -1,14 +1,14 @@
-require 'plumlinks/version'
-require 'plumlinks/xhr_headers'
-require 'plumlinks/xhr_redirect'
-require 'plumlinks/xhr_url_for'
-require 'plumlinks/cookies'
-require 'plumlinks/x_domain_blocker'
-require 'plumlinks/render'
-require 'plumlinks/helpers'
-require 'plumlinks/configuration'
-require 'plumlinks/plum_template'
-require 'plumlinks/digestor'
+require 'bensonhurst/version'
+require 'bensonhurst/xhr_headers'
+require 'bensonhurst/xhr_redirect'
+require 'bensonhurst/xhr_url_for'
+require 'bensonhurst/cookies'
+require 'bensonhurst/x_domain_blocker'
+require 'bensonhurst/render'
+require 'bensonhurst/helpers'
+require 'bensonhurst/configuration'
+require 'bensonhurst/plum_template'
+require 'bensonhurst/digestor'
 
 module Bensonhurst
   module Controller
@@ -24,23 +24,23 @@ module Bensonhurst
       end
 
       if base.respond_to?(:helper_method)
-        base.helper_method :plumlinks_tag
-        base.helper_method :plumlinks_silient?
-        base.helper_method :plumlinks_snippet
-        base.helper_method :use_plumlinks_html
+        base.helper_method :bensonhurst_tag
+        base.helper_method :bensonhurst_silient?
+        base.helper_method :bensonhurst_snippet
+        base.helper_method :use_bensonhurst_html
       end
     end
   end
 
   class Engine < ::Rails::Engine
-    config.plumlinks = ActiveSupport::OrderedOptions.new
-    config.plumlinks.auto_include = true
+    config.bensonhurst = ActiveSupport::OrderedOptions.new
+    config.bensonhurst.auto_include = true
 
-    initializer :plumlinks do |app|
+    initializer :bensonhurst do |app|
       ActiveSupport.on_load(:action_controller) do
         next if self != ActionController::Base
 
-        if app.config.plumlinks.auto_include
+        if app.config.bensonhurst.auto_include
           include Controller
         end
 
@@ -59,8 +59,8 @@ module Bensonhurst
 
       ActiveSupport.on_load(:action_view) do
         ActionView::Template.register_template_handler :plum, Bensonhurst::KbuilderHandler
-        require 'plumlinks/dependency_tracker'
-        require 'plumlinks/active_support'
+        require 'bensonhurst/dependency_tracker'
+        require 'bensonhurst/active_support'
 
         (ActionView::RoutingUrlFor rescue ActionView::Helpers::UrlHelper).module_eval do
           prepend XHRUrlFor

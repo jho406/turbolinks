@@ -1,22 +1,22 @@
 module Bensonhurst
   module Helpers
-    def plumlinks_tag
-      if defined?(@plumlinks) && @plumlinks
-        "<script type='text/javascript'>Bensonhurst.replace(#{@plumlinks});</script>".html_safe
+    def bensonhurst_tag
+      if defined?(@bensonhurst) && @bensonhurst
+        "<script type='text/javascript'>Bensonhurst.replace(#{@bensonhurst});</script>".html_safe
       end
     end
 
-    def plumlinks_snippet
-      if defined?(@plumlinks) && @plumlinks
-        "Bensonhurst.replace(#{@plumlinks});".html_safe
+    def bensonhurst_snippet
+      if defined?(@bensonhurst) && @bensonhurst
+        "Bensonhurst.replace(#{@bensonhurst});".html_safe
       end
     end
 
-    def use_plumlinks_html
-      @_use_plumlinks_html = true
+    def use_bensonhurst_html
+      @_use_bensonhurst_html = true
     end
 
-    def plumlinks_silient?
+    def bensonhurst_silient?
       !!controller.request.headers["X-SILENT"]
     end
   end

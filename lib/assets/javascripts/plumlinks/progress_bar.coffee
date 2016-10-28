@@ -1,5 +1,5 @@
 class window.ProgressBar
-  className = 'plumlinks-progress-bar'
+  className = 'bensonhurst-progress-bar'
   # Setting the opacity to a value < 1 fixes a display issue in Safari 6 and
   # iOS 6 where the progress bar would fill the entire page.
   originalOpacity = 0.99

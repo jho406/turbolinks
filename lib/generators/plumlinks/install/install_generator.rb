@@ -3,7 +3,7 @@ module Bensonhurst
     class InstallGenerator < ::Rails::Generators::Base
        desc <<-DESC
 Description:
-    Copy plumlinks files to your application.
+    Copy bensonhurst files to your application.
 DESC
       def self.source_root
         @source_root ||= File.expand_path(File.join(File.dirname(__FILE__), 'templates'))
@@ -26,7 +26,7 @@ DESC
 
         if File.readlines("#{Rails.root}/#{app_js}").grep(/require_tree/).any?
           inject_into_file app_js, before: '//= require_tree .' do
-            "//= require plumlinks\n//= require boot\n//= require_tree ./layouts\n//= require_tree ./views\n//= require_tree ./components\n"
+            "//= require bensonhurst\n//= require boot\n//= require_tree ./layouts\n//= require_tree ./views\n//= require_tree ./components\n"
           end
         end
       end
@@ -35,7 +35,7 @@ DESC
         app_html = 'app/views/layouts/application.html.erb'
         js_tag = <<-JS_TAG
   <script type="text/javascript">
-    document.addEventListener('plumlinks:load', function(event){
+    document.addEventListener('bensonhurst:load', function(event){
       var props = {
         view: event.data.view,
         data:  event.data.data
@@ -43,7 +43,7 @@ DESC
       ReactDOM.render(React.createElement(window.App.Components.View, props), document.getElementById('app'));
     });
 
-    $(function(){ <%= plumlinks_snippet %> });
+    $(function(){ <%= bensonhurst_snippet %> });
 
   </script>
         JS_TAG
