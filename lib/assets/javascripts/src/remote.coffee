@@ -74,12 +74,12 @@ class Bensonhurst.Remote
 
   nativeEncodeForm: (form) ->
     formData = new FormData
-    @_iterateOverFormInputs form, (input) =>
+    @iterateOverFormInputs form, (input) =>
       formData = @formDataAppend(formData, input)
     formData
 
-  _iterateOverFormInputs: (form, callback) ->
-    inputs = @_enabledInputs(form)
+  iterateOverFormInputs: (form, callback) ->
+    inputs = @enabledInputs(form)
     for input in inputs
       inputEnabled = !input.disabled
       radioOrCheck = (input.type == 'checkbox' || input.type == 'radio')
@@ -88,7 +88,7 @@ class Bensonhurst.Remote
         if (radioOrCheck && input.checked) || !radioOrCheck
           callback(input)
 
-  _enabledInputs: (form) ->
+  enabledInputs: (form) ->
     selector = "input:not([type='reset']):not([type='button']):not([type='submit']):not([type='image']), select, textarea"
     inputs = Array::slice.call(form.querySelectorAll(selector))
     disabledNodes = Array::slice.call(@querySelectorAllBHAttribute(form, 'bh-remote-noserialize'))
