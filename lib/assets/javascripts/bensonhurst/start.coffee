@@ -1,6 +1,6 @@
-#= require ./controller
-#= require ./remote
-#= require ./utils
+#= require bensonhurst/controller
+#= require bensonhurst/remote
+#= require bensonhurst/utils
 
 EVENTS =
   BEFORE_CHANGE:  'bensonhurst:click'

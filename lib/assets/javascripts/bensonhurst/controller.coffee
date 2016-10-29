@@ -1,8 +1,8 @@
-#= require ./doubly_linked_list
-#= require ./snapshot
-#= require ./progress_bar
-#= require ./parallel_queue
-#= require ./component_url
+#= require bensonhurst/doubly_linked_list
+#= require bensonhurst/snapshot
+#= require bensonhurst/progress_bar
+#= require bensonhurst/parallel_queue
+#= require bensonhurst/component_url
 
 PAGE_CACHE_SIZE = 20
 

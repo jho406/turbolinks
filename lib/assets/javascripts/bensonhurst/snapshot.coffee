@@ -1,6 +1,6 @@
-#= require ./component_url
-#= require ./csrf_token
-#= require ./utils
+#= require bensonhurst/component_url
+#= require bensonhurst/csrf_token
+#= require bensonhurst/utils
 
 class Bensonhurst.Snapshot
   constructor: (@controller) ->

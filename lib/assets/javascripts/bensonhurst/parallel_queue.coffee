@@ -1,4 +1,4 @@
-#= require ./doubly_linked_list
+#= require bensonhurst/doubly_linked_list
 
 class Bensonhurst.ParallelQueue
   constructor: ->
