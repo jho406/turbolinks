@@ -3,7 +3,7 @@
 #= require ./utils
 
 class Bensonhurst.Snapshot
-  constructor: (@delegate) ->
+  constructor: (@controller) ->
     @pageCache = {}
     @currentBrowserState = null
     @pageCacheSize = 20
@@ -18,9 +18,9 @@ class Bensonhurst.Snapshot
       if restorePoint = @pageCache[newUrl.absolute]
         @cacheCurrentPage()
         @currentPage = restorePoint
-        @delegate.restore(@currentPage)
+        @controller.restore(@currentPage)
       else
-        @delegate.request event.target.location.href
+        @controller.request event.target.location.href
 
   constrainPageCacheTo: (limit = @pageCacheSize) =>
     pageCacheKeys = Object.keys @pageCache
