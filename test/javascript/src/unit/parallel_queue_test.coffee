@@ -5,7 +5,7 @@ testWithSession "#push will add an XHR to the q", (assert) ->
   xhr = sinon.useFakeXMLHttpRequest()
   xhr.onload = ->{}
 
-  q = new @window.ParallelQueue
+  q = new @Bensonhurst.ParallelQueue
   q.push xhr
 
   assert.equal q.dll.length, 1
@@ -17,7 +17,7 @@ testWithSession "#push, when a pushed xhr finishes, it will attempt to process X
   xhr2 = {}
   xhr2.onload = -> {}
 
-  q = new @window.ParallelQueue
+  q = new @Bensonhurst.ParallelQueue
   q.push xhr1
   q.push xhr2
 
@@ -34,7 +34,7 @@ testWithSession "#push, when a pushed xhr finishes, it will attempt to process X
   xhr2 = {}
   xhr2.onload = -> {}
 
-  q = new @window.ParallelQueue
+  q = new @Bensonhurst.ParallelQueue
   q.push xhr1
   q.push xhr2
 
@@ -50,7 +50,7 @@ testWithSession "#drain resets the queue and any existing XHRs will not onload",
   xhr1.abort = ->
     xhr1.status = 0
 
-  q = new @window.ParallelQueue
+  q = new @Bensonhurst.ParallelQueue
   q.push xhr1
 
   assert.equal q.dll.length, 1

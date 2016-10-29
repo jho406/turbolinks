@@ -1,4 +1,4 @@
-class window.DoublyLinkedList
+class Bensonhurst.DoublyLinkedList
   constructor: ->
     @head = @tail = null
     @length = 0

@@ -15,7 +15,7 @@ clone = (original) ->
   copy
 
 withDefaults = (page, state) =>
-    currentUrl = new ComponentUrl state.url
+    currentUrl = new Bensonhurst.ComponentUrl state.url
 
     reverseMerge page,
       url: currentUrl.relative
@@ -131,7 +131,7 @@ cloneByKeypath = (path, leaf, obj, opts={}) ->
 
 
 
-@Utils =
+@Bensonhurst.Utils =
   cloneByKeypath:cloneByKeypath
   documentListenerForLinks: documentListenerForLinks
   reverseMerge: reverseMerge

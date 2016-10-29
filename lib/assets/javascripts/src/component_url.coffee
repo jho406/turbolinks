@@ -1,4 +1,3 @@
-
 # The ComponentUrl class converts a basic URL string into an object
 # that behaves similarly to document.location.
 #
@@ -7,9 +6,9 @@
 uniqueId = ->
   new Date().getTime().toString(36)
 
-class window.ComponentUrl
+class Bensonhurst.ComponentUrl
   constructor: (@original = document.location.href) ->
-    return @original if @original.constructor is ComponentUrl
+    return @original if @original.constructor is Bensonhurst.ComponentUrl
     @_parse()
 
   withoutHash: -> @href.replace(@hash, '').replace('#', '')
@@ -20,25 +19,25 @@ class window.ComponentUrl
   hasNoHash: -> @hash.length is 0
 
   crossOrigin: ->
-    @origin isnt (new ComponentUrl).origin
+    @origin isnt (new Bensonhurst.ComponentUrl).origin
 
   formatForXHR: (options = {}) ->
     (if options.cache then @withMimeBust() else @withAntiCacheParam()).withoutHashForIE10compatibility()
 
   withMimeBust: ->
-    new ComponentUrl(
+    new Bensonhurst.ComponentUrl(
       if /([?&])__=[^&]*/.test @absolute
         @absolute
       else
-        new ComponentUrl(@withoutHash() + (if /\?/.test(@absolute) then "&" else "?") + "__=0" + @hash)
+        new Bensonhurst.ComponentUrl(@withoutHash() + (if /\?/.test(@absolute) then "&" else "?") + "__=0" + @hash)
     )
 
   withAntiCacheParam: ->
-    new ComponentUrl(
+    new Bensonhurst.ComponentUrl(
       if /([?&])_=[^&]*/.test @absolute
         @absolute.replace /([?&])_=[^&]*/, "$1_=#{uniqueId()}"
       else
-        new ComponentUrl(@withoutHash() + (if /\?/.test(@absolute) then "&" else "?") + "_=#{uniqueId()}" + @hash)
+        new Bensonhurst.ComponentUrl(@withoutHash() + (if /\?/.test(@absolute) then "&" else "?") + "_=#{uniqueId()}" + @hash)
     )
 
   _parse: ->

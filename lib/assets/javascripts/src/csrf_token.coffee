@@ -1,4 +1,4 @@
-class window.CSRFToken
+class Bensonhurst.CSRFToken
   @get: (doc = document) ->
     node:   tag = doc.querySelector 'meta[name="csrf-token"]'
     token:  tag?.getAttribute? 'content'

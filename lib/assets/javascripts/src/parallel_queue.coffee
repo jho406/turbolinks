@@ -1,6 +1,8 @@
-class window.ParallelQueue
+#= require ./doubly_linked_list
+
+class Bensonhurst.ParallelQueue
   constructor: ->
-    @dll = new DoublyLinkedList
+    @dll = new Bensonhurst.DoublyLinkedList
     @active = true
 
   push:(xhr)->
@@ -28,5 +30,5 @@ class window.ParallelQueue
       qxhr.abort()
       qxhr._isDone = true
       node = node.next
-    @dll = new DoublyLinkedList
+    @dll = new Bensonhurst.DoublyLinkedList
 

@@ -1,14 +1,20 @@
+#= require ./doubly_linked_list
+#= require ./snapshot
+#= require ./progress_bar
+#= require ./parallel_queue
+#= require ./component_url
+
 PAGE_CACHE_SIZE = 20
 
-class window.Controller
+class Bensonhurst.Controller
   constructor: ->
     @atomCache = {}
-    @history = new Snapshot(this)
+    @history = new Bensonhurst.Snapshot(this)
     @transitionCacheEnabled = false
     @requestCachingEnabled = true
 
-    @progressBar = new ProgressBar 'html'
-    @pq = new ParallelQueue
+    @progressBar = new Bensonhurst.ProgressBar 'html'
+    @pq = new Bensonhurst.ParallelQueue
     @http = null
 
     @history.rememberCurrentUrlAndState()
@@ -17,7 +23,7 @@ class window.Controller
     @history.currentPage
 
   request: (url, options = {}) =>
-    url = new ComponentUrl url
+    url = new Bensonhurst.ComponentUrl url
     return if @pageChangePrevented(url.absolute)
 
     if url.crossOrigin()
@@ -36,7 +42,7 @@ class window.Controller
     options.cacheRequest ?= @requestCachingEnabled
     options.showProgressBar ?= true
 
-    Utils.triggerEvent Bensonhurst.EVENTS.FETCH, url: url.absolute
+    Bensonhurst.Utils.triggerEvent Bensonhurst.EVENTS.FETCH, url: url.absolute
 
     if options.isAsync
       options.showProgressBar = false
@@ -62,23 +68,23 @@ class window.Controller
     @history.changePage(cachedPage, options)
 
     @progressBar?.done()
-    Utils.triggerEvent Bensonhurst.EVENTS.RESTORE
-    Utils.triggerEvent Bensonhurst.EVENTS.LOAD, cachedPage
+    Bensonhurst.Utils.triggerEvent Bensonhurst.EVENTS.RESTORE
+    Bensonhurst.Utils.triggerEvent Bensonhurst.EVENTS.LOAD, cachedPage
 
   replace: (nextPage, options = {}) =>
-    Utils.withDefaults(nextPage, @history.currentBrowserState)
+    Bensonhurst.Utils.withDefaults(nextPage, @history.currentBrowserState)
     @history.changePage(nextPage, options)
-    Utils.triggerEvent Bensonhurst.EVENTS.LOAD, @currentPage()
+    Bensonhurst.Utils.triggerEvent Bensonhurst.EVENTS.LOAD, @currentPage()
 
   crossOriginRedirect: =>
     redirect = @http.getResponseHeader('Location')
-    crossOrigin = (new ComponentUrl(redirect)).crossOrigin()
+    crossOrigin = (new Bensonhurst.ComponentUrl(redirect)).crossOrigin()
 
     if redirect? and crossOrigin
       redirect
 
   pageChangePrevented: (url) =>
-    !Utils.triggerEvent Bensonhurst.EVENTS.BEFORE_CHANGE, url: url
+    !Bensonhurst.Utils.triggerEvent Bensonhurst.EVENTS.BEFORE_CHANGE, url: url
 
   cache: (key, value) =>
     return @atomCache[key] if value == null
@@ -87,14 +93,14 @@ class window.Controller
   updateContentByKeypath: (keypath, node)=>
     for k, v in @history.pageCache
       keypath = 'data.' + keypath
-      @history.pageCache[k] = Utils.updateCurrentBrowserState(keypath, node, v)
-    Utils.triggerEvent Bensonhurst.EVENTS.LOAD, @currentPage()
+      @history.pageCache[k] = Bensonhurst.Utils.updateCurrentBrowserState(keypath, node, v)
+    Bensonhurst.Utils.triggerEvent Bensonhurst.EVENTS.LOAD, @currentPage()
 
   # Events
   onLoadEnd: => @http = null
 
   onLoad: (xhr, url, options) =>
-    Utils.triggerEvent Bensonhurst.EVENTS.RECEIVE, url: url.absolute
+    Bensonhurst.Utils.triggerEvent Bensonhurst.EVENTS.RECEIVE, url: url.absolute
     nextPage =  @processResponse(xhr)
 
     if xhr.status == 0
@@ -106,9 +112,9 @@ class window.Controller
         return
 
       @history.reflectNewUrl url
-      Utils.withDefaults(nextPage, @history.currentBrowserState)
+      Bensonhurst.Utils.withDefaults(nextPage, @history.currentBrowserState)
       @history.changePage(nextPage, options)
-      Utils.triggerEvent Bensonhurst.EVENTS.LOAD, @currentPage()
+      Bensonhurst.Utils.triggerEvent Bensonhurst.EVENTS.LOAD, @currentPage()
 
       if options.showProgressBar
         @progressBar?.done()
@@ -135,7 +141,7 @@ class window.Controller
     xhr.setRequestHeader 'X-Requested-With', 'XMLHttpRequest'
     xhr.setRequestHeader 'Content-Type', opts.contentType if opts.contentType
 
-    csrfToken = CSRFToken.get().token
+    csrfToken = Bensonhurst.CSRFToken.get().token
     xhr.setRequestHeader('X-CSRF-Token', csrfToken) if csrfToken
 
     if !opts.silent

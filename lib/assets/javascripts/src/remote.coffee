@@ -1,4 +1,4 @@
-class window.Remote
+class Bensonhurst.Remote
   SUPPORTED_METHODS = ['GET', 'PUT', 'POST', 'DELETE', 'PATCH']
   FALLBACK_LINK_METHOD = 'GET'
   FALLBACK_FORM_METHOD = 'POST'

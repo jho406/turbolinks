@@ -10,7 +10,7 @@ testWithSession "#httpRequestType returns GET link with bh-remote set to nothing
     <a href="/test" data-bh-remote></a>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.equal remote.httpUrl, '/test'
   assert.equal remote.actualRequestType, 'GET'
 
@@ -19,7 +19,7 @@ testWithSession "#httpRequestType returns a VERB link with bh-remote set to a va
     <a href="/test" data-bh-remote='post'></a>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.equal remote.httpUrl, '/test'
   assert.equal remote.actualRequestType, 'POST'
 
@@ -28,7 +28,7 @@ testWithSession "#httpRequestType returns GET link with bh-remote set to an inva
     <a href="/test" data-bh-remote='invalid'></a>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.equal remote.httpUrl, '/test'
   assert.equal remote.actualRequestType, 'GET'
 
@@ -39,7 +39,7 @@ testWithSession "#httpRequestType returns the form method by default", (assert) 
     </form>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.equal remote.actualRequestType, 'POST'
 
 testWithSession "#httpRequestType uses the data-bh-remote when method is not set", (assert) ->
@@ -49,7 +49,7 @@ testWithSession "#httpRequestType uses the data-bh-remote when method is not set
     </form>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.equal remote.actualRequestType, 'POST'
 
 testWithSession "#httpRequestType is set to method even if data-bh-remote is set", (assert) ->
@@ -59,7 +59,7 @@ testWithSession "#httpRequestType is set to method even if data-bh-remote is set
     </form>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.equal remote.actualRequestType, 'POST'
 
 testWithSession "#httpRequestType is set to POST when method is not set and data-bh-remote is present", (assert) ->
@@ -69,7 +69,7 @@ testWithSession "#httpRequestType is set to POST when method is not set and data
     </form>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.equal remote.actualRequestType, 'POST'
 
 testWithSession "#httpRequestType is set to data-bh-remote when used with a value, and when method is not set", (assert) ->
@@ -79,7 +79,7 @@ testWithSession "#httpRequestType is set to data-bh-remote when used with a valu
     </form>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.equal remote.actualRequestType, 'GET'
 
 testWithSession "#payload will contain a _method when data-bh-remote is set to verbs unsupported by the browser (PUT, DELETE)", (assert) ->
@@ -87,7 +87,7 @@ testWithSession "#payload will contain a _method when data-bh-remote is set to v
     <a href="/test" data-bh-remote='put'></a>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.equal remote.httpUrl, '/test'
   assert.equal remote.actualRequestType, 'POST'
   assert.equal remote.payload, "_method=PUT"
@@ -100,7 +100,7 @@ testWithSession "#payload will contain a _method when data-bh-remote on a form i
     </form>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   payload = Array.from(remote.payload.keys())
   assert.equal remote.actualRequestType, 'POST'
   assert.ok "_method" in payload
@@ -110,7 +110,7 @@ testWithSession "#contentType returns null", (assert) ->
     <a href="/test" data-bh-remote></a>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.equal remote.contentType, null
 
 testWithSession "#contentType returns form-urlencoded on non-GET links", (assert) ->
@@ -118,7 +118,7 @@ testWithSession "#contentType returns form-urlencoded on non-GET links", (assert
     <a href="/test" data-bh-remote='put'></a>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.equal remote.contentType, 'application/x-www-form-urlencoded; charset=UTF-8'
 
 
@@ -129,7 +129,7 @@ testWithSession "#contentType returns null on forms regardless of verb", (assert
     </form>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.equal remote.contentType, null
 
   html = """
@@ -138,7 +138,7 @@ testWithSession "#contentType returns null on forms regardless of verb", (assert
     </form>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.equal remote.contentType, null
 
   html = """
@@ -147,7 +147,7 @@ testWithSession "#contentType returns null on forms regardless of verb", (assert
     </form>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.equal remote.contentType, null
 
   html = """
@@ -156,7 +156,7 @@ testWithSession "#contentType returns null on forms regardless of verb", (assert
     </form>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.equal remote.contentType, null
 
 testWithSession "#isValid returns true with a valid form", (assert) ->
@@ -166,7 +166,7 @@ testWithSession "#isValid returns true with a valid form", (assert) ->
     </form>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.ok remote.isValid()
 
 testWithSession "#isValid returns false with an invalid form (missing action)", (assert) ->
@@ -176,7 +176,7 @@ testWithSession "#isValid returns false with an invalid form (missing action)", 
     </form>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.notOk remote.isValid()
 
 testWithSession "#isValid returns false with an invalid form (missing data-bh-remote)", (assert) ->
@@ -186,7 +186,7 @@ testWithSession "#isValid returns false with an invalid form (missing data-bh-re
     </form>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.notOk remote.isValid()
 
 testWithSession "#isValid returns true with a valid link", (assert) ->
@@ -194,7 +194,7 @@ testWithSession "#isValid returns true with a valid link", (assert) ->
     <a href="/test" data-bh-remote='POST'></a>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.ok remote.isValid()
 
 testWithSession "#isValid returns false with a invalid link (missing data-bh-remote)", (assert) ->
@@ -202,7 +202,7 @@ testWithSession "#isValid returns false with a invalid link (missing data-bh-rem
     <a href="/test"></a>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.notOk remote.isValid()
 
 testWithSession "#isValid returns true with bh-remote (sans data-)", (assert) ->
@@ -210,7 +210,7 @@ testWithSession "#isValid returns true with bh-remote (sans data-)", (assert) ->
     <a href="/test" bh-remote='POST'></a>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   assert.ok remote.isValid()
 
 testWithSession "#payload returns captured input fields", (assert) ->
@@ -220,7 +220,7 @@ testWithSession "#payload returns captured input fields", (assert) ->
     </form>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   payload = remote.payload
   assert.ok (payload instanceof @window.FormData)
   assert.equal payload.get('bar'), 'fizzbuzz'
@@ -233,7 +233,7 @@ testWithSession "#payload won't include form inputs with bh-remote-noserialize",
     </form>
   """
   target = createTarget(html)
-  remote = new @window.Remote(target)
+  remote = new @Bensonhurst.Remote(target)
   payload = remote.payload
   assert.ok (payload instanceof @window.FormData)
   assert.propEqual Array.from(payload.keys()), []

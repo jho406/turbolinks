@@ -1,7 +1,7 @@
-#= export Bensonhurst
-#= require_tree ./bensonhurst
-#= require_self
-#
+#= require ./controller
+#= require ./remote
+#= require ./utils
+
 EVENTS =
   BEFORE_CHANGE:  'bensonhurst:click'
   FETCH:          'bensonhurst:request-start'
@@ -9,7 +9,7 @@ EVENTS =
   LOAD:           'bensonhurst:load'
   RESTORE:        'bensonhurst:restore'
 
-controller = new Controller
+controller = new Bensonhurst.Controller
 progressBar = controller.progressBar
 
 ProgressBarAPI =
@@ -24,7 +24,7 @@ ProgressBarAPI =
 
 remoteHandler = (ev) ->
   target = ev.target
-  remote = new Remote(target)
+  remote = new Bensonhurst.Remote(target)
   return unless remote.isValid()
   ev.preventDefault()
 
@@ -41,25 +41,24 @@ initializeBensonhurst = ->
   ProgressBarAPI.enable()
   window.addEventListener 'hashchange', controller.history.rememberCurrentUrlAndState, false
   window.addEventListener 'popstate', controller.history.onHistoryChange, false
-  Utils.documentListenerForLinks 'click', remoteHandler
+  Bensonhurst.Utils.documentListenerForLinks 'click', remoteHandler
   document.addEventListener "submit", remoteHandler
 
-if Utils.browserSupportsBensonhurst()
+if Bensonhurst.Utils.browserSupportsBensonhurst()
   visit = controller.request
   initializeBensonhurst()
 else
   visit = (url = document.location.href) -> document.location.href = url
 
-@Bensonhurst = {
-  controller,
-  updateContentByKeypath: controller.history.updateContentByKeypath,
-  visit,
-  replace: controller.replace,
-  cache: controller.cache,
-  pagesCached: controller.history.pagesCached,
-  enableTransitionCache: controller.enableTransitionCache,
-  disableRequestCaching: controller.disableRequestCaching,
-  ProgressBar: ProgressBarAPI,
-  supported: Utils.browserSupportsBensonhurst(),
-  EVENTS: Utils.clone(EVENTS)
-}
+Bensonhurst.controller = controller
+Bensonhurst.updateContentByKeypath = controller.history.updateContentByKeypath
+Bensonhurst.visit = visit
+Bensonhurst.replace = controller.replace
+Bensonhurst.cache = controller.cache
+Bensonhurst.pagesCached = controller.history.pagesCached
+Bensonhurst.enableTransitionCache = controller.enableTransitionCache
+Bensonhurst.disableRequestCaching = controller.disableRequestCaching
+Bensonhurst.ProgressBar = ProgressBarAPI
+Bensonhurst.supported = Bensonhurst.Utils.browserSupportsBensonhurst()
+Bensonhurst.EVENTS = Bensonhurst.Utils.clone(EVENTS)
+
