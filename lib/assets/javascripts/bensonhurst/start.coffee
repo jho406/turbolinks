@@ -51,7 +51,7 @@ else
   visit = (url = document.location.href) -> document.location.href = url
 
 Bensonhurst.controller = controller
-Bensonhurst.updateContentByKeypath = controller.history.updateContentByKeypath
+Bensonhurst.graftByKeypath = controller.history.graftByKeypath
 Bensonhurst.visit = visit
 Bensonhurst.replace = controller.replace
 Bensonhurst.cache = controller.cache

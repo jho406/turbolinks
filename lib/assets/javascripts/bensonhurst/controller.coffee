@@ -90,7 +90,7 @@ class Bensonhurst.Controller
     return @atomCache[key] if value == null
     @atomCache[key] ||= value
 
-  updateContentByKeypath: (keypath, node)=>
+  graftByKeypath: (keypath, node)=>
     for k, v in @history.pageCache
       keypath = 'data.' + keypath
       @history.pageCache[k] = Bensonhurst.Utils.updateCurrentBrowserState(keypath, node, v)

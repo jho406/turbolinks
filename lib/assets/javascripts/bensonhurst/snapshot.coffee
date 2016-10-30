@@ -81,16 +81,9 @@ class Bensonhurst.Snapshot
     fetchedAssets = nextPage.assets
     fetchedAssets.length isnt @loadedAssets.length or Bensonhurst.Utils.intersection(fetchedAssets, @loadedAssets).length isnt @loadedAssets.length
 
-  updateContentByKeypath: (keypath, node, opts={})=>
+  graftByKeypath: (keypath, node, opts={})=>
     for k, v in @pageCache
-      @history.pageCache[k] = Bensonhurst.Utils.cloneByKeypath(keypath, node, v, opts)
+      @history.pageCache[k] = Bensonhurst.Utils.graftByKeypath(keypath, node, v, opts)
 
-    @currentPage = Bensonhurst.Utils.cloneByKeypath(keypath, node, @currentPage, opts)
-    Bensonhurst.Utils.triggerEvent Bensonhurst.EVENTS.LOAD, @currentPage
-
-  addContentByKeypath: (keypath, node)=>
-    for k, v in @pageCache
-      @history.pageCache[k] = Bensonhurst.Utils.cloneByKeypath(keypath, node, v, append: true)
-
-    @currentPage = Bensonhurst.Utils.cloneByKeypath(keypath, node, @currentPage)
+    @currentPage = Bensonhurst.Utils.graftByKeypath(keypath, node, @currentPage, opts)
     Bensonhurst.Utils.triggerEvent Bensonhurst.EVENTS.LOAD, @currentPage

@@ -13,10 +13,10 @@ testWithSession "updating content node and rendering", (assert) ->
     load +=1
     if load == 1
       assert.propEqual data, update1
-      @Bensonhurst.updateContentByKeypath('data.contact.firstName', 'sully')
+      @Bensonhurst.graftByKeypath('data.contact.firstName', 'sully')
     else if load == 2
       assert.strictEqual data.contact.address, update1.contact.address
       assert.notStrictEqual event.data.contact, update1.contact
       done()
   newData = data: heading: 'new data'
-  @Bensonhurst.updateContentByKeypath('data', update1)
+  @Bensonhurst.graftByKeypath('data', update1)
