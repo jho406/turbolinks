@@ -89,7 +89,7 @@ cloneByKeypath = (path, leaf, obj, opts={}) ->
   remaining = path.slice(1)
 
   if path.length is 0
-    if opts.append? and isArray(obj)
+    if opts.type == 'add' and isArray(obj)
       copy = []
       for child in obj
         copy.push child

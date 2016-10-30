@@ -150,6 +150,9 @@ class Bensonhurst.Controller
         redirectedUrl = self.getResponseHeader 'X-XHR-Redirected-To'
         actualUrl = redirectedUrl || url
         @onLoad(self, actualUrl, opts)
+    else
+      xhr.onload = =>
+        @progressBar?.done()
 
     xhr.onprogress = @onProgress if @progressBar and opts.showProgressBar
     xhr.onloadend = @onLoadEnd

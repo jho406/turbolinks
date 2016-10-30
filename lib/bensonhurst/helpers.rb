@@ -17,7 +17,7 @@ module Bensonhurst
     end
 
     def bensonhurst_silient?
-      !!controller.request.headers["X-SILENT"]
+      !!request.headers["X-SILENT"]
     end
   end
 end
