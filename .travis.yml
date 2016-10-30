@@ -17,7 +17,7 @@ cache: bundler
 
 script:
  - bundle exec rake test
- - script/test
+ - bundle exec blade ci
 
 gemfile:
   - Gemfile.rails40
