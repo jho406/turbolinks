@@ -3,3 +3,6 @@ gemspec
 
 gem 'rails', '~> 5.0'
 gem "mocha", :require => false
+gem 'blade-sprockets_override_accept_plugin',
+  :path => './vendor/blade-sprockets_override_accept_plugin'
+gem 'blade'
