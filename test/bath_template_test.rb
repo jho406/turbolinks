@@ -578,6 +578,13 @@ class BathTemplateTest < ActionView::TestCase
   test "fragment caching works with previous version of cache digests" do
     undef_context_methods :cache_fragment_name
 
+    if !@context.class.method_defined? :fragment_name_with_digest
+      @context.class_eval do
+        def fragment_name_with_digest
+        end
+      end
+    end
+
     @context.expects :fragment_name_with_digest
 
     jbuild <<-JBUILDER
