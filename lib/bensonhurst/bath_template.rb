@@ -248,8 +248,7 @@ module Bensonhurst
       def _fragment_name_with_digest(key, options)
         if options[:partial] && !options[:skip_digest]
           [key, _partial_digest(options[:partial])]
-        elsif
-          @context.respond_to?(:cache_fragment_name)
+        elsif @context.respond_to?(:cache_fragment_name)
           # Current compatibility, fragment_name_with_digest is private again and cache_fragment_name
           # should be used instead.
           @context.cache_fragment_name(key, options)
