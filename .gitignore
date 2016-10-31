@@ -4,3 +4,5 @@ pkg/
 test/log/
 /vendor
 tmp/
+.byebug_history
+log
